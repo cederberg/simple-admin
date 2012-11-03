@@ -1,4 +1,6 @@
 admin-scripts
 =============
 
-Server Administration Scripts
+Server administration scripts for simplified maintenance.
+
+Install the files from ```bin``` to ```/usr/local/bin```.
