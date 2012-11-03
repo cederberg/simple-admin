@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+# Makes a backup SQL copy of the local MySQL database.
+#
+# Syntax: admin-mysqldump [-v]
+#
+# Options:
+#   -v  Print verbose output.
+
+# Configuration
+DATABASE=***
+USER=***
+PWD=***
+FILE=***/$DATABASE.sql
+OPTIONS="--quick --skip-lock-tables --skip-add-locks --ignore-table=***"
+VERBOSE="false"
+
+# Function for printing verbose information
+printinfo() {
+    if [ $VERBOSE = "true" ] ; then
+        echo `date +"%F %T"`: "$*"
+    fi
+}
+
+# Check for root user
+if [ `whoami` != 'root' ] ; then
+    echo "ERROR: only root is allowed to run admin-mysqldump" >&2
+    exit 1
+fi
+
+# Parse command-line arguments
+if [ "$1" = "-v" ] ; then
+    shift
+    OPTIONS="$OPTIONS -v"
+    VERBOSE=true
+fi
+
+printinfo starting MySQL dump of $DATABASE
+rm -f $FILE $FILE.lzma
+mysqldump -u$USER -p$PWD $OPTIONS --result-file=$FILE $DATABASE
+printinfo finished MySQL dump of $DATABASE
+printinfo starting compression of file $FILE
+lzma $FILE
+/usr/local/bin/admin-freemem
+printinfo finished compression of file $FILE

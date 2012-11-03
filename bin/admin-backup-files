@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# Performs a filesystem backup for configured directories. All the files in
+# the specified directories will be copied to a snapshot directory and
+# previous versions will be stored in historic diff directories. The backup
+# will keep hourly diffs for 24 hours, daily diffs for 30 days and thereafter
+# only the sum of all changes for the month will be kept. The backup can be
+# run hourly or every minute as desired.
+#
+# Syntax: admin-backup-files [-v]
+#
+# Options:
+#   -v  Print verbose output.
+#
+# Files:
+#   /etc/admin-backup-files.conf
+#
+# See Also:
+#   admin-backup-mysql
+#
+
+# Configuration variables
+CONFIG=/etc/admin-backup-files.conf
+HOST=`hostname --fqdn`
+DATE_HOURLY=`date '+%Y-%m-%d-%H%M'`
+DATE_DAILY=`date '+%Y-%m-%d'`
+DATE_MONTHLY=`date '+%Y-%m'`
+SNAP_DIR=/backup/$HOST/current
+DIFF_DIR=/backup/$HOST/history
+DIFF_DIR_HOURLY=$DIFF_DIR/$DATE_HOURLY
+DIFF_DIR_DAILY=$DIFF_DIR/$DATE_DAILY
+DIFF_DIR_MONTHLY=$DIFF_DIR/$DATE_MONTHLY
+OPTIONS="--archive --delete --force --ignore-errors --quiet"
+VERBOSE="false"
+
+# Function for printing verbose information
+printinfo() {
+    if [ $VERBOSE = "true" ] ; then
+        echo `date +"%F %T"`: $*
+    fi
+}
+
+# Check for root user
+if [ `whoami` != 'root' ] ; then
+    echo "ERROR: only root is allowed to run administration tasks" >&2
+    exit 1
+fi
+
+# Parse command-line arguments
+if [ "$1" = "-v" ] ; then
+    shift
+    VERBOSE=true
+fi
+
+# Perform backup
+printinfo init backup on $HOST
+mkdir -p $SNAP_DIR $DIFF_DIR_HOURLY $DIFF_DIR_DAILY $DIFF_DIR_MONTHLY
+cat $CONFIG | while read SRC_DIR ; do
+    printinfo syncing dir $SRC_DIR
+    mkdir -p $SNAP_DIR$SRC_DIR
+    rsync $OPTIONS --backup --backup-dir=$DIFF_DIR_HOURLY$SRC_DIR $SRC_DIR/ $SNAP_DIR$SRC_DIR/
+done
+
+# Remove empty dirs
+find $DIFF_DIR_HOURLY -depth -type d -exec rmdir {} \; 2> /dev/null
+
+# Update daily and montly dirs
+if [ -d $DIFF_DIR_HOURLY ] ; then 
+    printinfo updating daily and monthly diff dirs
+    cp -fluR $DIFF_DIR_HOURLY/* $DIFF_DIR_DAILY
+    cp -fluR $DIFF_DIR_DAILY/* $DIFF_DIR_MONTHLY
+fi
+
+# Remove outdated hourly and daily dirs
+find $DIFF_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +2 -exec rm -rf {} \;
+find $DIFF_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {} \;
+
+# Finished backup
+/usr/local/bin/admin-freemem
+printinfo done backup on $HOST

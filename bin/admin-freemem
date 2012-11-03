@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Cleans filesystem cache (if possible) to recover memory.
+#
+# Syntax: admin-freemem
+#
+
+sync
+( echo 3 > /proc/sys/vm/drop_caches ) 2> /dev/null

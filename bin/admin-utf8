@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# Prints some command-line help
+printhelp() {
+    ERROR=$1
+    echo "Converts a file or directory to UTF-8 (from ISO-8859-1). Only if needed."
+    echo
+    echo "Syntax: admin-utf8 (check|convert) <file or dir>"
+    if [ "$ERROR" != "" ] ; then
+        echo
+        echo "ERROR: $ERROR" >&2
+    fi
+}
+
+# Converts an ISO-8859-1 file to UTF-8
+convert_file() {
+    FILE=$1
+    MATCH=`file --mime $FILE | grep "8859-1"`
+    if [ "$MATCH" != "" ] ; then
+        iconv -f ISO-8859-1 -t UTF-8 $FILE > $FILE.new
+        mv $FILE.new $FILE
+        echo "$FILE -- converted to UTF-8"
+    fi
+}
+
+# Parse command-line arguments
+MODE=$1
+if [ -z "$MODE" ] ; then
+    printhelp "Either 'check' or 'convert' must be specified"
+    exit 1
+fi
+shift
+DIR=$1
+if [ -z "$DIR" ] ; then
+    printhelp "No file or directory specified"
+    exit 1
+fi
+
+# Check or convert all files
+if [ $MODE = "convert" ] ; then
+    FILES=`find $DIR -type f -not -path "*.svn*"`
+    for FILE in $FILES ; do
+        convert_file $FILE
+    done
+else
+    find $DIR -type f -not -path "*.svn*" -exec file --mime {} \;
+fi

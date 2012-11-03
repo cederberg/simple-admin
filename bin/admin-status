@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Checks the status of the services on this machine.
+#
+# Syntax: admin-status
+#
+
+# Function for listing all processes matching a name
+listprocesses() {
+    OWNER=$1
+    NAME=$2
+    ps -FU $OWNER | grep $NAME | grep -v grep
+}
+
+# Function for checking a service
+checkprocesses() {
+    OWNER=$1
+    NAME=$2
+    PS=`listprocesses $OWNER $NAME`
+    if [ "$PS" = "" ] ; then
+        echo "!! $NAME NOT running"
+    else
+        echo " * $NAME is running"
+    fi
+}
+
+# Checking all services
+checkprocesses root cron
+checkprocesses root mon
+checkprocesses root sshd
+checkprocesses root postfix
+checkprocesses mysql mysqld
+checkprocesses nginx nginx
+checkprocesses jetty jetty

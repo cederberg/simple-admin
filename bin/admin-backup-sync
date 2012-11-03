@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# Performs a cross-server file sync for configured directories.
+#
+# Syntax: admin-backup-sync [-v]
+#
+# Options:
+#   -v  Print verbose output.
+#
+# Files:
+#   /etc/admin-backup-sync.conf
+#
+# See Also:
+#   admin-backup-files
+#
+
+# Configuration variables
+CONFIG=/etc/admin-backup-sync.conf
+OPTIONS="-az --delete"
+VERBOSE="false"
+
+# Function for printing verbose information
+printinfo() {
+    if [ $VERBOSE = "true" ] ; then
+        echo `date +"%F %T"`: "$*"
+    fi
+}
+
+# Check for root user
+if [ `whoami` != 'root' ] ; then
+    echo "ERROR: only root is allowed to run administration tasks" >&2
+    exit 1
+fi
+
+# Parse command-line arguments
+if [ "$1" = "-v" ] ; then
+    shift
+    OPTIONS="$OPTIONS -v"
+    VERBOSE=true
+else
+    OPTIONS="$OPTIONS -q"
+fi
+
+# Perform synchronization
+printinfo init sync from `hostname --fqdn`
+cat $CONFIG | while read LINE ; do
+    SRC=${LINE%% *}
+    DST=${LINE#* }
+    printinfo "syncing from:" $SRC
+    printinfo "          to:" $DST
+    rsync $OPTIONS $SRC $DST
+    sleep 10
+done
+/usr/local/bin/admin-freemem
+printinfo done sync from `hostname --fqdn`

@@ -1,0 +1,106 @@
+#!/bin/sh
+
+# Configuration variables
+VERBOSE="true"
+
+# Function for printing command-line help
+printhelp() {
+    ERROR=$1
+    echo "Restarts all web-related services on this machine."
+    echo
+    echo "Syntax: admin-restart-web [-q] <mode>"
+    echo
+    echo "Options:"
+    echo "  -q    -- Quiet mode (prints no output)."
+    echo
+    echo "Mode Values:"
+    echo "  full  -- Restarts database and all web servers."
+    echo "  cms   -- Restarts only the CMS web server."
+    if [ "$ERROR" != "" ] ; then
+        echo
+        echo "ERROR: $ERROR" >&2
+    fi
+}
+
+# Function for printing verbose information
+printinfo() {
+    if [ $VERBOSE = "true" ] ; then
+        echo `date +"%F %T"`: $*
+    fi
+}
+
+# Function for listing all processes matching a command
+listprocesses() {
+    ps --no-header -f -C $1
+}
+
+# Function that sleep until a process disappears
+waitprocess() {
+    CMD=$1
+    MAXSECS=$2
+    SECS=0
+    while [ $SECS -lt $MAXSECS ] && [ "`listprocesses $CMD`" != "" ] ; do
+        let SECS++
+        sleep 1
+    done
+}
+
+# Function for stopping a named service
+stopservice() {
+    NAME=$1
+    CMD=$2
+    printinfo "stopping service $NAME ($CMD)..."
+    service $NAME stop > /dev/null
+    waitprocess $CMD 10
+    if [ "`listprocesses $CMD`" != "" ] ; then
+        echo "ALERT: sending TERM signal to $NAME..."
+        killall -TERM $CMD
+        waitprocess $CMD 5
+    fi
+    if [ "`listprocesses $CMD`" != "" ] ; then
+        echo "ALERT: sending KILL signal to $NAME..."
+        killall -KILL $CMD
+        waitprocess $CMD 10
+    fi
+    if [ "`listprocesses $CMD`" != "" ] ; then
+        echo "ERROR: failed to kill process $NAME, exiting"
+        exit 1
+    fi
+    printinfo "service $NAME ($CMD) stopped"
+}
+
+# Function for starting a named service
+startservice() {
+    NAME=$1
+    service $NAME start > /dev/null
+    printinfo "service $NAME started"
+}
+
+# Check for root user
+if [ `whoami` != 'root' ] ; then
+    echo "ERROR: only root is allowed to run administration tasks" >&2
+    exit 1
+fi
+
+# Parse command-line arguments
+if [ "$1" = "-q" ] ; then
+    shift
+    VERBOSE=false
+fi
+if [ -z "$1" ] ; then
+    printhelp "Restart mode not specified"
+    exit 1
+fi
+MODE=$1
+
+# Stop services
+stopservice jetty jsvc
+if [ "$MODE" = "full" ] ; then
+    stopservice mysql mysqld
+    stopservice nginx nginx
+    startservice nginx
+    startservice mysql
+    sleep 3
+fi
+sleep 1
+startservice jetty

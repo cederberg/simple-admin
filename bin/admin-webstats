@@ -1,0 +1,311 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+no warnings "misc";
+use Geo::IPfree;
+use JSON::XS;
+
+# Global variables
+my $total = 0;
+my $totaltime = 0.0;
+my $totalkb = 0;
+my $totalbytes = 0;
+my %timeofday = ();
+my %prcstime = ();
+my %stat_top_count = ();
+my %stat_top_time = ();
+my %stat_top_download = ();
+my %stat_source = ();
+my %stat_host = ();
+my %stat_host_time = ();
+my %stat_host_download = ();
+my %stat_country = ();
+my %stat_timeofday = ();
+my %stat_prcstime = ();
+my %stat_httpmethod = ();
+my %stat_httpversion = ();
+my %stat_httpcode = ();
+my %stat_useragent = ();
+my %stat_errortype = ();
+my $geo = Geo::IPfree->new;
+$geo->Faster;
+$geo->{cache} = 1;
+
+# Percent calculation (safe from div-by-zero)
+sub percent {
+    my ($value, $total) = @_;
+    if ($value <= 0 || $total <= 0) {
+        return 0;
+    } else {
+        return $value * 100.0 / $total;
+    }
+}
+
+# Format a number of KB (data size)
+sub format_kb {
+    my ($kb) = @_;
+    if ($kb < 1024) {
+        return sprintf("%d KB", $kb);
+    } elsif ($kb < 1024 * 1024) {
+        return sprintf("%.2f MB", $kb / 1024);
+    } else {
+        return sprintf("%.2f GB", $kb / (1024 * 1024));
+    }
+}
+
+# Format a number of seconds (time)
+sub format_secs {
+    my ($secs) = @_;
+    if ($secs < 60) {
+        return sprintf("%.1f sec", $secs);
+    } elsif ($secs < 3600) {
+        return sprintf("%.1f min", $secs / 60);
+    } else {
+        return sprintf("%.1f hrs", $secs / 3600);
+    }
+}
+
+# Print a formatted histogram
+sub print_histogram {
+    my ($handle, $hashref, $width, $max) = @_;
+    my @sorted = reverse sort {$$hashref{$a} <=> $$hashref{$b}} keys %$hashref;
+    my $fmt = sprintf("  %%-%ds %s\n", $width || 15, "%7d (%4.1f%%) requests");
+    if (defined($max) && @sorted > $max) {
+        $#sorted = $max - 1;
+    }
+    foreach my $key (@sorted) {
+        my $count = $$hashref{$key};
+        printf $handle $fmt, $key.':', $count, percent($count, $total);
+    }
+}
+
+# Print a formatted time histogram
+sub print_histogram_time {
+    my ($handle, $hashref, $width, $max) = @_;
+    my @sorted = reverse sort {$$hashref{$a} <=> $$hashref{$b}} keys %$hashref;
+    my $fmt = sprintf("  %%-%ds %s\n", $width || 15, "%10s (%4.1f%%)");
+    if (defined($max) && @sorted > $max) {
+        $#sorted = $max - 1;
+    }
+    foreach my $key (@sorted) {
+        my $count = $$hashref{$key};
+        printf $handle $fmt, $key.':', format_secs($count), percent($count, $totaltime);
+    }
+}
+
+# Print a formatted data size histogram
+sub print_histogram_kb {
+    my ($handle, $hashref, $width, $max) = @_;
+    my @sorted = reverse sort {$$hashref{$a} <=> $$hashref{$b}} keys %$hashref;
+    my $fmt = sprintf("  %%-%ds %s\n", $width || 15, "%10s (%4.1f%%)");
+    if (defined($max) && @sorted > $max) {
+        $#sorted = $max - 1;
+    }
+    foreach my $key (@sorted) {
+        my $count = $$hashref{$key};
+        printf $handle $fmt, $key.':', format_kb($count), percent($count, $totalkb);
+    }
+}
+
+# Parse command-line arguments
+my $output_json;
+my $output_text;
+my $filename;
+while (my $arg = shift @ARGV) {
+    if ($arg eq '--json') {
+        $output_json = shift @ARGV;
+    } elsif ($arg eq '--text') {
+        $output_text = shift @ARGV;
+    } else {
+        $filename = $arg;
+        last;
+    }    
+}
+if (!defined($filename)) {
+    die "ERROR: no access log file specified";
+} elsif ($filename ne "-" && (! -f $filename || ! -r $filename)) {
+    die "ERROR: cannot read file: $filename";
+}
+
+# Parse access log file
+if ($filename =~ /\.gz$/) {
+    open(STATFILE, "-|", "zcat $filename") or die $!;
+} elsif ($filename =~ /\.lzma$/) {
+    open(STATFILE, "-|", "lzcat $filename") or die $!;
+} else {
+    open(STATFILE, "<$filename") or die $!;
+}
+while (my $line = <STATFILE>) {
+    $total++;
+    if ($line =~ /^\[.*?\d{4}:(\d{2}):\d{2}:\d{2} .*? - (\d+\.\d+) s\] (\S*) (\S+) "(.*?)" (\d{1,3}) (\d+) "(.*?)" "(.*?)" "backend:(.*?)" "cache:(.*)"/) {
+        $timeofday{''.(int($1) >> 2)}++;
+        my $resptime = $2;
+        $totaltime += $resptime;
+        $prcstime{$resptime}++;
+        my $host = $3 || '<blank>';
+        $stat_host{$host}++;
+        my $ip = $4;
+        my ($ipcode, $ipcountry) = $geo->LookUp($ip);
+        $stat_country{$ipcountry || $ipcode}++;
+        my $request = $5;
+        my $respcode = $6;
+        $stat_httpcode{'HTTP '.$respcode}++;
+        my $bytes = int($7);
+        $totalbytes += $bytes;
+        $totalkb += $totalbytes >> 10;
+        $totalbytes &= 0x3FF;
+        my $referer = $8;
+        my $agent = $9;
+        if ($10 eq '-' && $11 eq '-') {
+            $stat_source{'File'}++;
+        } elsif ($10 ne '-') {
+            $stat_source{'Backend'}++;
+        } else {
+            $stat_source{'Cache'}++;
+        }
+        if ($request =~ /(\S+) (.*?) (HTTP\/.*)/) {
+            $stat_httpmethod{'HTTP '.$1}++;
+            $stat_httpversion{$3}++;
+            my $url = $2;
+            if ($respcode =~ /^[23]0[0-9]$/) {
+                $stat_top_count{$host.$url}++;
+                $stat_top_time{$host.$url} += 0.0 + $resptime;
+                $stat_top_download{$host.$url} += ($bytes >> 10) + 1;
+                $stat_host_time{$host} += 0.0 + $resptime;
+                $stat_host_download{$host} += ($bytes >> 10) + 1;
+            } else {
+                if ($respcode eq '403' || $respcode eq '405') {
+                    $stat_errortype{$respcode.' bot probe (WebDAV)'}++;
+                } elsif ($respcode eq '404' && $referer eq '-') {
+                    $stat_errortype{$respcode.' bot, invalid url (no referer)'}++;
+                } elsif ($respcode eq '444') {
+                    $stat_errortype{$respcode.' <blank host>'}++;
+                } elsif ($respcode eq '499') {
+                    $stat_errortype{$respcode.' client closed connection'}++;
+                } elsif ($url =~ /phpMyAdmin/i) {
+                    $stat_errortype{$respcode.' bot probe (phpMyAdmin)'}++;
+                } elsif ($url =~ /\.php/) {
+                    $stat_errortype{$respcode.' bot probe (php)'}++;
+                } elsif ($url =~ /\+uri/) {
+                    $stat_errortype{$respcode.' bot, invalid url (+uri)'}++;
+                } elsif ($url =~ /\/null$/) {
+                    $stat_errortype{$respcode.' ad invalid (null)'}++;
+                } elsif ($url =~ /data:image\/png;base64/) {
+                    $stat_errortype{$respcode.' ad invalid (base64 image)'}++;
+                } elsif ($url eq '/favicon.ico') {
+                    $stat_errortype{$respcode.' missing favicon.ico'}++;
+                } else {
+                    $stat_errortype{$respcode.' '.$host.$url}++;
+                }
+            }
+        } else {
+            $stat_httpmethod{'<blank>'}++;
+            $stat_httpversion{'<blank>'}++;
+            $stat_errortype{$respcode.' '.'<blank URL>'}++;
+        }
+	if ($agent =~ /(MSIE)/i || $agent =~ /(Opera)/i || $agent =~ /(Chrome)/i ||
+            $agent =~ /(iPhone)/i || $agent =~ /(iPad)/i || $agent =~ /(Safari)/i ||
+            $agent =~ /(WebKit)/i || $agent =~ /(Firefox)/i) {
+            $stat_useragent{$1}++;
+        } elsif ($agent =~ /Google/i || $agent =~ /Facebook/i || $agent =~ /Yahoo/i ||
+                 $agent =~ /Java/i ||
+                 $agent =~ /spider/i || $agent =~ /bot/i || $agent =~ /crawler/i) {
+            $stat_useragent{'Robots'}++;
+        } elsif ($agent =~ /^-?$/) {
+            $stat_useragent{'<blank>'}++;
+        } else {
+            $stat_useragent{'Other'}++;
+        }
+    } else {
+        print "Ignoring: $line";
+    }
+}
+close(STATFILE);
+$totalkb += 1;
+
+# Format time-of-day keys
+foreach my $key (sort keys %timeofday) {
+    my $count = $timeofday{$key};
+    my $timekey = sprintf("%02d:00-%02d:59", int($key) * 4, int($key) * 4 + 3);
+    $stat_timeofday{$timekey} = $count;
+}
+
+# Calculate processing time thresholds
+my @limits = (0.500, 0.750, 0.900, 0.950, 0.975, 0.990, 0.995, 0.998, 0.999, 1.0);
+my $nextlimit = shift(@limits);
+my $count = 0;
+foreach my $time (sort {$a <=> $b} keys %prcstime) {
+    $count += $prcstime{$time};
+    if ($count / $total >= $nextlimit) {
+        $stat_prcstime{$nextlimit} = $time;
+        $nextlimit = shift(@limits);
+    }
+}
+
+# Print output
+if (defined($output_json)) {
+    open(JSONFILE, '>'.$output_json) or die "ERROR: Couldn't write to ".$output_json;
+    printf JSONFILE "\{\n";
+    my %json_total = ( 'count' => $total, 'kb' => $totalkb, 'size' => format_kb($totalkb));
+    printf JSONFILE "  \"total\": %s,\n", encode_json(\%json_total);
+    printf JSONFILE "  \"error_type\": %s,\n", encode_json(\%stat_errortype);
+    printf JSONFILE "  \"hostname\": %s,\n", encode_json(\%stat_host);
+    printf JSONFILE "  \"country\": %s,\n", encode_json(\%stat_country);
+    printf JSONFILE "  \"processing_time\": %s,\n", encode_json(\%stat_prcstime);
+    printf JSONFILE "  \"time_of_day\": %s,\n", encode_json(\%stat_timeofday);
+    printf JSONFILE "  \"data_source\": %s,\n", encode_json(\%stat_source);
+    printf JSONFILE "  \"http_method\": %s,\n", encode_json(\%stat_httpmethod);
+    printf JSONFILE "  \"http_version\": %s,\n", encode_json(\%stat_httpversion);
+    printf JSONFILE "  \"http_code\": %s,\n", encode_json(\%stat_httpcode);
+    printf JSONFILE "  \"user_agent\": %s,\n", encode_json(\%stat_useragent);
+    printf JSONFILE "\}\n";
+    close(JSONFILE);
+}
+if (!defined($output_json) || defined($output_text)) {
+    if (defined($output_text)) {
+        open(TXTFILE, '>'.$output_text) or die "ERROR: Couldn't write to ".$output_text;
+    } else {
+        *TXTFILE = *STDOUT;
+    }
+    print TXTFILE "Top Request Count:\n";
+    print_histogram(*TXTFILE, \%stat_top_count, 71, 20);
+    print TXTFILE "Top Process Time:\n";
+    print_histogram_time(*TXTFILE, \%stat_top_time, 68, 20);
+    print TXTFILE "Top Download Size:\n";
+    print_histogram_kb(*TXTFILE, \%stat_top_download, 68, 20);
+    print TXTFILE "Errors:\n";
+    print_histogram(*TXTFILE, \%stat_errortype, 71);
+    print TXTFILE "Hostnames:\n";
+    print_histogram(*TXTFILE, \%stat_host, 35);
+    print TXTFILE "Top Hostname Process Times:\n";
+    print_histogram_time(*TXTFILE, \%stat_host_time, 35, 20);
+    print TXTFILE "Top Hostname Download Sizes:\n";
+    print_histogram_kb(*TXTFILE, \%stat_host_download, 35, 20);
+    print TXTFILE "Countries:\n";
+    print_histogram(*TXTFILE, \%stat_country, 35);
+    print TXTFILE "Processing Times:\n";
+    foreach my $key (sort keys %stat_prcstime) {
+        printf TXTFILE "  %5.1f%% within: %8s seconds\n", $key * 100.0, $stat_prcstime{$key};
+    }
+    print TXTFILE "Time of Day:\n";
+    foreach my $key (sort keys %stat_timeofday) {
+        my $count = $stat_timeofday{$key};
+        printf TXTFILE "  %-15s %7d (%4.1f%%) requests\n", $key.':', $count, $count * 100.0 / $total;
+    }
+    print TXTFILE "Data Sources:\n";
+    print_histogram(*TXTFILE, \%stat_source);
+    print TXTFILE "Request Methods:\n";
+    print_histogram(*TXTFILE, \%stat_httpmethod);
+    print TXTFILE "Request Versions:\n";
+    print_histogram(*TXTFILE, \%stat_httpversion);
+    print TXTFILE "Response Codes:\n";
+    print_histogram(*TXTFILE, \%stat_httpcode);
+    print TXTFILE "User Agents:\n";
+    print_histogram(*TXTFILE, \%stat_useragent);
+    printf(TXTFILE "Total:\n");
+    printf(TXTFILE "  %7d requests\n", $total);
+    printf(TXTFILE "  %11s process time\n", format_secs($totaltime));
+    printf(TXTFILE "  %10s downloaded data\n", format_kb($totalkb));
+    close(TXTFILE);
+}

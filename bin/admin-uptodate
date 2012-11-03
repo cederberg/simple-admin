@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# Configuration parameters
+SENDMAIL=/usr/sbin/sendmail
+SECURITY=false
+MAIL=false
+
+# Function for printing command-line help
+printhelp() {
+    ERROR=$1
+    echo "Runs a check to determine if the system requires updates."
+    echo
+    echo "Syntax: admin-update [-s] [-m]"
+    echo
+    echo "Options:"
+    echo "  -s  Check only for security updates."
+    echo "  -m  Mail administrator instead of printing results."
+}
+
+# Check for root user
+if [ `whoami` != 'root' ] ; then
+    echo "ERROR: only root is allowed to run administration tasks" >&2
+    exit 1
+fi
+
+# Parse command-line arguments
+if [ "$1" = "-s" ] ; then
+    shift
+    SECURITY=true
+fi
+if [ "$1" = "-m" ] ; then
+    shift
+    MAIL=true
+fi
+
+# Check for update
+apt-get update > /dev/null
+OUTFILE=/tmp/admin-update.txt
+echo "Subject: System updates available for `hostname`" > $OUTFILE
+echo >> $OUTFILE
+apt-get --simulate --quiet upgrade >> $OUTFILE
+if [ "$SECURITY" = "true" ] ; then
+    RESULT=`grep "security" $OUTFILE`
+elif [ -z "`grep "0 upgraded" $OUTFILE`" ] ; then
+    RESULT="true"
+else
+    RESULT=""
+fi
+if [ -n "$RESULT" ] ; then
+    if [ "$MAIL" = "true" ] ; then
+        cat $OUTFILE | $SENDMAIL root
+    else
+        echo "Updates available:"
+        echo
+        cat $OUTFILE
+    fi
+fi
+rm $OUTFILE

@@ -1,0 +1,81 @@
+#!/bin/sh
+
+# Configuration variables
+LOG_DIR=/var/log/***
+STAT_DIR=***/logstats
+VERBOSE="false"
+
+# Function for printing command-line help
+printhelp() {
+    ERROR=$1
+    echo "Rotates the Nginx log files."
+    echo
+    echo "Syntax: admin-logrotate [-v]"
+    echo
+    echo "Options:"
+    echo "  -v  Print verbose output."
+    if [ "$ERROR" != "" ] ; then
+        echo
+        echo "ERROR: $ERROR" >&2
+    fi
+}
+
+# Function for printing verbose information
+printinfo() {
+    if [ $VERBOSE = "true" ] ; then
+        echo `date +"%F %T"`: $*
+    fi
+}
+
+# Check for root user
+if [ `whoami` != 'root' ] ; then
+    echo "ERROR: only root is allowed to run administration tasks" >&2
+    exit 1
+fi
+
+# Parse command-line arguments
+if [ "$1" = "-v" ] ; then
+    shift
+    VERBOSE=true
+fi
+
+# Rename log files
+YESTERDAY=`date -d "-1 day" +%Y%m%d`
+FILES=`find $LOG_DIR -name '*.log'`
+for LOG in $FILES ; do
+    if [ -e $LOG.$YESTERDAY -o -e $LOG.$YESTERDAY.lzma ] ; then
+        printinfo skipping $LOG "(already rotated)"
+    else
+        printinfo rotating $LOG
+        mv $LOG $LOG.$YESTERDAY
+    fi
+done
+
+# Restart Nginx to create new logs
+printinfo restarting Nginx
+[ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
+printinfo sleeping 60 seconds
+sleep 60
+
+# Process web statistics
+LOG_FILE=$LOG_DIR/access.log.$YESTERDAY
+JSON_FILE=$STAT_DIR/logstats.$YESTERDAY.json
+TEXT_FILE=$STAT_DIR/logstats.$YESTERDAY.txt
+printinfo processing stats on $LOG_FILE
+/usr/local/bin/admin-webstats --json $JSON_FILE --text $TEXT_FILE $LOG_FILE
+
+# Compress rotated log files
+for LOG in $FILES ; do
+    if [ -s $LOG.$YESTERDAY ] ; then
+        printinfo compressing $LOG.$YESTERDAY
+        lzma $LOG.$YESTERDAY
+    else
+        printinfo removing empty file $LOG.$YESTERDAY
+        rm -f $LOG.$YESTERDAY
+    fi
+done
+
+# Remove old log files
+printinfo removing old log files
+find $LOG_DIR -name '*.gz' -mtime +30 | xargs -r rm
+find $LOG_DIR -name '*.lzma' -mtime +30 | xargs -r rm
