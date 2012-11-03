@@ -26,9 +26,10 @@ checkprocesses() {
 
 # Checking all services
 checkprocesses root cron
-checkprocesses root mon
+checkprocesses root /usr/sbin/mon
 checkprocesses root sshd
 checkprocesses root postfix
 checkprocesses mysql mysqld
 checkprocesses nginx nginx
 checkprocesses jetty jetty
+checkprocesses tenshi tenshi

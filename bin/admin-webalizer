@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# Configuration variables
+LOG_DIR=/var/log/liquidsite
+STATS_DIR=/srv/webstats
+OPTIONS="-c /etc/webalizer/webalizer.conf"
+VERBOSE="false"
+
+# Function for printing command-line help
+printhelp() {
+    ERROR=$1
+    echo "Processes the web log files and creates statistics."
+    echo
+    echo "Syntax: admin-webstats [-v]"
+    echo
+    echo "Options:"
+    echo "  -v  Print verbose output."
+    if [ "$ERROR" != "" ] ; then
+        echo
+        echo "ERROR: $ERROR" >&2
+    fi
+}
+
+# Function for printing verbose information
+printinfo() {
+    if [ $VERBOSE = "true" ] ; then
+        echo `date +"%F %T"`: $*
+    fi
+}
+
+# Check for root user
+if [ `whoami` != 'root' ] ; then
+    echo "ERROR: only root is allowed to run administration tasks" >&2
+    exit 1
+fi
+
+# Parse command-line arguments
+if [ "$1" = "-v" ] ; then
+    shift
+    VERBOSE=true
+    OPTIONS="-v $OPTIONS"
+else
+    OPTIONS="-Q $OPTIONS"
+fi
+
+# Perform log file processing
+FILES=`find $LOG_DIR -name webalizer.conf`
+for CONF in $FILES ; do
+    DIR=`dirname $CONF`
+    LOGS=`find $DIR -name 'access*.gz'`
+    printinfo init webstats for $CONF
+    if [ "$LOGS" != "" ] ; then
+#        zcat $DIR/access*.gz | webazolver $OPTIONS -
+        zcat $DIR/access*.gz | webalizer $OPTIONS -c $CONF -
+    fi
+    printinfo done webstats for $CONF
+done
+/usr/local/bin/admin-freemem
+

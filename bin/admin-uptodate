@@ -56,3 +56,4 @@ if [ -n "$RESULT" ] ; then
     fi
 fi
 rm $OUTFILE
+/usr/local/bin/admin-freemem
