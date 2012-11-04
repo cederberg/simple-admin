@@ -26,8 +26,8 @@ Cleans filesystem cache (if possible) to recover memory.
 
 **Syntax:** admin-freemem
 
-Forces a filesystem sync followed by a write to
-```/proc/sys/vm/drop_caches```.
+Forces a filesystem sync followed by a write
+to ```/proc/sys/vm/drop_caches```.
 
 
 admin-status
@@ -65,3 +65,4 @@ Converts a file or directory to UTF-8 (from ISO-8859-1). Only if needed.
 
 Use either ```check``` to detect file encoding, or ```convert``` to
 convert all ISO-8859-1 file(s).
+
