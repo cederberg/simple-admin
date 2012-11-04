@@ -5,31 +5,51 @@
 # Syntax: admin-status
 #
 
-# Function for listing all processes matching a name
-listprocesses() {
-    OWNER=$1
-    NAME=$2
-    ps -FU $OWNER | grep $NAME | grep -v grep
-}
+# Configuration variables
+CONFIG=/etc/admin-status.conf
 
-# Function for checking a service
-checkprocesses() {
-    OWNER=$1
-    NAME=$2
-    PS=`listprocesses $OWNER $NAME`
-    if [ "$PS" = "" ] ; then
-        echo "!! $NAME NOT running"
+# Function for checking the service status
+checkstatus() {
+    NAME=$1
+    PIDFILE=$2
+    if [ -f "$PIDFILE" ] ; then
+        PID=`cat $PIDFILE`
+        ps -p $PID > /dev/null
+        if [ $? -eq 0 ] ; then
+            return 0
+        fi
+    fi
+    ps -e | grep $NAME > /dev/null
+    if [ $? -eq 0 ] ; then
+        return 1
     else
-        echo " * $NAME is running"
+        return 2
     fi
 }
 
 # Checking all services
-checkprocesses root cron
-checkprocesses root /usr/sbin/mon
-checkprocesses root sshd
-checkprocesses root postfix
-checkprocesses mysql mysqld
-checkprocesses nginx nginx
-checkprocesses jetty jetty
-checkprocesses tenshi tenshi
+RETVAL=0
+LOCALDIR=`dirname $0`/..
+if [ -f $CONFIG ] ; then
+    exec < $CONFIG
+elif [ -f $LOCALDIR/$CONFIG ] ; then
+    exec < $LOCALDIR/$CONFIG
+else
+    echo "Error: Missing config file $CONFIG"
+    exit 1
+fi
+while read NAME PIDFILE ; do
+    printf " * %-10s " "$NAME:"
+    checkstatus $NAME $PIDFILE
+    STATUS=$?
+    if [ $STATUS -eq 0 ] ; then
+        echo "OK"
+    elif [ $STATUS -eq 1 ] ; then
+        echo "ERROR -- invalid PID file $PIDFILE"
+        RETVAL=`expr $RETVAL + 1`
+    else
+        echo "ERROR -- service not running"
+        RETVAL=`expr $RETVAL + 1`
+    fi
+done
+exit $RETVAL
