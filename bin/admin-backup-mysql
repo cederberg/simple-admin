@@ -1,18 +1,20 @@
 #!/bin/sh
 #
-# Makes a backup SQL copy of the local MySQL database.
+# Performs a MySQL dump of configured databases.
 #
-# Syntax: admin-mysqldump [-v]
+# Syntax: admin-backup-mysql [-v]
 #
 # Options:
 #   -v  Print verbose output.
+#
+# Files:
+#   /etc/admin-backup-mysql.conf
+#
 
-# Configuration
-DATABASE=***
-USER=***
-PWD=***
-FILE=***/$DATABASE.sql
-OPTIONS="--quick --skip-lock-tables --skip-add-locks --ignore-table=***"
+# Configuration variables
+CONFIG=/etc/admin-backup-mysql.conf
+DUMP_DIR=/var/local/admin-backup-mysql
+OPTIONS="--quick --skip-lock-tables --skip-add-locks"
 VERBOSE="false"
 
 # Function for printing verbose information
@@ -22,9 +24,13 @@ printinfo() {
     fi
 }
 
-# Check for root user
-if [ `whoami` != 'root' ] ; then
-    echo "ERROR: only root is allowed to run admin-mysqldump" >&2
+# Load config to stdin
+if [ -f $CONFIG ] ; then
+    exec < $CONFIG
+elif [ -f $LOCALDIR/$CONFIG ] ; then
+    exec < $LOCALDIR/$CONFIG
+else
+    echo "ERROR: Missing config file $CONFIG"
     exit 1
 fi
 
@@ -35,11 +41,16 @@ if [ "$1" = "-v" ] ; then
     VERBOSE=true
 fi
 
-printinfo starting MySQL dump of $DATABASE
-rm -f $FILE $FILE.lzma
-mysqldump -u$USER -p$PWD $OPTIONS --result-file=$FILE $DATABASE
-printinfo finished MySQL dump of $DATABASE
-printinfo starting compression of file $FILE
-lzma $FILE
+# Perform MySQL dumps
+mkdir -p $DUMP_DIR
+while read DATABASE USER PWD EXTRAS ; do
+    printinfo starting MySQL dump of $DATABASE
+    FILE=$DUMP_DIR/$DATABASE.sql
+    rm -f $FILE $FILE.lzma
+    mysqldump -u$USER -p$PWD $OPTIONS $EXTRAS --result-file=$FILE $DATABASE
+    printinfo finished MySQL dump of $DATABASE
+    printinfo starting compression of file $FILE
+    lzma $FILE
+    printinfo finished compression of file $FILE
+done
 /usr/local/bin/admin-freemem
-printinfo finished compression of file $FILE

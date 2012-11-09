@@ -7,6 +7,7 @@ maintenance.
 Requirements
 ------------
 * Ubuntu 12.04
+* lzma
 * Perl
 * Perl - Geo::IPfree
 * Perl - JSON::XS
@@ -30,18 +31,50 @@ Option | Description
 -------|-------------------------------------------------
 -v     | Print verbose output.
 
-All the files in the directories specified in
-```/etc/admin-backup-files.conf``` will be recursively copied to
-```/backup/<hostname>/current/``` as a snapshot backup directory.
+Configured in ```/etc/admin-backup-files.conf``` with one line
+per directory to backup:
 
-Previous versions of the files will be stored in
-```/backup/<hostname>/history``` in separate directories per hour,
-day and month. The historic files will be hard linked to the
-snapshot directory to preserve space. The hourly history is preserved
+```
+/etc
+/home
+/root
+```
+
+All the files in the directories specified will be recursively
+copied to ```/backup/<hostname>/current/```, which serves as a
+snapshot backup directory. Previous versions of files are also
+stored, under the ```/backup/<hostname>/history``` directory.
+
+Separate directories with changed files per hour, day and month
+are created. The historic files are hard linked to the snapshot
+directory to preserve space. The hourly history is preserved
 for 24 hours, daily history for 30 days and thereafter only the
 monthly history is kept.
 
-The file backup can be run every hour or every minute as desired.
+The file backup can be run as frequently as every minute, but
+should at least be run once per day.
+
+
+admin-backup-mysql
+------------------
+Performs a MySQL dump of configured databases.
+
+**Syntax:** admin-backup-mysql [-v]
+
+Option | Description
+-------|-------------------------------------------------
+-v     | Print verbose output.
+
+Configured in ```/etc/admin-backup-mysql.conf``` with one line
+per database to backup:
+
+```
+database1 user password
+database2 user password --ignore-table=table1
+```
+
+The ```/var/local/admin-backup-mysql``` directory is used to
+store the output MySQL dump files (compressed).
 
 
 admin-freemem
@@ -73,12 +106,12 @@ admin-uptodate
 --------------
 Runs a check to determine if the system requires updates.
 
-**Syntax:** ```admin-update [-s] [-m]```  
+**Syntax:** ```admin-uptodate [-s] [-m]```  
 
 Option | Description
 -------|-------------------------------------------------
 -s     | Check only for security updates.
--m     | Mail administrator instead of printing results.
+-m     | Mail root instead of printing results.
 
 
 admin-utf8
