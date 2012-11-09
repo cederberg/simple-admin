@@ -1,25 +1,22 @@
 #!/bin/sh
+#
+# Runs a check to determine if the system requires updates.
+#
+# Syntax: admin-uptodate [-s] [-m]
+#
+# Options:
+#   -s  Check only for security updates.
+#   -m  Mail root instead of printing results.
+#
 
 # Configuration parameters
 SENDMAIL=/usr/sbin/sendmail
 SECURITY=false
 MAIL=false
 
-# Function for printing command-line help
-printhelp() {
-    ERROR=$1
-    echo "Runs a check to determine if the system requires updates."
-    echo
-    echo "Syntax: admin-update [-s] [-m]"
-    echo
-    echo "Options:"
-    echo "  -s  Check only for security updates."
-    echo "  -m  Mail administrator instead of printing results."
-}
-
 # Check for root user
 if [ `whoami` != 'root' ] ; then
-    echo "ERROR: only root is allowed to run administration tasks" >&2
+    echo "ERROR: Only root is allowed to run admin-uptodate" >&2
     exit 1
 fi
 
@@ -35,7 +32,7 @@ fi
 
 # Check for update
 apt-get update > /dev/null
-OUTFILE=/tmp/admin-update.txt
+OUTFILE=/tmp/admin-uptodate.txt
 echo "Subject: System updates available for `hostname`" > $OUTFILE
 echo >> $OUTFILE
 apt-get --simulate --quiet upgrade >> $OUTFILE
