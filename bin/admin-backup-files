@@ -1,11 +1,6 @@
 #!/bin/sh
 #
-# Performs a filesystem backup for configured directories. All the files in
-# the specified directories will be copied to a snapshot directory and
-# previous versions will be stored in historic diff directories. The backup
-# will keep hourly diffs for 24 hours, daily diffs for 30 days and thereafter
-# only the sum of all changes for the month will be kept. The backup can be
-# run hourly or every minute as desired.
+# Performs a filesystem backup for configured directories.
 #
 # Syntax: admin-backup-files [-v]
 #
@@ -15,12 +10,10 @@
 # Files:
 #   /etc/admin-backup-files.conf
 #
-# See Also:
-#   admin-backup-mysql
-#
 
 # Configuration variables
 CONFIG=/etc/admin-backup-files.conf
+LOCALDIR=`dirname $0`/..
 HOST=`hostname --fqdn`
 DATE_HOURLY=`date '+%Y-%m-%d-%H%M'`
 DATE_DAILY=`date '+%Y-%m-%d'`
@@ -42,7 +35,17 @@ printinfo() {
 
 # Check for root user
 if [ `whoami` != 'root' ] ; then
-    echo "ERROR: only root is allowed to run administration tasks" >&2
+    echo "ERROR: Only root is allowed to run administration tasks" >&2
+    exit 1
+fi
+
+# Load config to stdin
+if [ -f $CONFIG ] ; then
+    exec < $CONFIG
+elif [ -f $LOCALDIR/$CONFIG ] ; then
+    exec < $LOCALDIR/$CONFIG
+else
+    echo "ERROR: Missing config file $CONFIG"
     exit 1
 fi
 
@@ -55,10 +58,10 @@ fi
 # Perform backup
 printinfo init backup on $HOST
 mkdir -p $SNAP_DIR $DIFF_DIR_HOURLY $DIFF_DIR_DAILY $DIFF_DIR_MONTHLY
-cat $CONFIG | while read SRC_DIR ; do
-    printinfo syncing dir $SRC_DIR
-    mkdir -p $SNAP_DIR$SRC_DIR
-    rsync $OPTIONS --backup --backup-dir=$DIFF_DIR_HOURLY$SRC_DIR $SRC_DIR/ $SNAP_DIR$SRC_DIR/
+while read SRC ; do
+    printinfo syncing dir $SRC
+    mkdir -p $SNAP_DIR$SRC
+    rsync $OPTIONS --backup --backup-dir=$DIFF_DIR_HOURLY$SRC $SRC/ $SNAP_DIR$SRC/
 done
 
 # Remove empty dirs

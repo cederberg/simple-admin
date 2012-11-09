@@ -20,6 +20,30 @@ Installation
 4. Copy & modify config files in ```etc```
 
 
+admin-backup-files
+------------------
+Performs a filesystem backup for configured directories.
+
+**Syntax:** admin-backup-files [-v]
+
+Option | Description
+-------|-------------------------------------------------
+-v     | Print verbose output.
+
+All the files in the directories specified in
+```/etc/admin-backup-files.conf``` will be recursively copied to
+```/backup/<hostname>/current/``` as a snapshot backup directory.
+
+Previous versions of the files will be stored in
+```/backup/<hostname>/history``` in separate directories per hour,
+day and month. The historic files will be hard linked to the
+snapshot directory to preserve space. The hourly history is preserved
+for 24 hours, daily history for 30 days and thereafter only the
+monthly history is kept.
+
+The file backup can be run every hour or every minute as desired.
+
+
 admin-freemem
 -------------
 Cleans filesystem cache (if possible) to recover memory.

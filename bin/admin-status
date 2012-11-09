@@ -4,9 +4,13 @@
 #
 # Syntax: admin-status
 #
+# Files:
+#   /etc/admin-status.conf
+#
 
 # Configuration variables
 CONFIG=/etc/admin-status.conf
+LOCALDIR=`dirname $0`/..
 
 # Function for checking the service status
 checkstatus() {
@@ -27,17 +31,18 @@ checkstatus() {
     fi
 }
 
-# Checking all services
-RETVAL=0
-LOCALDIR=`dirname $0`/..
+# Load config to stdin
 if [ -f $CONFIG ] ; then
     exec < $CONFIG
 elif [ -f $LOCALDIR/$CONFIG ] ; then
     exec < $LOCALDIR/$CONFIG
 else
-    echo "Error: Missing config file $CONFIG"
+    echo "ERROR: Missing config file $CONFIG"
     exit 1
 fi
+
+# Checking all services
+RETVAL=0
 while read NAME PIDFILE ; do
     printf " * %-10s " "$NAME:"
     checkstatus $NAME $PIDFILE
