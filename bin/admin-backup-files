@@ -35,7 +35,7 @@ printinfo() {
 
 # Check for root user
 if [ `whoami` != 'root' ] ; then
-    echo "ERROR: Only root is allowed to run administration tasks" >&2
+    echo "ERROR: Only root is allowed to run admin-backup-files" >&2
     exit 1
 fi
 
