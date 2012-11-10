@@ -15,14 +15,14 @@
 CONFIG=/etc/admin-backup-files.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname --fqdn`
-DATE_HOURLY=`date '+%Y-%m-%d-%H%M'`
+DATE_MINUTE=`date '+%Y-%m-%d-%H%M'`
 DATE_DAILY=`date '+%Y-%m-%d'`
 DATE_MONTHLY=`date '+%Y-%m'`
 SNAP_DIR=/backup/$HOST/current
-DIFF_DIR=/backup/$HOST/history
-DIFF_DIR_HOURLY=$DIFF_DIR/$DATE_HOURLY
-DIFF_DIR_DAILY=$DIFF_DIR/$DATE_DAILY
-DIFF_DIR_MONTHLY=$DIFF_DIR/$DATE_MONTHLY
+HIST_DIR=/backup/$HOST/history
+HIST_DIR_MINUTE=$HIST_DIR/$DATE_MINUTE
+HIST_DIR_DAILY=$HIST_DIR/$DATE_DAILY
+HIST_DIR_MONTHLY=$HIST_DIR/$DATE_MONTHLY
 OPTIONS="--archive --delete --force --ignore-errors --quiet"
 VERBOSE="false"
 
@@ -57,26 +57,26 @@ fi
 
 # Perform backup
 printinfo init backup on $HOST
-mkdir -p $SNAP_DIR $DIFF_DIR_HOURLY $DIFF_DIR_DAILY $DIFF_DIR_MONTHLY
+mkdir -p $SNAP_DIR $HIST_DIR_MINUTE $HIST_DIR_DAILY $HIST_DIR_MONTHLY
 while read SRC ; do
     printinfo syncing dir $SRC
     mkdir -p $SNAP_DIR$SRC
-    rsync $OPTIONS --backup --backup-dir=$DIFF_DIR_HOURLY$SRC $SRC/ $SNAP_DIR$SRC/
+    rsync $OPTIONS --backup --backup-dir=$HIST_DIR_MINUTE$SRC $SRC/ $SNAP_DIR$SRC/
 done
 
 # Remove empty dirs
-find $DIFF_DIR_HOURLY -depth -type d -exec rmdir {} \; 2> /dev/null
+find $HIST_DIR_MINUTE -depth -type d -exec rmdir {} \; 2> /dev/null
 
 # Update daily and montly dirs
-if [ -d $DIFF_DIR_HOURLY ] ; then 
+if [ -d $HIST_DIR_MINUTE ] ; then 
     printinfo updating daily and monthly diff dirs
-    cp -fluR $DIFF_DIR_HOURLY/* $DIFF_DIR_DAILY
-    cp -fluR $DIFF_DIR_DAILY/* $DIFF_DIR_MONTHLY
+    cp -fluR $HIST_DIR_MINUTE/* $HIST_DIR_DAILY
+    cp -fluR $HIST_DIR_DAILY/* $HIST_DIR_MONTHLY
 fi
 
 # Remove outdated hourly and daily dirs
-find $DIFF_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +2 -exec rm -rf {} \;
-find $DIFF_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {} \;
+find $HIST_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +2 -exec rm -rf {} \;
+find $HIST_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {} \;
 
 # Finished backup
 /usr/local/bin/admin-freemem
