@@ -17,7 +17,7 @@ LOCALDIR=`dirname $0`/..
 HOST=`hostname --fqdn`
 DATE=`date '+%Y-%m-%d'`
 DUMP_DIR=/backup/$HOST/mysql
-OPTIONS="--quick --skip-lock-tables --skip-add-locks"
+OPTIONS="--opt --quote-names --skip-add-locks --skip-lock-tables"
 VERBOSE="false"
 
 # Function for printing verbose information
@@ -51,7 +51,7 @@ while read DATABASE USER PWD EXTRAS ; do
     printinfo starting MySQL dump of $DATABASE
     FILE=$DUMP_DIR/$DATABASE.$DATE.sql
     rm -f $FILE $FILE.lzma
-    mysqldump -u$USER -p$PWD $OPTIONS $EXTRAS --result-file=$FILE $DATABASE
+    mysqldump -u$USER -p$PWD $OPTIONS $EXTRAS --result-file=$FILE --databases $DATABASE
     printinfo finished MySQL dump of $DATABASE
     printinfo starting compression of file $FILE
     lzma $FILE
