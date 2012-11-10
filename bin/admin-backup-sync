@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Performs a cross-server file sync for configured directories.
+# Performs a remote file sync for configured directories.
 #
 # Syntax: admin-backup-sync [-v]
 #
@@ -10,13 +10,11 @@
 # Files:
 #   /etc/admin-backup-sync.conf
 #
-# See Also:
-#   admin-backup-files
-#
 
 # Configuration variables
 CONFIG=/etc/admin-backup-sync.conf
-OPTIONS="-az --delete"
+LOCALDIR=`dirname $0`/..
+OPTIONS="--archive --hard-links --delete --compress"
 VERBOSE="false"
 
 # Function for printing verbose information
@@ -26,9 +24,13 @@ printinfo() {
     fi
 }
 
-# Check for root user
-if [ `whoami` != 'root' ] ; then
-    echo "ERROR: only root is allowed to run administration tasks" >&2
+# Load config to stdin
+if [ -f $CONFIG ] ; then
+    exec < $CONFIG
+elif [ -f $LOCALDIR/$CONFIG ] ; then
+    exec < $LOCALDIR/$CONFIG
+else
+    echo "ERROR: Missing config file $CONFIG"
     exit 1
 fi
 
@@ -43,13 +45,10 @@ fi
 
 # Perform synchronization
 printinfo init sync from `hostname --fqdn`
-cat $CONFIG | while read LINE ; do
-    SRC=${LINE%% *}
-    DST=${LINE#* }
+while read SRC DST ; do
     printinfo "syncing from:" $SRC
     printinfo "          to:" $DST
     rsync $OPTIONS $SRC $DST
-    sleep 10
 done
 /usr/local/bin/admin-freemem
 printinfo done sync from `hostname --fqdn`

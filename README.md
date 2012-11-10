@@ -7,6 +7,7 @@ maintenance.
 Requirements
 ------------
 * Ubuntu 12.04
+* rsync
 * lzma
 * Perl
 * Perl - Geo::IPfree
@@ -16,6 +17,7 @@ Requirements
 Installation
 ------------
 1. Install dependencies:
+   - ```apt-get install rsync```
    - ```apt-get install lzma```
    - ```apt-get install libgeo-ipfree-perl```
    - ```apt-get install libjson-xs-perl```
@@ -84,6 +86,29 @@ kept for 30 days, except the first backup file from each month
 
 The MySQL backup should be run once per day. More frequent runs
 will overwrite the previous backup.
+
+
+admin-backup-sync
+-----------------
+Performs a remote file sync for configured directories.
+
+**Syntax:** admin-backup-sync [-v]
+
+Option | Description
+-------|-------------------------------------------------
+-v     | Print verbose output.
+
+Configured in ```/etc/admin-backup-sync.conf``` with one line
+for each pair of source and destination directories:
+
+```
+/backup/host01/ root@host02:/backup/host01/
+root@host02:/backup/host02/ /backup/host02/
+```
+
+The file syncronization use ```rsync``` and will update and
+remove files on the receiving side, so be careful to sync the
+correct backup subdirectories.
 
 
 admin-freemem
