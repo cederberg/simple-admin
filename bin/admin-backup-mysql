@@ -13,7 +13,10 @@
 
 # Configuration variables
 CONFIG=/etc/admin-backup-mysql.conf
-DUMP_DIR=/var/local/admin-backup-mysql
+LOCALDIR=`dirname $0`/..
+HOST=`hostname --fqdn`
+DATE=`date '+%Y-%m-%d'`
+DUMP_DIR=/backup/$HOST/mysql
 OPTIONS="--quick --skip-lock-tables --skip-add-locks"
 VERBOSE="false"
 
@@ -41,11 +44,12 @@ if [ "$1" = "-v" ] ; then
     VERBOSE=true
 fi
 
-# Perform MySQL dumps
+# Perform MySQL backup
+printinfo init MySQL backup on $HOST
 mkdir -p $DUMP_DIR
 while read DATABASE USER PWD EXTRAS ; do
     printinfo starting MySQL dump of $DATABASE
-    FILE=$DUMP_DIR/$DATABASE.sql
+    FILE=$DUMP_DIR/$DATABASE.$DATE.sql
     rm -f $FILE $FILE.lzma
     mysqldump -u$USER -p$PWD $OPTIONS $EXTRAS --result-file=$FILE $DATABASE
     printinfo finished MySQL dump of $DATABASE
@@ -53,4 +57,10 @@ while read DATABASE USER PWD EXTRAS ; do
     lzma $FILE
     printinfo finished compression of file $FILE
 done
+
+# Remove outdated backup files
+find $DUMP_DIR -type f -mtime +30 \! -name "*.????-??-01.*" -delete
+
+# Finished backup
 /usr/local/bin/admin-freemem
+printinfo done MySQL backup on $HOST
