@@ -15,10 +15,13 @@ Requirements
 
 Installation
 ------------
-1. ```apt-get install libgeo-ipfree-perl```
-2. ```apt-get install libjson-xs-perl```
-3. ```cp bin/admin-* /usr/local/bin/```
-4. Copy & modify config files in ```etc```
+1. Install dependencies:
+   - ```apt-get install lzma```
+   - ```apt-get install libgeo-ipfree-perl```
+   - ```apt-get install libjson-xs-perl```
+2. Copy binaries into place:
+   - ```cp bin/admin-* /usr/local/bin/```
+3. Copy & modify config files.
 
 
 admin-backup-files
@@ -42,17 +45,18 @@ per directory to backup:
 
 All the files in the directories specified will be recursively
 copied to ```/backup/<hostname>/current/```, which serves as a
-snapshot backup directory. Previous versions of files are also
-stored, under the ```/backup/<hostname>/history``` directory.
+snapshot backup directory. Previous (replaced) versions of files
+are kept in the ```/backup/<hostname>/history/``` directory.
 
-Separate directories with changed files per hour, day and month
-are created. The historic files are hard linked to the snapshot
-directory to preserve space. The hourly history is preserved
-for 24 hours, daily history for 30 days and thereafter only the
-monthly history is kept.
+Separate history directories per minute, day and month are
+maintained. The minute history is only preserved for 24 hours
+and a single new directory is created per backup run. The daily
+history is preserved for 30 days and thereafter only the monthly
+history is kept.
 
-The file backup can be run as frequently as every minute, but
-should at least be run once per day.
+The files are hard linked between the various history directories
+to preserve space. The file backup can be run as frequently as
+every minute, but should be run at least once per day.
 
 
 admin-backup-mysql
@@ -73,8 +77,13 @@ database1 user password
 database2 user password --ignore-table=table1
 ```
 
-The ```/var/local/admin-backup-mysql``` directory is used to
-store the output MySQL dump files (compressed).
+The ```/backup/<hostname>/mysql/``` directory is used to
+store the output MySQL dump files (compressed). Backup files are
+kept for 30 days, except the first backup file from each month
+(which is kept indefinitely).
+
+The MySQL backup should be run once per day. More frequent runs
+will overwrite the previous backup.
 
 
 admin-freemem
