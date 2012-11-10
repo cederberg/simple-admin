@@ -157,3 +157,26 @@ Converts a file or directory to UTF-8 (from ISO-8859-1). Only if needed.
 Use either ```check``` to detect file encoding, or ```convert``` to
 convert all ISO-8859-1 file(s).
 
+
+admin-www-logrotate
+-------------------
+
+**TODO:** Update tool and docs.
+
+
+admin-www-restart
+-----------------
+
+**TODO:** Update tool and docs.
+
+
+admin-www-stats
+---------------
+
+**TODO:** Update tool and docs.
+
+
+admin-www-webalizer
+-------------------
+
+**TODO:** Update tool and docs.
