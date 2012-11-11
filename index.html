@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Admin-Scripts for Ubuntu by cederberg</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Admin-Scripts for Ubuntu</h1>
+          <h2>Server Administration Scripts</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/cederberg/admin-scripts/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/cederberg/admin-scripts/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/cederberg/admin-scripts" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>admin-scripts</h1>
+
+<p>Scripts for simplified Ubuntu server administration and
+maintenance.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>Ubuntu 12.04</li>
+<li>rsync</li>
+<li>lzma</li>
+<li>Perl</li>
+<li>Perl - Geo::IPfree</li>
+<li>Perl - JSON::XS</li>
+</ul><h2>Installation</h2>
+
+<ol>
+<li>Install dependencies:
+
+<ul>
+<li><code>apt-get install rsync</code></li>
+<li><code>apt-get install lzma</code></li>
+<li><code>apt-get install libgeo-ipfree-perl</code></li>
+<li><code>apt-get install libjson-xs-perl</code></li>
+</ul>
+</li>
+<li>Copy binaries into place:
+
+<ul>
+<li><code>cp bin/admin-* /usr/local/bin/</code></li>
+</ul>
+</li>
+<li>Copy &amp; modify config files.</li>
+</ol><h2>admin-backup-files</h2>
+
+<p>Performs a filesystem backup for configured directories.</p>
+
+<p><strong>Syntax:</strong> admin-backup-files [-v]</p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-v</td>
+<td>Print verbose output.</td>
+</tr>
+</table><p>Configured in <code>/etc/admin-backup-files.conf</code> with one line
+per directory to backup:</p>
+
+<pre><code>/etc
+/home
+/root
+</code></pre>
+
+<p>All the files in the directories specified will be recursively
+copied to <code>/backup/&lt;hostname&gt;/current/</code>, which serves as a
+snapshot backup directory. Previous (replaced) versions of files
+are kept in the <code>/backup/&lt;hostname&gt;/history/</code> directory.</p>
+
+<p>Separate history directories per minute, day and month are
+maintained. The minute history is only preserved for 24 hours
+and a single new directory is created per backup run. The daily
+history is preserved for 30 days and thereafter only the monthly
+history is kept.</p>
+
+<p>The files are hard linked between the various history directories
+to preserve space. The file backup can be run as frequently as
+every minute, but should be run at least once per day.</p>
+
+<h2>admin-backup-mysql</h2>
+
+<p>Performs a MySQL dump of configured databases.</p>
+
+<p><strong>Syntax:</strong> admin-backup-mysql [-v]</p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-v</td>
+<td>Print verbose output.</td>
+</tr>
+</table><p>Configured in <code>/etc/admin-backup-mysql.conf</code> with one line
+per database to backup:</p>
+
+<pre><code>database1 user password
+database2 user password --ignore-table=table1
+</code></pre>
+
+<p>The <code>/backup/&lt;hostname&gt;/mysql/</code> directory is used to
+store the output MySQL dump files (compressed). Backup files are
+kept for 30 days, except the first backup file from each month
+(which is kept indefinitely).</p>
+
+<p>The MySQL backup should be run once per day. More frequent runs
+will overwrite the previous backup.</p>
+
+<h2>admin-backup-sync</h2>
+
+<p>Performs a remote file sync for configured directories.</p>
+
+<p><strong>Syntax:</strong> admin-backup-sync [-v]</p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-v</td>
+<td>Print verbose output.</td>
+</tr>
+</table><p>Configured in <code>/etc/admin-backup-sync.conf</code> with one line
+for each pair of source and destination directories:</p>
+
+<pre><code>/backup/host01 root@host02:/backup/
+root@host02:/backup/host02 /backup/
+</code></pre>
+
+<p>The file syncronization use <code>rsync</code> and will update and
+remove files on the receiving side, so be careful to sync the
+correct backup subdirectories.</p>
+
+<h2>admin-freemem</h2>
+
+<p>Cleans filesystem cache (if possible) to recover memory.</p>
+
+<p><strong>Syntax:</strong> admin-freemem</p>
+
+<p>Forces a filesystem sync followed by a write
+to <code>/proc/sys/vm/drop_caches</code>.</p>
+
+<h2>admin-status</h2>
+
+<p>Checks the status of a number of services on the machine.</p>
+
+<p><strong>Syntax:</strong> <code>admin-status</code></p>
+
+<p>Configured in <code>/etc/admin-status.conf</code> with one line
+per service (and PID file):</p>
+
+<pre><code>cron    /var/run/crond.pid
+sshd    /var/run/sshd.pid
+</code></pre>
+
+<h2>admin-uptodate</h2>
+
+<p>Runs a check to determine if the system requires updates.</p>
+
+<p><strong>Syntax:</strong> <code>admin-uptodate [-s] [-m]</code>  </p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-s</td>
+<td>Check only for security updates.</td>
+</tr>
+<tr>
+<td>-m</td>
+<td>Mail root instead of printing results.</td>
+</tr>
+</table><h2>admin-utf8</h2>
+
+<p>Converts a file or directory to UTF-8 (from ISO-8859-1). Only if needed.</p>
+
+<p><strong>Syntax:</strong> <code>admin-utf8 (check|convert) &lt;file or dir&gt;</code></p>
+
+<p>Use either <code>check</code> to detect file encoding, or <code>convert</code> to
+convert all ISO-8859-1 file(s).</p>
+        </section>
+
+        <footer>
+          Admin-Scripts for Ubuntu is maintained by <a href="https://github.com/cederberg">cederberg</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
