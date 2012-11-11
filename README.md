@@ -102,8 +102,8 @@ Configured in ```/etc/admin-backup-sync.conf``` with one line
 for each pair of source and destination directories:
 
 ```
-/backup/host01/ root@host02:/backup/host01/
-root@host02:/backup/host02/ /backup/host02/
+/backup/host01 root@host02:/backup/
+root@host02:/backup/host02 /backup/
 ```
 
 The file syncronization use ```rsync``` and will update and
