@@ -57,7 +57,7 @@ fi
 
 # Perform backup
 printinfo init backup on $HOST
-mkdir -p $SNAP_DIR $HIST_DIR_MINUTE $HIST_DIR_DAILY $HIST_DIR_MONTHLY
+mkdir -p $SNAP_DIR $HIST_DIR_MINUTE
 while read SRC ; do
     printinfo syncing dir $SRC
     mkdir -p $SNAP_DIR$SRC
@@ -70,6 +70,7 @@ find $HIST_DIR_MINUTE -depth -type d -exec rmdir {} \; 2> /dev/null
 # Update daily and montly dirs
 if [ -d $HIST_DIR_MINUTE ] ; then 
     printinfo updating daily and monthly diff dirs
+    mkdir -p $HIST_DIR_DAILY $HIST_DIR_MONTHLY
     cp -fluR $HIST_DIR_MINUTE/* $HIST_DIR_DAILY
     cp -fluR $HIST_DIR_DAILY/* $HIST_DIR_MONTHLY
 fi
