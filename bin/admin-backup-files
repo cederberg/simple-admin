@@ -15,15 +15,15 @@
 CONFIG=/etc/admin-backup-files.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname --fqdn`
+OPTIONS="--archive --one-file-system --quiet"
 DATE_MINUTE=`date '+%Y-%m-%d-%H%M'`
 DATE_DAILY=`date '+%Y-%m-%d'`
 DATE_MONTHLY=`date '+%Y-%m'`
-SNAP_DIR=/backup/$HOST/current
-HIST_DIR=/backup/$HOST/history
+HIST_DIR=/backup/$HOST/files
 HIST_DIR_MINUTE=$HIST_DIR/$DATE_MINUTE
 HIST_DIR_DAILY=$HIST_DIR/$DATE_DAILY
 HIST_DIR_MONTHLY=$HIST_DIR/$DATE_MONTHLY
-OPTIONS="--archive --delete --force --ignore-errors --quiet"
+LATEST_DIR=/backup/$HOST/latest
 VERBOSE="false"
 
 # Function for printing verbose information
@@ -55,25 +55,26 @@ if [ "$1" = "-v" ] ; then
     VERBOSE=true
 fi
 
+# Select backup dir
+if [ ! -d $HIST_DIR_MONTHLY ] ; then
+    BACKUP_DIR=$HIST_DIR_MONTHLY
+elif [ ! -d $HIST_DIR_DAILY ] ; then
+    BACKUP_DIR=$HIST_DIR_DAILY
+else
+    BACKUP_DIR=$HIST_DIR_MINUTE
+fi
+
 # Perform backup
 printinfo init backup on $HOST
-mkdir -p $SNAP_DIR $HIST_DIR_MINUTE
+mkdir -p $BACKUP_DIR
 while read SRC ; do
     printinfo syncing dir $SRC
-    mkdir -p $SNAP_DIR$SRC
-    rsync $OPTIONS --backup --backup-dir=$HIST_DIR_MINUTE$SRC $SRC/ $SNAP_DIR$SRC/
+    rsync $OPTIONS --link-dest=$LATEST_DIR$SRC $SRC/ $BACKUP_DIR$SRC/
 done
 
-# Remove empty dirs
-find $HIST_DIR_MINUTE -depth -type d -exec rmdir {} \; 2> /dev/null
-
-# Update daily and montly dirs
-if [ -d $HIST_DIR_MINUTE ] ; then 
-    printinfo updating daily and monthly diff dirs
-    mkdir -p $HIST_DIR_DAILY $HIST_DIR_MONTHLY
-    cp -fluR $HIST_DIR_MINUTE/* $HIST_DIR_DAILY
-    cp -fluR $HIST_DIR_DAILY/* $HIST_DIR_MONTHLY
-fi
+# Update latest backup dir
+rm -f $LATEST_DIR
+ln -s $BACKUP_DIR $LATEST_DIR
 
 # Remove outdated hourly and daily dirs
 find $HIST_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +2 -exec rm -rf {} \;
