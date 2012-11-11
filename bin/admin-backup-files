@@ -65,11 +65,16 @@ else
 fi
 
 # Perform backup
-printinfo init backup on $HOST
+printinfo init backup to $BACKUP_DIR
 mkdir -p $BACKUP_DIR
 while read SRC ; do
     printinfo syncing dir $SRC
-    rsync $OPTIONS --link-dest=$LATEST_DIR$SRC $SRC/ $BACKUP_DIR$SRC/
+    mkdir -p $BACKUP_DIR$SRC
+    RSYNC_OPTS=$OPTIONS
+    if [ -d $LATEST_DIR$SRC ] ; then
+        RSYNC_OPTS="$RSYNC_OPTS --link-dest=$LATEST_DIR$SRC/"
+    fi
+    rsync $RSYNC_OPTS $SRC/ $BACKUP_DIR$SRC/
 done
 
 # Update latest backup dir
@@ -82,4 +87,4 @@ find $HIST_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {}
 
 # Finished backup
 /usr/local/bin/admin-freemem
-printinfo done backup on $HOST
+printinfo done backup to $BACKUP_DIR
