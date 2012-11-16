@@ -15,15 +15,12 @@
 CONFIG=/etc/admin-backup-files.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname --fqdn`
+BACKUP_BASE_DIR=/backup/$HOST/files
+BACKUP_LATEST_DIR=$BACKUP_BASE_DIR/latest
 OPTIONS="--archive --one-file-system --quiet"
+DATE_MONTH=`date '+%Y-%m'`
+DATE_DAY=`date '+%Y-%m-%d'`
 DATE_MINUTE=`date '+%Y-%m-%d-%H%M'`
-DATE_DAILY=`date '+%Y-%m-%d'`
-DATE_MONTHLY=`date '+%Y-%m'`
-HIST_DIR=/backup/$HOST/files
-HIST_DIR_MINUTE=$HIST_DIR/$DATE_MINUTE
-HIST_DIR_DAILY=$HIST_DIR/$DATE_DAILY
-HIST_DIR_MONTHLY=$HIST_DIR/$DATE_MONTHLY
-LATEST_DIR=/backup/$HOST/latest
 VERBOSE="false"
 
 # Function for printing verbose information
@@ -55,36 +52,39 @@ if [ "$1" = "-v" ] ; then
     VERBOSE=true
 fi
 
-# Select backup dir
-if [ ! -d $HIST_DIR_MONTHLY ] ; then
-    BACKUP_DIR=$HIST_DIR_MONTHLY
-elif [ ! -d $HIST_DIR_DAILY ] ; then
-    BACKUP_DIR=$HIST_DIR_DAILY
+# Create backup dir
+if [ ! -d $BACKUP_BASE_DIR/$DATE_MONTH ] ; then
+    NAME=$DATE_MONTH
+elif [ ! -d $BACKUP_BASE_DIR/$DATE_DAY ] ; then
+    NAME=$DATE_DAY
 else
-    BACKUP_DIR=$HIST_DIR_MINUTE
+    NAME=$DATE_MINUTE
 fi
+BACKUP_CURRENT_DIR=$BACKUP_BASE_DIR/$NAME
 
 # Perform backup
-printinfo init backup to $BACKUP_DIR
-mkdir -p $BACKUP_DIR
+printinfo init backup to $BACKUP_CURRENT_DIR
+mkdir -p $BACKUP_CURRENT_DIR
 while read SRC ; do
     printinfo syncing dir $SRC
-    mkdir -p $BACKUP_DIR$SRC
+    DST=$BACKUP_CURRENT_DIR$SRC
+    LNK=$BACKUP_LATEST_DIR$SRC
+    mkdir -p $DST
     RSYNC_OPTS=$OPTIONS
-    if [ -d $LATEST_DIR$SRC ] ; then
-        RSYNC_OPTS="$RSYNC_OPTS --link-dest=$LATEST_DIR$SRC/"
+    if [ -d $LNK ] ; then
+        RSYNC_OPTS="$RSYNC_OPTS --link-dest=$LNK/"
     fi
-    rsync $RSYNC_OPTS $SRC/ $BACKUP_DIR$SRC/
+    rsync $RSYNC_OPTS $SRC/ $DST/
 done
 
-# Update latest backup dir
-rm -f $LATEST_DIR
-ln -s $BACKUP_DIR $LATEST_DIR
+# Change latest backup dir
+rm -f $BACKUP_LATEST_DIR
+cd $BACKUP_BASE_DIR ; ln -s `basename $BACKUP_CURRENT_DIR` `basename $BACKUP_LATEST_DIR`
 
-# Remove outdated hourly and daily dirs
-find $HIST_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +2 -exec rm -rf {} \;
-find $HIST_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {} \;
+# Remove outdated backup dirs
+find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +2 -exec rm -rf {} \;
+find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {} \;
 
 # Finished backup
 /usr/local/bin/admin-freemem
-printinfo done backup to $BACKUP_DIR
+printinfo done backup to $BACKUP_CURRENT_DIR
