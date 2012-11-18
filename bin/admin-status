@@ -12,6 +12,30 @@
 CONFIG=/etc/admin-status.conf
 LOCALDIR=`dirname $0`/..
 
+# Function for printing CPU load average
+cpustatus() {
+    CPU_COUNT=`nproc`
+    LOAD_AVG=`cat /proc/loadavg | awk '{print $1, $2, $3}'`
+    FMT=" * loadavg:   %s, %s, %s    -- %s processors\n"
+    printf "$FMT" $LOAD_AVG $CPU_COUNT
+}
+
+# Function for printing memory status
+memstatus() {
+    TMPFILE=/tmp/admin-status.vars
+    sed -e 's/[()]/_/g' -e 's/:\s*/=/' -e 's/ kB//' /proc/meminfo > $TMPFILE
+    . $TMPFILE
+    rm $TMPFILE
+    FREE=`echo $MemFree | awk '{print int($1 / 1024 + 0.5)}'`
+    FREE_PERCENT=`echo $MemFree $MemTotal | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
+    CACHE=`echo $Buffers $Cached | awk '{print int(($1 + $2) / 1024 + 0.5)}'`
+    RSS=`echo $MemFree $Buffers $Cached $MemTotal | awk '{print int(($4 - $1 - $2 - $3) / 1024 + 0.5)}'`
+    SWAP=`echo $SwapFree $SwapTotal | awk '{print int(($2 - $1) / 1024 + 0.5)}'`
+    TOTAL=`echo $MemTotal | awk '{print int($1 / 1024 + 0.5)}'`
+    FMT=" * memory:    %s free (%s%%)    -- %s rss, %s cache, %s swap, %s total (MiB)\n"
+    printf "$FMT" $FREE $FREE_PERCENT $RSS $CACHE $SWAP $TOTAL
+}
+
 # Function for checking the service status
 checkstatus() {
     NAME=$1
@@ -40,6 +64,10 @@ else
     echo "ERROR: Missing config file $CONFIG"
     exit 1
 fi
+
+# System statistics
+cpustatus
+memstatus
 
 # Checking all services
 RETVAL=0
