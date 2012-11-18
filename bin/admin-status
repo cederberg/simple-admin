@@ -16,7 +16,7 @@ LOCALDIR=`dirname $0`/..
 cpustatus() {
     CPU_COUNT=`nproc`
     LOAD_AVG=`cat /proc/loadavg | awk '{print $1, $2, $3}'`
-    FMT="loadavg:    %s, %s, %s     -- %s processors\n"
+    FMT="loadavg:    %s, %s, %s       -- %s processors\n"
     printf "$FMT" $LOAD_AVG $CPU_COUNT
 }
 
@@ -32,8 +32,22 @@ memstatus() {
     RSS=`echo $MemFree $Buffers $Cached $MemTotal | awk '{print int(($4 - $1 - $2 - $3) / 1024 + 0.5)}'`
     SWAP=`echo $SwapFree $SwapTotal | awk '{print int(($2 - $1) / 1024 + 0.5)}'`
     TOTAL=`echo $MemTotal | awk '{print int($1 / 1024 + 0.5)}'`
-    FMT="memory:     %s MB (%s%%) free  -- %s rss, %s cache, %s swap, %s total (MB)\n"
-    printf "$FMT" $FREE $FREE_PERCENT $RSS $CACHE $SWAP $TOTAL
+    INFO=`printf "%s MB (%s%%) free" $FREE $FREE_PERCENT`
+    DETAILS=`printf "%s rss, %s cache, %s swap, %s total (MB)" $RSS $CACHE $SWAP $TOTAL`
+    printf "memory:     %-22s -- %s\n" "$INFO" "$DETAILS"
+}
+
+# Function for printing storage status
+storagestatus() {
+    df -x tmpfs -x devtmpfs -k | tail -n +2 | while read DEVICE TOTALK USEDK FREEK USEDPERCENT MOUNT ; do
+        TOTAL=`echo $TOTALK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
+        USED=`echo $USEDK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
+        FREE=`echo $FREEK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
+        FREE_PERCENT=`echo $FREEK $TOTALK | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
+        INFO=`printf "%s GB (%s%%) free" $FREE $FREE_PERCENT`
+        DETAILS=`printf "%s used, %s total (GB) on %s" $USED $TOTAL $DEVICE`
+        printf "storage:    %-22s -- %s\n" "$INFO" "$DETAILS"
+    done
 }
 
 # Function for printing process status
@@ -76,7 +90,7 @@ servicestatus() {
     else
         STATUSNAME="ERROR"
     fi
-    FMT="* %-9s %-20s -- %s\n"
+    FMT="* %-9s %-22s -- %s\n"
     printf "$FMT" "$NAME:" $STATUSNAME "$DETAILS"
     return $STATUS
 }
@@ -94,6 +108,7 @@ fi
 # System statistics
 cpustatus
 memstatus
+storagestatus
 
 # Checking all services
 RETVAL=0
