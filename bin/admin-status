@@ -45,8 +45,10 @@ storagestatus() {
         FREE=`echo $FREEK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
         FREE_PERCENT=`echo $FREEK $TOTALK | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
         INFO=`printf "%s GB (%s%%) free" $FREE $FREE_PERCENT`
-        DETAILS=`printf "%s used, %s total (GB) on %s" $USED $TOTAL $DEVICE`
-        printf "storage:    %-22s -- %s\n" "$INFO" "$DETAILS"
+        DETAILS=`printf "%s GB used, %s GB total on %s" $USED $TOTAL $DEVICE`
+        if [ $TOTALK -ge 1048576 ] ; then
+            printf "storage:    %-22s -- %s\n" "$INFO" "$DETAILS"
+        fi
     done
 }
 
