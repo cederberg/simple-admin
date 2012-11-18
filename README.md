@@ -45,20 +45,23 @@ per directory to backup:
 /root
 ```
 
-All the files in the directories specified will be recursively
-copied to ```/backup/<hostname>/current/```, which serves as a
-snapshot backup directory. Previous (replaced) versions of files
-are kept in the ```/backup/<hostname>/history/``` directory.
+All the files in the directories specified will be recursively copied
+to a new directory ```/backup/<hostname>/files/<timestamp>```. A
+symbolic link ```/backup/<hostname>/files/latest``` always points to
+the last completed backup directory.
 
-Separate history directories per minute, day and month are
-maintained. The minute history is only preserved for 24 hours
-and a single new directory is created per backup run. The daily
-history is preserved for 30 days and thereafter only the monthly
-history is kept.
+In order to save space, identical files are hard linked between the
+current and the previous backup directories. Only modified files (and
+the directory structure) will require more space on the disk.
 
-The files are hard linked between the various history directories
-to preserve space. The file backup can be run as frequently as
-every minute, but should be run at least once per day.
+The first backup every month and day are created with a different
+timestamp signature (omitting the hour and minute). The monthly backup
+directories are kept indefinitely, but the daily directories are only
+preserved for 30 days. Other timestamped backup directories will be
+preserved for 24 hours.
+
+The file backup can be run as frequently as every minute, but should
+probably be run at least once per day.
 
 
 admin-backup-mysql
