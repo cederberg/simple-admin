@@ -43,12 +43,15 @@ per directory to backup:
 /etc
 /home
 /root
+/var/log   5
 ```
 
 All the files in the directories specified will be recursively copied
 to a new directory ```/backup/<hostname>/files/<timestamp>```. A
 symbolic link ```/backup/<hostname>/files/latest``` always points to
-the last completed backup directory.
+the last completed backup directory. An optional number after each
+directory specified the maximum number of days to store these files
+(differing from the standard retention policy below).
 
 In order to save space, identical files are hard linked between the
 current and the previous backup directories. Only modified files (and
