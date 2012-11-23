@@ -7,23 +7,17 @@ maintenance.
 Requirements
 ------------
 * Ubuntu 12.04
-* rsync
-* lzma
-* Perl
-* Perl - Geo::IPfree
-* Perl - JSON::XS
+* Bash
 
 
 Installation
 ------------
-1. Install dependencies:
-   - ```apt-get install rsync```
-   - ```apt-get install lzma```
-   - ```apt-get install libgeo-ipfree-perl```
-   - ```apt-get install libjson-xs-perl```
-2. Copy binaries into place:
-   - ```cp bin/admin-* /usr/local/bin/```
-3. Copy & modify config files.
+The install script will install required command-line tools and
+Perl modules.
+
+1. Run install script (as root):
+   - ```./install.sh```
+2. Copy & modify config files from ```etc```.
 
 
 admin-backup-files
