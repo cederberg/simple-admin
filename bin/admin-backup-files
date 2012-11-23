@@ -65,16 +65,22 @@ BACKUP_CURRENT_DIR=$BACKUP_BASE_DIR/$NAME
 # Perform backup
 printinfo init backup to $BACKUP_CURRENT_DIR
 mkdir -p $BACKUP_CURRENT_DIR
-while read SRC ; do
+while read SRC EXPIRES ; do
     printinfo syncing dir $SRC
     DST=$BACKUP_CURRENT_DIR$SRC
     LNK=$BACKUP_LATEST_DIR$SRC
     mkdir -p $DST
-    RSYNC_OPTS=$OPTIONS
     if [ -d $LNK ] ; then
-        RSYNC_OPTS="$RSYNC_OPTS --link-dest=$LNK/"
+        RSYNC_OPTS="$OPTIONS --link-dest=$LNK/"
+    else
+        RSYNC_OPTS="$OPTIONS"
     fi
     rsync $RSYNC_OPTS $SRC/ $DST/
+    touch $DST
+    if [ "$EXPIRES" != "" ] ; then
+        printinfo removing $SRC backups older than $EXPIRES days
+        find $BACKUP_BASE_DIR/????-*$SRC -maxdepth 0 -type d -mtime +$EXPIRES -exec rm -rf {} \;
+    fi
 done
 
 # Change latest backup dir
