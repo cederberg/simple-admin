@@ -28,6 +28,7 @@ install --mode=0744 bin/admin-backup-files /usr/local/bin/
 install bin/admin-backup-mysql /usr/local/bin/
 install bin/admin-backup-sync /usr/local/bin/
 install bin/admin-freemem /usr/local/bin/
+install --mode=0744 bin/admin-restart /usr/local/bin/
 install bin/admin-status /usr/local/bin/
 install --mode=0744 bin/admin-uptodate /usr/local/bin/
 install bin/admin-utf8 /usr/local/bin/
