@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Checks the status of the services on this machine.
 #
@@ -11,6 +11,12 @@
 # Configuration variables
 CONFIG=/etc/admin-status.conf
 LOCALDIR=`dirname $0`/..
+
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
 
 # Function for printing CPU load average
 cpustatus() {
@@ -71,15 +77,13 @@ servicestatus() {
     STATUS=99
     if [ -f "$PIDFILE" ] ; then
         PID=`cat $PIDFILE | awk '{print $1}'`
-        ps -p $PID > /dev/null
-        if [ $? -eq 0 ] ; then
+        if ps -p $PID > /dev/null ; then
             STATUS=0
             DETAILS=`procstatus $PID`
         fi
     fi
     if [ $STATUS -ne 0 ] ; then
-        ps -e | grep $NAME > /dev/null
-        if [ $? -eq 0 ] ; then
+        if ps -e | grep $NAME > /dev/null ; then
             STATUS=1
             DETAILS="invalid PID file $PIDFILE, process exists"
         else
@@ -115,9 +119,7 @@ storagestatus
 # Checking all services
 RETVAL=0
 while read NAME PIDFILE ; do
-    servicestatus $NAME $PIDFILE
-    STATUS=$?
-    if [ $STATUS -ne 0 ] ; then
+    if ! servicestatus $NAME $PIDFILE ; then
         RETVAL=`expr $RETVAL + 1`
     fi
 done
