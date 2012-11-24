@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+#
+# Restarts a group of services in a predefined order.
+#
+
+# Configuration variables
+CONFIG=/etc/admin-restart.conf
+LOCALDIR=`dirname $0`/..
+VERBOSE="true"
+
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
+
+# Function for logging an error to stderr without exiting
+alert() {
+    echo "ALERT:" $* >&2
+}
+
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "ERROR:" $* >&2
+    exit 1
+}
+
+# Function for logging information in verbose mode
+log() {
+    [ "$VERBOSE" = "true" ] && echo `date +"%F %T"`: $*
+}
+
+# Function for printing command-line usage info
+usage() {
+    echo "Restarts a group of services in a predefined order."
+    echo
+    echo "Syntax: admin-restart [-q] <group>"
+    echo
+    echo "Options:"
+    echo "  -q       -- Quiet mode (prints no output)."
+    echo
+    echo "Groups:"
+    for VAR in $(compgen -A variable group_) ; do
+        NAME=${VAR#group_}
+        DESC=${!VAR}
+        printf "  %-8s -- %s\n" $NAME "$DESC"
+    done
+    exit 1
+}
+
+# Function for finding a PID from a service name
+findprocess() {
+    NAME=$1
+    OUT=`find /var/run/ -type f -iregex ".*/${NAME}d?.pid" -exec cat {} \;`
+    if [ "$OUT" == "" ] ; then
+        OUT=`ps -C $NAME --no-headers --sort pid`
+    fi
+    if [ "$OUT" == "" ] ; then
+        OUT=`ps -e -O command --sort pid | grep $NAME | grep -v grep | head -1`
+    fi
+    if [ "$OUT" != "" ] ; then
+        echo $OUT | awk '{print $1}'
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Function for waiting for a process to die
+waitprocess() {
+    WAIT=$1
+    PID=$2
+    SECS=0
+    while [ $SECS -lt "$WAIT" ] && ps --pid $PID > /dev/null ; do
+        let SECS++
+        sleep 1
+    done
+}
+
+# Function for starting a named service
+start() {
+    NAME=$1
+    WAIT=${2:-}
+    log "starting service $NAME..."
+    service $NAME start > /dev/null || fail "failed to start $NAME"
+    if [ "$WAIT" != "" ] ; then
+        sleep $WAIT
+    fi
+    PID=`findprocess $NAME` || fail "no PID found for $NAME, aborting"
+    ps --pid $PID > /dev/null || fail "$NAME (pid: $PID) not started, aborting" 
+    log "service $NAME (pid: $PID) started"
+}
+
+# Function for stopping a named service
+stop() {
+    NAME=$1
+    WAIT=${2:-}
+    FORCE=${3:-}
+    PID=`findprocess $NAME` || true
+    log "stopping service $NAME (pid: $PID)..."
+    service $NAME stop > /dev/null || true
+    if [ "$WAIT" != "" -a "$PID" != "" ] ; then
+        waitprocess $WAIT $PID
+        if [ "$FORCE" != "" ] && ps --pid $PID > /dev/null ; then
+            alert "sending TERM signal to $NAME (pid: $PID)..."
+            kill -TERM $PID
+            waitprocess $WAIT $PID
+        fi
+        if [ "$FORCE" != "" ] && ps --pid $PID > /dev/null ; then
+            alert "sending KILL signal to $NAME (pid: $PID)..."
+            kill -KILL $PID
+            waitprocess $WAIT $PID
+        fi
+        if ps --pid $PID > /dev/null ; then
+            fail "failed to kill process $NAME (pid: $PID), aborting"
+        fi
+    fi
+    log "service $NAME (pid: $PID) stopped"
+}
+
+# Check for root user
+[ `whoami` == 'root' ] || fail "only root is allowed to run admin-restart"
+
+# Load config (shell)
+if [ -f $CONFIG ] ; then
+    . $CONFIG
+elif [ -f $LOCALDIR/$CONFIG ] ; then
+    . $LOCALDIR/$CONFIG
+else
+    fail "missing config file $CONFIG"
+fi
+
+# Parse command-line arguments
+if [ "${1:-}" = "-q" ] ; then
+    shift
+    VERBOSE=false
+fi
+if [ -z "${1:-}" ] ; then
+    usage
+fi
+GROUP=$1
+
+# Check for valid group name
+START=start_$GROUP
+STOP=stop_$GROUP
+compgen -A function $START > /dev/null || fail "no function $START in $CONFIG"
+compgen -A function $STOP > /dev/null || fail "no function $STOP in $CONFIG"
+
+# Restart services
+$STOP
+$START
