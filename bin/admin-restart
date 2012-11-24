@@ -2,6 +2,11 @@
 #
 # Restarts a group of services in a predefined order.
 #
+# Syntax: admin-restart [-q] <group>
+#
+# Files:
+#   /etc/admin-restart.conf
+#
 
 # Configuration variables
 CONFIG=/etc/admin-restart.conf
