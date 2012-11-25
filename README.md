@@ -3,6 +3,8 @@ admin-scripts
 Scripts for simplified Ubuntu server administration and
 maintenance.
 
+Web Site: http://cederberg.github.com/admin-scripts
+
 
 Requirements
 ------------
@@ -44,7 +46,7 @@ All the files in the directories specified will be recursively copied
 to a new directory ```/backup/<hostname>/files/<timestamp>```. A
 symbolic link ```/backup/<hostname>/files/latest``` always points to
 the last completed backup directory. An optional number after each
-directory specified the maximum number of days to store these files
+directory specifies the maximum number of days to store the files
 (differing from the standard retention policy below).
 
 In order to save space, identical files are hard linked between the
@@ -132,7 +134,7 @@ Option | Description
 -q     | Quiet mode. Only prints errors to stderr.
 
 Configured in ```/etc/admin-restart.conf``` using shell script syntax
-for definin each group with description, start and stop:
+for defining each group with description, start and stop:
 
 ```
 group_web="Restart the Nginx and Jetty services"
