@@ -24,7 +24,7 @@ admin-backup-files
 ------------------
 Performs a filesystem backup for configured directories.
 
-**Syntax:** admin-backup-files [-v]
+**Syntax:** ```admin-backup-files [-v]```
 
 Option | Description
 -------|-------------------------------------------------
@@ -65,7 +65,7 @@ admin-backup-mysql
 ------------------
 Performs a MySQL dump of configured databases.
 
-**Syntax:** admin-backup-mysql [-v]
+**Syntax:** ```admin-backup-mysql [-v]```
 
 Option | Description
 -------|-------------------------------------------------
@@ -92,7 +92,7 @@ admin-backup-sync
 -----------------
 Performs a remote file sync for configured directories.
 
-**Syntax:** admin-backup-sync [-v]
+**Syntax:** ```admin-backup-sync [-v]```
 
 Option | Description
 -------|-------------------------------------------------
@@ -115,10 +115,50 @@ admin-freemem
 -------------
 Cleans filesystem cache (if possible) to recover memory.
 
-**Syntax:** admin-freemem
+**Syntax:** ```admin-freemem```
 
 Forces a filesystem sync followed by a write
 to ```/proc/sys/vm/drop_caches```.
+
+
+admin-restart
+-------------
+Restarts a group of services in a predefined order.
+
+**Syntax:** ```admin-restart [-q] <group>```
+
+Option | Description
+-------|-------------------------------------------------
+-q     | Quiet mode. Only prints errors to stderr.
+
+Configured in ```/etc/admin-restart.conf``` using shell script syntax
+for definin each group with description, start and stop:
+
+```
+group_web="Restart the Nginx and Jetty services"
+
+start_web() {
+    start jetty 10
+    wget --quiet --spider localhost:8080 || fail "jetty not running"
+    start nginx
+}
+
+stop_web() {
+    stop nginx 10 force
+    stop jetty 30 force
+}
+```
+
+A number of built-in commands are available to simplify monitoring
+the startup or shutdown of services:
+
+Command     | Description
+------------|-------------------------------------------------
+```start``` | Starts a service and optionally waits for the process to start.
+```stop```  | Stops a service and optionally waits for the process to quit.
+```alert``` | Prints a message to stderr.
+```fail```  | Exits and prints a message to stderr.
+```log```   | Prints a log message (if not in quiet mode).
 
 
 admin-status
@@ -160,12 +200,6 @@ convert all ISO-8859-1 file(s).
 
 admin-www-logrotate
 -------------------
-
-**TODO:** Update tool and docs.
-
-
-admin-www-restart
------------------
 
 **TODO:** Update tool and docs.
 
