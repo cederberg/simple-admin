@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>Admin-Scripts for Ubuntu by cederberg</title>
+    <title>Admin-Scripts for Ubuntu</title>
   </head>
 
   <body>
@@ -19,55 +19,43 @@
 
         <header>
           <h1>Admin-Scripts for Ubuntu</h1>
-          <h2>Server Administration Scripts</h2>
+          <h2>Scripts for simplified Ubuntu server administration.</h2>
         </header>
 
         <section id="downloads" class="clearfix">
-          <a href="https://github.com/downloads/cederberg/admin-scripts/admin-scripts-0.1.zip" id="download-zip" class="button"><span>Download v0.1</span></a>
+          <a href="https://github.com/downloads/cederberg/admin-scripts/admin-scripts-0.2.zip" id="download-zip" class="button"><span>Download ZIP</span></a>
+          <a href="https://github.com/downloads/cederberg/admin-scripts/admin-scripts-0.2.tgz" id="download-tar-gz" class="button"><span>Download TGZ</span></a>
           <a href="https://github.com/cederberg/admin-scripts" id="view-on-github" class="button"><span>View on GitHub</span></a>
         </section>
 
         <hr>
 
         <section id="main_content">
-          <h1>admin-scripts</h1>
-
-<p>Scripts for simplified Ubuntu server administration and
-maintenance.</p>
 
 <h2>Requirements</h2>
 
 <ul>
 <li>Ubuntu 12.04</li>
-<li>rsync</li>
-<li>lzma</li>
-<li>Perl</li>
-<li>Perl - Geo::IPfree</li>
-<li>Perl - JSON::XS</li>
-</ul><h2>Installation</h2>
+<li>Bash</li>
+</ul>
+
+
+<h2>Installation</h2>
+
+<p>The install script will install required command-line tools and Perl modules.
 
 <ol>
-<li>Install dependencies:
+<li>Run install script (as root):<br/>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<code>./install.sh</code></li>
+<li>Copy &amp; modify config files from <code>etc</code>.</li>
+</ol>
 
-<ul>
-<li><code>apt-get install rsync</code></li>
-<li><code>apt-get install lzma</code></li>
-<li><code>apt-get install libgeo-ipfree-perl</code></li>
-<li><code>apt-get install libjson-xs-perl</code></li>
-</ul>
-</li>
-<li>Copy binaries into place:
 
-<ul>
-<li><code>cp bin/admin-* /usr/local/bin/</code></li>
-</ul>
-</li>
-<li>Copy &amp; modify config files.</li>
-</ol><h2>admin-backup-files</h2>
+<h2 class="tool">admin-backup-files</h2>
 
 <p>Performs a filesystem backup for configured directories.</p>
 
-<p><strong>Syntax:</strong> admin-backup-files [-v]</p>
+<p><strong>Syntax:</strong> <code>admin-backup-files [-v]</code></p>
 
 <table>
 <tr>
@@ -78,34 +66,42 @@ maintenance.</p>
 <td>-v</td>
 <td>Print verbose output.</td>
 </tr>
-</table><p>Configured in <code>/etc/admin-backup-files.conf</code> with one line
+</table>
+
+<p>Configured in <code>/etc/admin-backup-files.conf</code> with one line
 per directory to backup:</p>
 
 <pre><code>/etc
 /home
 /root
+/var/log   5
 </code></pre>
 
-<p>All the files in the directories specified will be recursively
-copied to <code>/backup/&lt;hostname&gt;/current/</code>, which serves as a
-snapshot backup directory. Previous (replaced) versions of files
-are kept in the <code>/backup/&lt;hostname&gt;/history/</code> directory.</p>
+<p>All the files in the directories specified will be recursively copied to a
+new directory <code>/backup/&lt;hostname&gt;/files/&lt;timestamp&gt;</code>.
+A symbolic link <code>/backup/&lt;hostname&gt;/files/latest</code> always points
+to the last completed backup directory. An optional number after each directory
+specifies the maximum number of days to store the files (differing from the
+standard retention policy below).</p>
 
-<p>Separate history directories per minute, day and month are
-maintained. The minute history is only preserved for 24 hours
-and a single new directory is created per backup run. The daily
-history is preserved for 30 days and thereafter only the monthly
-history is kept.</p>
+<p>In order to save space, identical files are hard linked between the current
+and the previous backup directories. Only modified files (and the directory
+structure) will require more space on the disk.</p>
 
-<p>The files are hard linked between the various history directories
-to preserve space. The file backup can be run as frequently as
-every minute, but should be run at least once per day.</p>
+<p>The first backup every month and day are created with a different timestamp
+signature (omitting the hour and minute). The monthly backup directories are
+kept indefinitely, but the daily directories are only preserved for 30 days.
+Other timestamped backup directories will be preserved for 24 hours.</p>
 
-<h2>admin-backup-mysql</h2>
+<p>The file backup can be run as frequently as every minute, but should
+probably be run at least once per day.</p>
+
+
+<h2 class="tool">admin-backup-mysql</h2>
 
 <p>Performs a MySQL dump of configured databases.</p>
 
-<p><strong>Syntax:</strong> admin-backup-mysql [-v]</p>
+<p><strong>Syntax:</strong> <code>admin-backup-mysql [-v]</code></p>
 
 <table>
 <tr>
@@ -116,7 +112,9 @@ every minute, but should be run at least once per day.</p>
 <td>-v</td>
 <td>Print verbose output.</td>
 </tr>
-</table><p>Configured in <code>/etc/admin-backup-mysql.conf</code> with one line
+</table>
+
+<p>Configured in <code>/etc/admin-backup-mysql.conf</code> with one line
 per database to backup:</p>
 
 <pre><code>database1 user password
@@ -131,11 +129,12 @@ kept for 30 days, except the first backup file from each month
 <p>The MySQL backup should be run once per day. More frequent runs
 will overwrite the previous backup.</p>
 
-<h2>admin-backup-sync</h2>
+
+<h2 class="tool">admin-backup-sync</h2>
 
 <p>Performs a remote file sync for configured directories.</p>
 
-<p><strong>Syntax:</strong> admin-backup-sync [-v]</p>
+<p><strong>Syntax:</strong> <code>admin-backup-sync [-v]</code></p>
 
 <table>
 <tr>
@@ -146,27 +145,96 @@ will overwrite the previous backup.</p>
 <td>-v</td>
 <td>Print verbose output.</td>
 </tr>
-</table><p>Configured in <code>/etc/admin-backup-sync.conf</code> with one line
+</table>
+
+<p>Configured in <code>/etc/admin-backup-sync.conf</code> with one line
 for each pair of source and destination directories:</p>
 
 <pre><code>/backup/host01 root@host02:/backup/
 root@host02:/backup/host02 /backup/
 </code></pre>
 
-<p>The file syncronization use <code>rsync</code> and will update and
+<p>The file syncronization uses <code>rsync</code> and will update and
 remove files on the receiving side, so be careful to sync the
 correct backup subdirectories.</p>
 
-<h2>admin-freemem</h2>
+
+<h2 class="tool">admin-freemem</h2>
 
 <p>Cleans filesystem cache (if possible) to recover memory.</p>
 
-<p><strong>Syntax:</strong> admin-freemem</p>
+<p><strong>Syntax:</strong> <code>admin-freemem</code></p>
 
 <p>Forces a filesystem sync followed by a write
 to <code>/proc/sys/vm/drop_caches</code>.</p>
 
-<h2>admin-status</h2>
+
+<h2 class="tool">admin-restart</h2>
+
+<p>Restarts a group of services in a predefined order.</p>
+
+<p><strong>Syntax:</strong> <code>admin-restart [-q] &lt;group&gt;</code></p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-q</td>
+<td>Quiet mode. Only prints errors to stderr.</td>
+</tr>
+</table>
+
+<p>Configured in <code>/etc/admin-restart.conf</code> using shell script syntax
+for defining each group with description, start and stop:</p>
+
+<pre><code>group_web="Restart the Nginx and Jetty services"
+
+start_web() {
+    start jetty 10
+    wget --quiet --spider localhost:8080 || fail "jetty not running"
+    start nginx
+}
+
+stop_web() {
+    stop nginx 10 force
+    stop jetty 30 force
+}
+</code></pre>
+
+<p>A number of built-in commands are available to simplify monitoring the
+startup or shutdown of services:</p>
+
+<table>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><code>start</code></td>
+<td>Starts a service and optionally waits for the process to start.</td>
+</tr>
+<tr>
+<td><code>stop</code></td>
+<td>Stops a service and optionally waits for the process to quit.</td>
+</tr>
+<tr>
+<td><code>alert</code></td>
+<td>Prints a message to stderr.</td>
+</tr>
+<tr>
+<td><code>fail</code></td>
+<td>Exits and prints a message to stderr.</td>
+</tr>
+<tr>
+<td><code>log</code></td>
+<td>Prints a log message (if not in quiet mode).</td>
+</tr>
+</table>
+
+
+<h2 class="tool">admin-status</h2>
 
 <p>Checks the status of a number of services on the machine.</p>
 
@@ -179,7 +247,8 @@ per service (and PID file):</p>
 sshd    /var/run/sshd.pid
 </code></pre>
 
-<h2>admin-uptodate</h2>
+
+<h2 class="tool">admin-uptodate</h2>
 
 <p>Runs a check to determine if the system requires updates.</p>
 
@@ -198,7 +267,10 @@ sshd    /var/run/sshd.pid
 <td>-m</td>
 <td>Mail root instead of printing results.</td>
 </tr>
-</table><h2>admin-utf8</h2>
+</table>
+
+
+<h2 class="tool">admin-utf8</h2>
 
 <p>Converts a file or directory to UTF-8 (from ISO-8859-1). Only if needed.</p>
 
@@ -209,8 +281,10 @@ convert all ISO-8859-1 file(s).</p>
         </section>
 
         <footer>
-          Admin-Scripts for Ubuntu is maintained by <a href="https://github.com/cederberg">cederberg</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+          Admin-Scripts for Ubuntu is maintained by <a href="https://github.com/cederberg">Per Cederberg</a><br>
+          This page was adapted from 
+          <a href="http://pages.github.com">GitHub Pages</a> with tactile theme
+          by <a href="http://twitter.com/jasonlong">Jason Long</a>.
         </footer>
 
         
