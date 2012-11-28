@@ -81,7 +81,7 @@ use JSON::XS;
         my $bytes = defined($self->{BYTES}) ? $parts[$self->{BYTES}] : "";
         my $referrer = defined($self->{REFERRER}) ? $parts[$self->{REFERRER}] : "-";
         my $agent = defined($self->{AGENT}) ? $parts[$self->{AGENT}] : "-";
-        my $delay = defined($self->{DELAY}) ? $parts[$self->{DELAY}] : "-";
+        my $delay = defined($self->{DELAY}) ? $parts[$self->{DELAY}] : "0";
         $delay =~ s/^t(ime)?://;
         my $cache = defined($self->{CACHE}) ? $parts[$self->{CACHE}] : "-";
         $cache =~ s/^c(ache)?://;
@@ -334,6 +334,7 @@ sub process_file {
     } else {
         open($fh, "<$filename") or die $!;
     }
+    $parser->Reset();
     while (<$fh>) {
         process_line($_);
     }
