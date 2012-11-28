@@ -32,6 +32,8 @@ install --mode=0744 bin/admin-restart /usr/local/bin/
 install bin/admin-status /usr/local/bin/
 install --mode=0744 bin/admin-uptodate /usr/local/bin/
 install bin/admin-utf8 /usr/local/bin/
+install bin/admin-www-stats /usr/local/bin/
+install bin/admin-www-webalizer /usr/local/bin/
 
 # Finished
 echo "...done"

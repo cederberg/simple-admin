@@ -1,41 +1,46 @@
-#!/bin/sh
+#!/usr/bin/env bash
+#
+# Processes HTTP access log files with Webalizer.
+#
+# Syntax: admin-www-webalizer [-v]
+#
+# Files:
+#   /etc/admin-www-webalizer.conf
+#
 
 # Configuration variables
-LOG_DIR=/var/log/liquidsite
-STATS_DIR=/srv/webstats
-OPTIONS="-c /etc/webalizer/webalizer.conf"
+CONFIG=/etc/admin-www-webalizer.conf
+LOCALDIR=`dirname $0`/..
 VERBOSE="false"
 
-# Function for printing command-line help
-printhelp() {
-    ERROR=$1
-    echo "Processes the web log files and creates statistics."
-    echo
-    echo "Syntax: admin-webstats [-v]"
-    echo
-    echo "Options:"
-    echo "  -v  Print verbose output."
-    if [ "$ERROR" != "" ] ; then
-        echo
-        echo "ERROR: $ERROR" >&2
-    fi
-}
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
 
-# Function for printing verbose information
-printinfo() {
-    if [ $VERBOSE = "true" ] ; then
-        echo `date +"%F %T"`: $*
-    fi
-}
-
-# Check for root user
-if [ `whoami` != 'root' ] ; then
-    echo "ERROR: only root is allowed to run administration tasks" >&2
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "ERROR:" $* >&2
     exit 1
+}
+
+# Function for logging information in verbose mode
+log() {
+    [ "$VERBOSE" = "true" ] && echo `date +"%F %T"`: $*
+}
+
+# Load config (shell)
+if [ -f $CONFIG ] ; then
+    . $CONFIG
+elif [ -f $LOCALDIR/$CONFIG ] ; then
+    . $LOCALDIR/$CONFIG
+else
+    fail "missing config file $CONFIG"
 fi
 
 # Parse command-line arguments
-if [ "$1" = "-v" ] ; then
+if [ "${1:-}" = "-v" ] ; then
     shift
     VERBOSE=true
     OPTIONS="-v $OPTIONS"
@@ -46,14 +51,13 @@ fi
 # Perform log file processing
 FILES=`find $LOG_DIR -name webalizer.conf`
 for CONF in $FILES ; do
+    log "init webstats for $CONF"
     DIR=`dirname $CONF`
     LOGS=`find $DIR -name 'access*.gz'`
-    printinfo init webstats for $CONF
     if [ "$LOGS" != "" ] ; then
-#        zcat $DIR/access*.gz | webazolver $OPTIONS -
         zcat $DIR/access*.gz | webalizer $OPTIONS -c $CONF -
     fi
-    printinfo done webstats for $CONF
+    log "done webstats for $CONF"
 done
 /usr/local/bin/admin-freemem
 
