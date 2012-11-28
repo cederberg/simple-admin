@@ -37,29 +37,29 @@ use JSON::XS;
         my ($self, @parts) = @_;
         for my $i (0 .. $#parts) {
             my $part = $parts[$i];
-        	if (!defined($self->{REQUEST}) and $part =~ /^[A-Z]{3,10} \/.* HTTP\/1.[01]/) {
-        	    $self->{REQUEST} = $i;
-        	} elsif (!defined($self->{TIME}) and $part =~ /^[0-3]?\d\/\w\w\w\/20\d\d:[0-2]\d:[0-5]\d:[0-5]\d /) {
-        	    $self->{TIME} = $i;
-        	} elsif (!defined($self->{IP}) and $part =~ /\d{2,3}\.\d{2,3}\.\d{2,3}\.\d{2,3}/) {
-        	    $self->{IP} = $i;
-        	} elsif (!defined($self->{HOST}) and $part =~ /^(\S+\.){2,}[a-z]{2,6}$/) {
-        	    $self->{HOST} = $i;
-        	} elsif (!defined($self->{CODE}) and $part =~ /^[1-5]\d\d$/) {
-        	    $self->{CODE} = $i;
-        	} elsif (!defined($self->{BYTES}) and $part =~ /^\d+$/) {
-        	    $self->{BYTES} = $i;
-        	} elsif (!defined($self->{REFERRER}) and $part =~ /^https?:/) {
-        	    $self->{REFERRER} = $i;
-        	} elsif (!defined($self->{AGENT}) and $part =~ /Mozilla|bot|crawler|spider/i) {
-        	    $self->{AGENT} = $i;
-        	} elsif (!defined($self->{DELAY}) and $part =~ /^t(ime)?:/) {
-        	    $self->{DELAY} = $i;
-        	} elsif (!defined($self->{CACHE}) and $part =~ /^c(ache)?:/) {
-        	    $self->{CACHE} = $i;
-        	} elsif (!defined($self->{BACKEND}) and $part =~ /^(b|backend|u|upstream):/) {
-        	    $self->{BACKEND} = $i;
-        	}
+            if (!defined($self->{REQUEST}) and $part =~ /^[A-Z]{3,10} \/.* HTTP\/1.[01]/) {
+                $self->{REQUEST} = $i;
+            } elsif (!defined($self->{TIME}) and $part =~ /^[0-3]?\d\/\w\w\w\/20\d\d:[0-2]\d:[0-5]\d:[0-5]\d /) {
+                $self->{TIME} = $i;
+            } elsif (!defined($self->{IP}) and $part =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/) {
+                $self->{IP} = $i;
+            } elsif (!defined($self->{HOST}) and $part =~ /^(\S+\.){2,}[a-z]{2,6}$/) {
+                $self->{HOST} = $i;
+            } elsif (!defined($self->{CODE}) and $part =~ /^[1-5]\d\d$/) {
+                $self->{CODE} = $i;
+            } elsif (!defined($self->{BYTES}) and $part =~ /^\d+$/) {
+                $self->{BYTES} = $i;
+            } elsif (!defined($self->{REFERRER}) and $part =~ /^https?:/) {
+                $self->{REFERRER} = $i;
+            } elsif (!defined($self->{AGENT}) and $part =~ /Mozilla|bot|crawler|spider/i) {
+                $self->{AGENT} = $i;
+            } elsif (!defined($self->{DELAY}) and $part =~ /^t(ime)?:/) {
+                $self->{DELAY} = $i;
+            } elsif (!defined($self->{CACHE}) and $part =~ /^c(ache)?:/) {
+                $self->{CACHE} = $i;
+            } elsif (!defined($self->{BACKEND}) and $part =~ /^(b|backend|u|upstream):/) {
+                $self->{BACKEND} = $i;
+            }
         }
     }
 
@@ -74,8 +74,15 @@ use JSON::XS;
             $self->_Init(@parts);
         }
         my $request = defined($self->{REQUEST}) ? $parts[$self->{REQUEST}] : "";
+        my ($method, $path, $version) = ($request =~ /^(\S+) (.*?) (HTTP\/.*)/);
+        if (!defined($method)) {
+            $method = '<Invalid>';
+            $path = '';
+            $version = '<Invalid>';
+        }
         my $time = defined($self->{TIME}) ? $parts[$self->{TIME}] : "";
         my $ip = defined($self->{IP}) ? $parts[$self->{IP}] : "";
+        $ip =~ s/^(0:0:0:0:0|:)(:FFFF:|:0:|:)((\d{1,3}\.){3}\d{1,3})$/$3/i;
         my $host = defined($self->{HOST}) ? $parts[$self->{HOST}] : "";
         my $code = defined($self->{CODE}) ? $parts[$self->{CODE}] : "";
         my $bytes = defined($self->{BYTES}) ? $parts[$self->{BYTES}] : "";
@@ -87,11 +94,10 @@ use JSON::XS;
         $cache =~ s/^c(ache)?://;
         my $backend = defined($self->{BACKEND}) ? $parts[$self->{BACKEND}] : "-";
         $backend =~ s/^(b|backend|u|upstream)://;
-        my @req = ($request =~ /^(\S+) (.*?) (HTTP\/.*)?/);
         return (
-        	METHOD => ($#req >= 1) ? $req[0] : "",
-        	PATH => ($#req >= 2) ? $req[1] : "",
-        	HTTP => ($#req >= 2) ? $req[2] : "",
+            METHOD => $method,
+            PATH => $path,
+            HTTP => $version,
             DATETIME => $time,
             IP => $ip,
             HOST => $host,
@@ -213,19 +219,18 @@ sub print_histogram_kb {
 sub normalize_browser_platform {
     my ($ref_data) = @_;
     my $agent = $$ref_data{'AGENT'};
-	if ($agent =~ m|(MSIE) (\d)|i or $agent =~ m|(Opera)/(\d+)|i or
-	    $agent =~ m|(Chrome)/(\d+)|i or $agent =~ m|(Firefox)/(\d+)|i) {
+    if ($agent =~ m#(Chrome|Firefox|MSIE|Opera)[/ ](\d+)#i) {
         $$ref_data{'BROWSER'} = $1;
         $$ref_data{'BROWSER_VERSION'} = $2;
-	} elsif ($agent =~ /(Safari)/i or $agent =~ /(WebKit)/i) {
+    } elsif ($agent =~ /(Safari|WebKit)/i) {
         $$ref_data{'BROWSER'} = $1;
-        if ($agent =~ m|Version/(\d+)|i) {
+        if ($agent =~ m#Version/(\d+)#i) {
             $$ref_data{'BROWSER_VERSION'} = $1;
         }
-    } elsif ($agent =~ /Google/i or $agent =~ /Facebook/i or
-             $agent =~ /Yahoo/i or $agent =~ /Java/i or
-             $agent =~ /bot/i or $agent =~ /crawler/i or
-             $agent =~ /spider/i) {
+    } elsif ($agent =~ /Bing|Facebook|Google|Yahoo/i or
+             $agent =~ /Java|PubSub|Reeder/i or
+             $agent =~ /bot|crawler|search|spider/i or
+             $agent =~ /archive|check|link|monitor|valid/i) {
         $$ref_data{'BROWSER'} = 'Bot';
     } elsif ($agent =~ /^-?$/) {
         $$ref_data{'BROWSER'} = '<blank>';
@@ -262,15 +267,16 @@ sub process_line {
     my $host = $data{'HOST'} || '<blank>';
     $stat_host{$host}++;
     my $ip = $data{'IP'};
-    $ip =~ s/.*?([\d\.]*)$/$1/;
-    if ($ip ne "") {
+    if ($ip =~ /^[\d\.]+$/) {
         my ($ipcode, $ipcountry) = $geo->LookUp($ip);
         $stat_country{$ipcountry || $ipcode}++;
+    } elsif ($ip ne '') {
+        $stat_country{'<Unsupported IPv6>'}++;
     } else {
-        $stat_country{'IPv6 (unsupported)'}++;
+        $stat_country{'<No IP adress>'}++;
     }
     my $respcode = $data{'CODE'};
-    $stat_httpcode{'HTTP '.$respcode}++;
+    $stat_httpcode{"HTTP $respcode"}++;
     my $bytes = int($data{'BYTES'});
     $totalbytes += $bytes;
     $totalkb += $totalbytes >> 10;
@@ -282,7 +288,7 @@ sub process_line {
     } else {
         $stat_source{'Cache'}++;
     }
-    $stat_httpmethod{"HTTP $data{'METHOD'}"}++;
+    $stat_httpmethod{$data{'METHOD'}}++;
     $stat_httpversion{$data{'HTTP'} || '<blank>'}++;
     $stat_useragent{$data{'BROWSER'}}++;
     my $referer = $data{'REFERRER'};
@@ -296,22 +302,22 @@ sub process_line {
     } else {
         if ($respcode eq '403' or $respcode eq '405') {
             $stat_errortype{$respcode.' bot probe (WebDAV)'}++;
-        } elsif ($respcode eq '404' and $referer eq '-') {
-            $stat_errortype{$respcode.' bot, invalid url (no referer)'}++;
-        } elsif ($respcode eq '444') {
-            $stat_errortype{$respcode.' <blank host>'}++;
+#        } elsif ($respcode eq '404' and $referer eq '-') {
+#            $stat_errortype{$respcode.' bot, invalid url (no referer)'}++;
+#        } elsif ($respcode eq '444') {
+#            $stat_errortype{$respcode.' <blank host>'}++;
         } elsif ($respcode eq '499') {
             $stat_errortype{$respcode.' client closed connection'}++;
         } elsif ($url =~ /phpMyAdmin/i) {
             $stat_errortype{$respcode.' bot probe (phpMyAdmin)'}++;
         } elsif ($url =~ /\.php/) {
             $stat_errortype{$respcode.' bot probe (php)'}++;
-        } elsif ($url =~ /\+uri/) {
-            $stat_errortype{$respcode.' bot, invalid url (+uri)'}++;
-        } elsif ($url =~ /\/null$/) {
-            $stat_errortype{$respcode.' ad invalid (null)'}++;
-        } elsif ($url =~ /data:image\/png;base64/) {
-            $stat_errortype{$respcode.' ad invalid (base64 image)'}++;
+#        } elsif ($url =~ /\+uri/) {
+#            $stat_errortype{$respcode.' bot, invalid url (+uri)'}++;
+#        } elsif ($url =~ /\/null$/) {
+#            $stat_errortype{$respcode.' ad invalid (null)'}++;
+#        } elsif ($url =~ /data:image\/png;base64/) {
+#            $stat_errortype{$respcode.' ad invalid (base64 image)'}++;
         } elsif ($url eq '/favicon.ico') {
             $stat_errortype{$respcode.' missing favicon.ico'}++;
         } else {
