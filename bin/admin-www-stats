@@ -53,11 +53,11 @@ use JSON::XS;
         	    $self->{REFERRER} = $i;
         	} elsif (!defined($self->{AGENT}) and $part =~ /Mozilla|bot|crawler|spider/i) {
         	    $self->{AGENT} = $i;
-        	} elsif (!defined($self->{DELAY}) and $part =~ /^time/) {
+        	} elsif (!defined($self->{DELAY}) and $part =~ /^t(ime)?:/) {
         	    $self->{DELAY} = $i;
-        	} elsif (!defined($self->{CACHE}) and $part =~ /^cache/) {
+        	} elsif (!defined($self->{CACHE}) and $part =~ /^c(ache)?:/) {
         	    $self->{CACHE} = $i;
-        	} elsif (!defined($self->{BACKEND}) and $part =~ /^backend/) {
+        	} elsif (!defined($self->{BACKEND}) and $part =~ /^(b|backend|u|upstream):/) {
         	    $self->{BACKEND} = $i;
         	}
         }
@@ -65,7 +65,11 @@ use JSON::XS;
 
     sub Parse {
         my ($self, $line) = @_;
-        my @parts = _SplitLine($line);
+        my @parts = $line =~ /"[^"]*"|\[[^\]]*\]|[^\s]+/g;
+        foreach (@parts) {
+            s/^"(.*)"$/$1/;
+            s/^\[(.*)\]$/$1/;
+        }
         if (!defined($self->{REQUEST}) || !defined($self->{REFERRER})) {
             $self->_Init(@parts);
         }
@@ -78,11 +82,11 @@ use JSON::XS;
         my $referrer = defined($self->{REFERRER}) ? $parts[$self->{REFERRER}] : "-";
         my $agent = defined($self->{AGENT}) ? $parts[$self->{AGENT}] : "-";
         my $delay = defined($self->{DELAY}) ? $parts[$self->{DELAY}] : "-";
-        $delay =~ s/^time://;
+        $delay =~ s/^t(ime)?://;
         my $cache = defined($self->{CACHE}) ? $parts[$self->{CACHE}] : "-";
-        $cache =~ s/^cache://;
+        $cache =~ s/^c(ache)?://;
         my $backend = defined($self->{BACKEND}) ? $parts[$self->{BACKEND}] : "-";
-        $backend =~ s/^backend://;
+        $backend =~ s/^(b|backend|u|upstream)://;
         my @req = ($request =~ /^(\S+) (.*?) (HTTP\/.*)?/);
         return (
         	METHOD => ($#req >= 1) ? $req[0] : "",
@@ -100,19 +104,7 @@ use JSON::XS;
             BACKEND => $backend
         );
     }
-
-    sub _SplitLine {
-        my ($line) = @_;
-        my @parts = $line =~ /"[^"]*"|\[[^\]]*\]|[^\s]+/g;
-        foreach (@parts) {
-            s/^"(.*)"$/$1/;
-            s/^\[(.*)\]$/$1/;
-        }
-        return @parts;
-    }
 }
-
-
 
 # Global variables
 my $total = 0;
@@ -217,6 +209,44 @@ sub print_histogram_kb {
     }
 }
 
+# Normalize HTTP browser & platform OS
+sub normalize_browser_platform {
+    my ($ref_data) = @_;
+    my $agent = $$ref_data{'AGENT'};
+	if ($agent =~ m|(MSIE) (\d)|i or $agent =~ m|(Opera)/(\d+)|i or
+	    $agent =~ m|(Chrome)/(\d+)|i or $agent =~ m|(Firefox)/(\d+)|i) {
+        $$ref_data{'BROWSER'} = $1;
+        $$ref_data{'BROWSER_VERSION'} = $2;
+	} elsif ($agent =~ /(Safari)/i or $agent =~ /(WebKit)/i) {
+        $$ref_data{'BROWSER'} = $1;
+        if ($agent =~ m|Version/(\d+)|i) {
+            $$ref_data{'BROWSER_VERSION'} = $1;
+        }
+    } elsif ($agent =~ /Google/i or $agent =~ /Facebook/i or
+             $agent =~ /Yahoo/i or $agent =~ /Java/i or
+             $agent =~ /bot/i or $agent =~ /crawler/i or
+             $agent =~ /spider/i) {
+        $$ref_data{'BROWSER'} = 'Bot';
+    } elsif ($agent =~ /^-?$/) {
+        $$ref_data{'BROWSER'} = '<blank>';
+    } else {
+        $$ref_data{'BROWSER'} = 'Other';
+    }
+    if ($agent =~ /Android/i) {
+        $$ref_data{'OS'} = 'Android';
+    } elsif ($agent =~ /iPhone|iPod|iPad|iOS/i) {
+        $$ref_data{'OS'} = 'iOS';
+    } elsif ($agent =~ /Mac/i) {
+        $$ref_data{'OS'} = 'Mac';
+    } elsif ($agent =~ /Linux/i) {
+        $$ref_data{'OS'} = 'Linux';
+    } elsif ($agent =~ /Win/i) {
+        $$ref_data{'OS'} = 'Windows';
+    } else {
+        $$ref_data{'OS'} = 'Other';
+    }
+}
+
 # Parse command-line arguments
 my $output_json;
 my $output_text;
@@ -250,6 +280,7 @@ while (my $line = <$STATFILE>) {
     chomp($line);
     $total++;
     my %data = $parser->Parse($line);
+    normalize_browser_platform(\%data);
     my $hour = $data{'DATETIME'};
     $hour =~ s/^.*?\d{4}:(\d{2}):.*/$1/;
     $timeofday{''.(int($hour) >> 2)}++;
@@ -273,7 +304,6 @@ while (my $line = <$STATFILE>) {
     $totalkb += $totalbytes >> 10;
     $totalbytes &= 0x3FF;
     my $referer = $data{'REFERRER'};
-    my $agent = $data{'AGENT'};
     if ($data{'BACKEND'} eq '-' and $data{'CACHE'} eq '-') {
         $stat_source{'File'}++;
     } elsif ($data{'BACKEND'} ne '-') {
@@ -315,19 +345,7 @@ while (my $line = <$STATFILE>) {
             $stat_errortype{$respcode.' '.$host.$url}++;
         }
     }
-	if ($agent =~ /(MSIE)/i or $agent =~ /(Opera)/i or $agent =~ /(Chrome)/i or
-        $agent =~ /(iPhone)/i or $agent =~ /(iPad)/i or $agent =~ /(Safari)/i or
-        $agent =~ /(WebKit)/i or $agent =~ /(Firefox)/i) {
-        $stat_useragent{$1}++;
-    } elsif ($agent =~ /Google/i or $agent =~ /Facebook/i or $agent =~ /Yahoo/i or
-             $agent =~ /Java/i or
-             $agent =~ /spider/i or $agent =~ /bot/i or $agent =~ /crawler/i) {
-        $stat_useragent{'Robots'}++;
-    } elsif ($agent =~ /^-?$/) {
-        $stat_useragent{'<blank>'}++;
-    } else {
-        $stat_useragent{'Other'}++;
-    }
+    $stat_useragent{$data{'BROWSER'}}++;
 }
 close($STATFILE);
 $totalkb += 1;
