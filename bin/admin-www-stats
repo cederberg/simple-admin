@@ -109,7 +109,7 @@ use JSON::XS;
 # Global variables
 my $total = 0;
 my $totaltime = 0.0;
-my $totalkb = 0;
+my $totalkb = 1;
 my $totalbytes = 0;
 my %timeofday = ();
 my %prcstime = ();
@@ -247,37 +247,9 @@ sub normalize_browser_platform {
     }
 }
 
-# Parse command-line arguments
-my $output_json;
-my $output_text;
-my $filename;
-while (my $arg = shift @ARGV) {
-    if ($arg eq '--json') {
-        $output_json = shift @ARGV;
-    } elsif ($arg eq '--text') {
-        $output_text = shift @ARGV;
-    } else {
-        $filename = $arg;
-        last;
-    }
-}
-if (!defined($filename)) {
-    die "ERROR: no access log file specified";
-} elsif ($filename ne "-" and !(-f $filename and -r $filename)) {
-    die "ERROR: cannot read file: $filename";
-}
-
-# Parse access log file
-my $STATFILE;
-if ($filename =~ /\.gz$/) {
-    open($STATFILE, "-|", "zcat $filename") or die $!;
-} elsif ($filename =~ /\.lzma$/) {
-    open($STATFILE, "-|", "lzcat $filename") or die $!;
-} else {
-    open($STATFILE, "<$filename") or die $!;
-}
-while (my $line = <$STATFILE>) {
-    chomp($line);
+# Processes an HTTP log file line
+sub process_line {
+    my ($line) = @_;
     $total++;
     my %data = $parser->Parse($line);
     normalize_browser_platform(\%data);
@@ -303,7 +275,6 @@ while (my $line = <$STATFILE>) {
     $totalbytes += $bytes;
     $totalkb += $totalbytes >> 10;
     $totalbytes &= 0x3FF;
-    my $referer = $data{'REFERRER'};
     if ($data{'BACKEND'} eq '-' and $data{'CACHE'} eq '-') {
         $stat_source{'File'}++;
     } elsif ($data{'BACKEND'} ne '-') {
@@ -313,6 +284,8 @@ while (my $line = <$STATFILE>) {
     }
     $stat_httpmethod{"HTTP $data{'METHOD'}"}++;
     $stat_httpversion{$data{'HTTP'} || '<blank>'}++;
+    $stat_useragent{$data{'BROWSER'}}++;
+    my $referer = $data{'REFERRER'};
     my $url = $data{'PATH'};
     if ($respcode =~ /^[23]0[0-9]$/) {
         $stat_top_count{$host.$url}++;
@@ -345,10 +318,45 @@ while (my $line = <$STATFILE>) {
             $stat_errortype{$respcode.' '.$host.$url}++;
         }
     }
-    $stat_useragent{$data{'BROWSER'}}++;
 }
-close($STATFILE);
-$totalkb += 1;
+
+# Processes an HTTP log file
+sub process_file {
+    my ($filename) = @_;
+    if ($filename ne "-" and !(-f $filename and -r $filename)) {
+        die "ERROR: cannot read file: $filename";
+    }
+    my $fh;
+    if ($filename =~ /\.gz$/) {
+        open($fh, "-|", "zcat $filename") or die $!;
+    } elsif ($filename =~ /\.lzma$/) {
+        open($fh, "-|", "lzcat $filename") or die $!;
+    } else {
+        open($fh, "<$filename") or die $!;
+    }
+    while (<$fh>) {
+        process_line($_);
+    }
+    close($fh);
+}
+
+# Process command-line arguments
+my $output_json;
+my $output_text;
+my @filenames;
+while (my $arg = shift @ARGV) {
+    if ($arg eq '--json') {
+        $output_json = shift @ARGV;
+    } elsif ($arg eq '--text') {
+        $output_text = shift @ARGV;
+    } else {
+        push(@filenames, $arg);
+        process_file($arg);
+    }
+}
+if (!@filenames) {
+    die "ERROR: no access log file specified";
+}
 
 # Format time-of-day keys
 foreach my $key (sort keys %timeofday) {
