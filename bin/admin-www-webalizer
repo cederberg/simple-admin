@@ -53,9 +53,12 @@ FILES=`find $LOG_DIR -name webalizer.conf`
 for CONF in $FILES ; do
     log "init webstats for $CONF"
     DIR=`dirname $CONF`
-    LOGS=`find $DIR -name 'access*.gz'`
+    LOGS=`ls $DIR/access*.{lzma,gz} 2> /dev/null` || true
     if [ "$LOGS" != "" ] ; then
-        zcat $DIR/access*.gz | webalizer $OPTIONS -c $CONF -
+        log "found `echo $LOGS | wc -w` log files to process"
+        zcat $LOGS | webalizer $OPTIONS -c $CONF -
+    else
+        log "found no log files to process"
     fi
     log "done webstats for $CONF"
 done

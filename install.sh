@@ -20,7 +20,7 @@ fail() {
 
 # Install required packages
 echo "Installing dependencies..."
-apt-get -qq install rsync lzma libgeo-ipfree-perl libjson-xs-perl
+apt-get -qq install rsync zutils lzma libgeo-ipfree-perl libjson-xs-perl
 
 # Install script files
 echo "Installing admin scripts..."
