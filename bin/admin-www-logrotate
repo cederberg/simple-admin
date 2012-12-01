@@ -71,7 +71,7 @@ for LOG in $FILES ; do
     if [ -s $LOG.$YESTERDAY ] ; then
         log "compressing $LOG.$YESTERDAY"
         lzma $LOG.$YESTERDAY
-    else
+    elif [ -e $LOG.$YESTERDAY ] ; then
         log "removing empty file $LOG.$YESTERDAY"
         rm -f $LOG.$YESTERDAY
     fi
@@ -83,9 +83,11 @@ find $LOG_DIR -name '*.gz' -mtime +$LOG_EXPIRES -exec rm -rf {} \;
 find $LOG_DIR -name '*.lzma' -mtime +$LOG_EXPIRES -exec rm -rf {} \;
 
 # Process web statistics
-LOG_FILES=`find $LOG_DIR -name 'access.log.$YESTERDAY.lzma'`
-JSON_FILE=$STAT_DIR/logstats.$YESTERDAY.json
-TEXT_FILE=$STAT_DIR/logstats.$YESTERDAY.txt
-log "processing stats to $STAT_DIR"
-/usr/local/bin/admin-webstats --json $JSON_FILE --text $TEXT_FILE $LOG_FILES
+LOG_FILES=`find $LOG_DIR -name "access.log.$YESTERDAY.lzma"`
+if [ -d $STAT_DIR -a "$LOG_FILES" != "" ] ; then
+    JSON_FILE=$STAT_DIR/logstats.$YESTERDAY.json
+    TEXT_FILE=$STAT_DIR/logstats.$YESTERDAY.txt
+    log "processing stats to $STAT_DIR"
+    /usr/local/bin/admin-www-stats --json $JSON_FILE --text $TEXT_FILE $LOG_FILES
+fi
 /usr/local/bin/admin-freemem
