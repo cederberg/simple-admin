@@ -77,7 +77,7 @@ waitprocess() {
     PID=$2
     SECS=0
     while [ $SECS -lt "$WAIT" ] && ps --pid $PID > /dev/null ; do
-        let SECS++
+        let ++SECS
         sleep 1
     done
 }
