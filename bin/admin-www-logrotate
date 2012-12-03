@@ -27,7 +27,7 @@ fail() {
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" = "true" ] && echo `date +"%F %T"`: $*
+    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: $*
 }
 
 # Check for root user
@@ -43,7 +43,7 @@ else
 fi
 
 # Parse command-line arguments
-if [ "${1:-}" = "-v" ] ; then
+if [ "${1:-}" == "-v" ] ; then
     shift
     VERBOSE=true
 fi
