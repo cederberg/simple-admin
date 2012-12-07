@@ -1,15 +1,16 @@
-admin-scripts
-=============
+simple-admin
+============
 Scripts for simplified Ubuntu server administration and
 maintenance.
 
-Web Site: http://cederberg.github.com/admin-scripts
+Web Site: http://cederberg.github.com/simple-admin
 
 
 Requirements
 ------------
 * Ubuntu 12.04
 * Bash
+* ...and some command-line tools (auto-installed)
 
 
 Installation
@@ -192,27 +193,27 @@ Option | Description
 
 admin-utf8
 ----------
-Converts a file or directory to UTF-8 (from ISO-8859-1). Only if needed.
+Converts files to UTF-8 (from ISO-8859-1) if needed.
 
-**Syntax:** ```admin-utf8 (check|convert) <file or dir>```
+**Syntax:** ```admin-utf8 (check|convert) <files or dirs>```
 
 Use either ```check``` to detect file encoding, or ```convert``` to
-convert all ISO-8859-1 file(s).
+convert all ISO-8859-1 files.
 
 
 admin-www-logrotate
 -------------------
 
-**TODO:** Update tool and docs.
+**TODO:** Update docs.
 
 
 admin-www-stats
 ---------------
 
-**TODO:** Update tool and docs.
+**TODO:** Update docs.
 
 
 admin-www-webalizer
 -------------------
 
-**TODO:** Update tool and docs.
+**TODO:** Update docs.
