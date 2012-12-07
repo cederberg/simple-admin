@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Performs a MySQL dump of configured databases.
 #
@@ -20,11 +20,21 @@ DUMP_DIR=/backup/$HOST/mysql
 OPTIONS="--opt --quote-names --skip-add-locks --skip-lock-tables"
 VERBOSE="false"
 
-# Function for printing verbose information
-printinfo() {
-    if [ $VERBOSE = "true" ] ; then
-        echo `date +"%F %T"`: "$*"
-    fi
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
+
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "ERROR:" $* >&2
+    exit 1
+}
+
+# Function for logging information in verbose mode
+log() {
+    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: $*
 }
 
 # Load config to stdin
@@ -33,29 +43,28 @@ if [ -f $CONFIG ] ; then
 elif [ -f $LOCALDIR/$CONFIG ] ; then
     exec < $LOCALDIR/$CONFIG
 else
-    echo "ERROR: Missing config file $CONFIG"
-    exit 1
+    fail "missing config file $CONFIG"
 fi
 
 # Parse command-line arguments
-if [ "$1" = "-v" ] ; then
+if [ "${1:-}" == "-v" ] ; then
     shift
     OPTIONS="$OPTIONS -v"
     VERBOSE=true
 fi
 
 # Perform MySQL backup
-printinfo init MySQL backup on $HOST
+log "init MySQL backup on $HOST"
 mkdir -p $DUMP_DIR
 while read DATABASE USER PWD EXTRAS ; do
-    printinfo starting MySQL dump of $DATABASE
+    log "starting MySQL dump of $DATABASE"
     FILE=$DUMP_DIR/$DATABASE.$DATE.sql
     rm -f $FILE $FILE.lzma
     mysqldump -u$USER -p$PWD $OPTIONS $EXTRAS --result-file=$FILE --databases $DATABASE
-    printinfo finished MySQL dump of $DATABASE
-    printinfo starting compression of file $FILE
+    log "finished MySQL dump of $DATABASE"
+    log "starting compression of file $FILE"
     lzma $FILE
-    printinfo finished compression of file $FILE
+    log "finished compression of file $FILE"
 done
 
 # Remove outdated backup files
@@ -63,4 +72,4 @@ find $DUMP_DIR -type f -mtime +30 \! -name "*.????-??-01.*" -delete
 
 # Finished backup
 /usr/local/bin/admin-freemem
-printinfo done MySQL backup on $HOST
+log "done MySQL backup on $HOST"
