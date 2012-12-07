@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Performs a remote file sync for configured directories.
 #
@@ -14,14 +14,25 @@
 # Configuration variables
 CONFIG=/etc/admin-backup-sync.conf
 LOCALDIR=`dirname $0`/..
+HOST=`hostname --fqdn`
 OPTIONS="--archive --hard-links --delete --compress"
 VERBOSE="false"
 
-# Function for printing verbose information
-printinfo() {
-    if [ $VERBOSE = "true" ] ; then
-        echo `date +"%F %T"`: "$*"
-    fi
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
+
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "ERROR:" $* >&2
+    exit 1
+}
+
+# Function for logging information in verbose mode
+log() {
+    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: $*
 }
 
 # Load config to stdin
@@ -30,12 +41,11 @@ if [ -f $CONFIG ] ; then
 elif [ -f $LOCALDIR/$CONFIG ] ; then
     exec < $LOCALDIR/$CONFIG
 else
-    echo "ERROR: Missing config file $CONFIG"
-    exit 1
+    fail "missing config file $CONFIG"
 fi
 
 # Parse command-line arguments
-if [ "$1" = "-v" ] ; then
+if [ "${1:-}" == "-v" ] ; then
     shift
     OPTIONS="$OPTIONS -v"
     VERBOSE=true
@@ -44,11 +54,11 @@ else
 fi
 
 # Perform synchronization
-printinfo init sync from `hostname --fqdn`
+log "init sync from $HOST" 
 while read SRC DST ; do
-    printinfo "syncing from:" $SRC
-    printinfo "          to:" $DST
+    log "syncing from: $SRC"
+    log "          to: $DST"
     rsync $OPTIONS $SRC $DST
 done
 /usr/local/bin/admin-freemem
-printinfo done sync from `hostname --fqdn`
+log "done sync from $HOST"
