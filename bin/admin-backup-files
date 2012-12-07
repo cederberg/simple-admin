@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Performs a filesystem backup for configured directories.
 #
@@ -23,18 +23,25 @@ DATE_DAY=`date '+%Y-%m-%d'`
 DATE_MINUTE=`date '+%Y-%m-%d-%H%M'`
 VERBOSE="false"
 
-# Function for printing verbose information
-printinfo() {
-    if [ $VERBOSE = "true" ] ; then
-        echo `date +"%F %T"`: $*
-    fi
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
+
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "ERROR:" $* >&2
+    exit 1
+}
+
+# Function for logging information in verbose mode
+log() {
+    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: $*
 }
 
 # Check for root user
-if [ `whoami` != 'root' ] ; then
-    echo "ERROR: Only root is allowed to run admin-backup-files" >&2
-    exit 1
-fi
+[ `whoami` == 'root' ] || fail "only root is allowed to run admin-backup-files"
 
 # Load config to stdin
 if [ -f $CONFIG ] ; then
@@ -42,12 +49,11 @@ if [ -f $CONFIG ] ; then
 elif [ -f $LOCALDIR/$CONFIG ] ; then
     exec < $LOCALDIR/$CONFIG
 else
-    echo "ERROR: Missing config file $CONFIG"
-    exit 1
+    fail "missing config file $CONFIG"
 fi
 
 # Parse command-line arguments
-if [ "$1" = "-v" ] ; then
+if [ "${1:-}" == "-v" ] ; then
     shift
     VERBOSE=true
 fi
@@ -63,10 +69,10 @@ fi
 BACKUP_CURRENT_DIR=$BACKUP_BASE_DIR/$NAME
 
 # Perform backup
-printinfo init backup to $BACKUP_CURRENT_DIR
+log "init backup to $BACKUP_CURRENT_DIR"
 mkdir -p $BACKUP_CURRENT_DIR
 while read SRC EXPIRES ; do
-    printinfo syncing dir $SRC
+    log "syncing dir $SRC"
     DST=$BACKUP_CURRENT_DIR$SRC
     LNK=$BACKUP_LATEST_DIR$SRC
     mkdir -p $DST
@@ -78,7 +84,7 @@ while read SRC EXPIRES ; do
     rsync $RSYNC_OPTS $SRC/ $DST/
     touch $DST
     if [ "$EXPIRES" != "" ] ; then
-        printinfo removing $SRC backups older than $EXPIRES days
+        log "removing $SRC backups older than $EXPIRES days"
         find $BACKUP_BASE_DIR/????-*$SRC -maxdepth 0 -type d -mtime +$EXPIRES -exec rm -rf {} \;
     fi
 done
@@ -93,4 +99,4 @@ find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm
 
 # Finished backup
 /usr/local/bin/admin-freemem
-printinfo done backup to $BACKUP_CURRENT_DIR
+log "done backup to $BACKUP_CURRENT_DIR"
