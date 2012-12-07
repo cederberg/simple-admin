@@ -1,22 +1,28 @@
-#!/bin/sh
+#!/usr/bin/env bash
+#
+# Converts files to UTF-8 (from ISO-8859-1) if needed.
+#
+# Syntax: admin-utf8 (check|convert) <files or dirs>
+#
 
-# Prints some command-line help
-printhelp() {
-    ERROR=$1
-    echo "Converts a file or directory to UTF-8 (from ISO-8859-1). Only if needed."
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
+
+# Function for printing command-line usage info
+usage() {
+    echo "Converts files to UTF-8 (from ISO-8859-1) if needed."
     echo
-    echo "Syntax: admin-utf8 (check|convert) <file or dir>"
-    if [ "$ERROR" != "" ] ; then
-        echo
-        echo "ERROR: $ERROR" >&2
-    fi
+    echo "Syntax: admin-utf8 (check|convert) <files or dirs>"
+    exit 1
 }
 
 # Converts an ISO-8859-1 file to UTF-8
 convert_file() {
     FILE=$1
-    MATCH=`file --mime $FILE | grep "8859-1"`
-    if [ "$MATCH" != "" ] ; then
+    if file --mime $FILE | grep "8859-1" > /dev/null ; then
         iconv -f ISO-8859-1 -t UTF-8 $FILE > $FILE.new
         mv $FILE.new $FILE
         echo "$FILE -- converted to UTF-8"
@@ -24,24 +30,19 @@ convert_file() {
 }
 
 # Parse command-line arguments
+if [ $# -lt 2 ] ; then
+    usage
+fi
 MODE=$1
-if [ -z "$MODE" ] ; then
-    printhelp "Either 'check' or 'convert' must be specified"
-    exit 1
-fi
 shift
-DIR=$1
-if [ -z "$DIR" ] ; then
-    printhelp "No file or directory specified"
-    exit 1
-fi
+DIRS=$*
 
 # Check or convert all files
-if [ $MODE = "convert" ] ; then
-    FILES=`find $DIR -type f -not -path "*.svn*"`
-    for FILE in $FILES ; do
+FILES=`find $DIRS -type f -not -path "*.svn*"`
+for FILE in $FILES ; do
+    if [ $MODE == "convert" ] ; then
         convert_file $FILE
-    done
-else
-    find $DIR -type f -not -path "*.svn*" -exec file --mime {} \;
-fi
+    else
+        file --mime $FILE
+    fi
+done
