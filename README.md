@@ -301,3 +301,15 @@ OPTIONS="-c /etc/webalizer/webalizer.conf"
 A base `webalizer.conf` file is placed in `/etc` (or elsewhere)
 and additional (possibly empty) `webalizer.conf` files are placed
 in each HTTP access log directory to process (subdir to `LOG_DIR`).
+
+
+admin-zcat
+----------
+Utility to output data from any compressed file.
+
+**Syntax:** `admin-www-webalizer <files>`
+
+Works similar to `zcat` (from `zutils` package), but also supports
+the `lzma` format properly. File compression is detected from file
+extensions `bz2`, `gz`, `lzma` or `xz`. Other file extensions are
+handled as uncompressed files (with `cat`).
