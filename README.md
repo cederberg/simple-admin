@@ -203,8 +203,35 @@ convert all ISO-8859-1 files.
 
 admin-www-logrotate
 -------------------
+Rotates HTTP access log files.
 
-**TODO:** Update docs.
+**Syntax:** `admin-www-logrotate [-v]`
+
+Option | Description
+-------|-------------------------------------------------
+-v     | Print verbose output.
+
+Configured in `/etc/admin-www-logrotate.conf` with a number of
+shell variables:
+
+```
+# Shell command to release old log files
+COMMAND="/usr/sbin/nginx -s reopen"
+
+# Base directory for access log files
+LOG_DIR=/var/log/www
+
+# Maximum log file age (days)
+LOG_EXPIRES=356
+
+# Statistics directory 
+STAT_DIR=/srv/logstats
+```
+
+The tools will rename any file matching `*.log` in the `LOG_DIR`
+directory hierarchy. Immediately afterwards the server command is
+run to create new log files. Finally the old log files are compressed
+and `admin-www-stats` is used to process their data.
 
 
 admin-www-stats
@@ -216,9 +243,9 @@ Output can be generated in text and/or JSON format.
 
 Option   | Description
 ---------|-------------------------------------------------
-`--json` | Write JSON output to the specified file.
-`--text` | Write text output to the specified file.
-`<logs>` | Log files to process or `-` to read stdin.
+--json   | Write JSON output to the specified file.
+--text   | Write text output to the specified file.
+\<logs\> | Log files to process or `-` to read stdin.
 
 If no output option is specified, the default is a text report
 to stdout. The log files may be compressed (in bzip2, gzip, lzip
