@@ -333,10 +333,8 @@ sub process_file {
         die "ERROR: cannot read file: $filename";
     }
     my $fh;
-    if ($filename =~ /\.gz$/) {
+    if ($filename =~ /\.(bz2|gz|lzma|xz))$/) {
         open($fh, "-|", "zcat $filename") or die $!;
-    } elsif ($filename =~ /\.lzma$/) {
-        open($fh, "-|", "lzcat $filename") or die $!;
     } else {
         open($fh, "<$filename") or die $!;
     }
