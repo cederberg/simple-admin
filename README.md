@@ -19,21 +19,21 @@ The install script will install required command-line tools and
 Perl modules.
 
 1. Run install script (as root):
-   - ```./install.sh```
-2. Copy & modify config files from ```etc```.
+   - `./install.sh`
+2. Copy & modify config files from `etc`.
 
 
 admin-backup-files
 ------------------
 Performs a filesystem backup for configured directories.
 
-**Syntax:** ```admin-backup-files [-v]```
+**Syntax:** `admin-backup-files [-v]`
 
 Option | Description
 -------|-------------------------------------------------
 -v     | Print verbose output.
 
-Configured in ```/etc/admin-backup-files.conf``` with one line
+Configured in `/etc/admin-backup-files.conf` with one line
 per directory to backup:
 
 ```
@@ -44,8 +44,8 @@ per directory to backup:
 ```
 
 All the files in the directories specified will be recursively copied
-to a new directory ```/backup/<hostname>/files/<timestamp>```. A
-symbolic link ```/backup/<hostname>/files/latest``` always points to
+to a new directory `/backup/<hostname>/files/<timestamp>`. A
+symbolic link `/backup/<hostname>/files/latest` always points to
 the last completed backup directory. An optional number after each
 directory specifies the maximum number of days to store the files
 (differing from the standard retention policy below).
@@ -68,13 +68,13 @@ admin-backup-mysql
 ------------------
 Performs a MySQL dump of configured databases.
 
-**Syntax:** ```admin-backup-mysql [-v]```
+**Syntax:** `admin-backup-mysql [-v]`
 
 Option | Description
 -------|-------------------------------------------------
 -v     | Print verbose output.
 
-Configured in ```/etc/admin-backup-mysql.conf``` with one line
+Configured in `/etc/admin-backup-mysql.conf` with one line
 per database to backup:
 
 ```
@@ -82,7 +82,7 @@ database1 user password
 database2 user password --ignore-table=table1
 ```
 
-The ```/backup/<hostname>/mysql/``` directory is used to
+The `/backup/<hostname>/mysql/` directory is used to
 store the output MySQL dump files (compressed). Backup files are
 kept for 30 days, except the first backup file from each month
 (which is kept indefinitely).
@@ -95,13 +95,13 @@ admin-backup-sync
 -----------------
 Performs a remote file sync for configured directories.
 
-**Syntax:** ```admin-backup-sync [-v]```
+**Syntax:** `admin-backup-sync [-v]`
 
 Option | Description
 -------|-------------------------------------------------
 -v     | Print verbose output.
 
-Configured in ```/etc/admin-backup-sync.conf``` with one line
+Configured in `/etc/admin-backup-sync.conf` with one line
 for each pair of source and destination directories:
 
 ```
@@ -109,7 +109,7 @@ for each pair of source and destination directories:
 root@host02:/backup/host02 /backup/
 ```
 
-The file syncronization use ```rsync``` and will update and
+The file syncronization use `rsync` and will update and
 remove files on the receiving side, so be careful to sync the
 correct backup subdirectories.
 
@@ -118,23 +118,23 @@ admin-freemem
 -------------
 Cleans filesystem cache (if possible) to recover memory.
 
-**Syntax:** ```admin-freemem```
+**Syntax:** `admin-freemem`
 
 Forces a filesystem sync followed by a write
-to ```/proc/sys/vm/drop_caches```.
+to `/proc/sys/vm/drop_caches`.
 
 
 admin-restart
 -------------
 Restarts a group of services in a predefined order.
 
-**Syntax:** ```admin-restart [-q] <group>```
+**Syntax:** `admin-restart [-q] <group>`
 
 Option | Description
 -------|-------------------------------------------------
 -q     | Quiet mode. Only prints errors to stderr.
 
-Configured in ```/etc/admin-restart.conf``` using shell script syntax
+Configured in `/etc/admin-restart.conf` using shell script syntax
 for defining each group with description, start and stop:
 
 ```
@@ -155,22 +155,22 @@ stop_web() {
 A number of built-in commands are available to simplify monitoring
 the startup or shutdown of services:
 
-Command     | Description
-------------|-------------------------------------------------
-```start``` | Starts a service and optionally waits for the process to start.
-```stop```  | Stops a service and optionally waits for the process to quit.
-```alert``` | Prints a message to stderr.
-```fail```  | Exits and prints a message to stderr.
-```log```   | Prints a log message (if not in quiet mode).
+Command   | Description
+----------|-------------------------------------------------
+`start` | Starts a service and optionally waits for the process to start.
+`stop`  | Stops a service and optionally waits for the process to quit.
+`alert` | Prints a message to stderr.
+`fail`  | Exits and prints a message to stderr.
+`log`   | Prints a log message (if not in quiet mode).
 
 
 admin-status
 ------------
 Checks the status of a number of services on the machine.
 
-**Syntax:** ```admin-status```
+**Syntax:** `admin-status`
 
-Configured in ```/etc/admin-status.conf``` with one line
+Configured in `/etc/admin-status.conf` with one line
 per service (and PID file):
 
 ```
@@ -183,7 +183,7 @@ admin-uptodate
 --------------
 Runs a check to determine if the system requires updates.
 
-**Syntax:** ```admin-uptodate [-s] [-m]```  
+**Syntax:** `admin-uptodate [-s] [-m]`  
 
 Option | Description
 -------|-------------------------------------------------
@@ -195,9 +195,9 @@ admin-utf8
 ----------
 Converts files to UTF-8 (from ISO-8859-1) if needed.
 
-**Syntax:** ```admin-utf8 (check|convert) <files or dirs>```
+**Syntax:** `admin-utf8 (check|convert) <files or dirs>`
 
-Use either ```check``` to detect file encoding, or ```convert``` to
+Use either `check` to detect file encoding, or `convert` to
 convert all ISO-8859-1 files.
 
 
@@ -215,5 +215,29 @@ admin-www-stats
 
 admin-www-webalizer
 -------------------
+Processes HTTP access log files with Webalizer (not automatically
+installed). This tool is scheduled for removal in the future.
 
-**TODO:** Update docs.
+**Syntax:** `admin-www-webalizer [-v]`
+
+Option | Description
+-------|-------------------------------------------------
+-v     | Print verbose output.
+
+Configured in `/etc/admin-www-webalizer.conf` with a number of
+shell variables:
+
+```
+# Base directory for access log files (with webalizer.conf in subdirs)
+LOG_DIR=/var/log/www
+
+# Base directory for stats output (same subdirs as in LOG_DIR)
+OUTPUT_DIR=/srv/webstats
+
+# Extra Webalizer command-line options
+OPTIONS="-c /etc/webalizer/webalizer.conf"
+```
+
+A base `webalizer.conf` file is placed in `/etc` (or elsewhere)
+and additional (possibly empty) `webalizer.conf` files are placed
+in each HTTP access log directory to process (subdir to `LOG_DIR`).
