@@ -405,6 +405,19 @@ files are placed in each HTTP access log directory to process (subdir to
 <code>LOG_DIR</code>).</p>
 
 
+<h2 class="tool">admin-zcat</h2>
+
+<p>Utility to output data from any compressed file.</p>
+
+<p><strong>Syntax:</strong> <code>admin-zcat &lt;files&gt;</code></p>
+
+<p>Works similar to <code>zcat</code> (from <code>zutils</code> package), but
+also supports the <code>lzma</code> format properly. File compression is
+detected from file extensions <code>bz2</code>, <code>gz</code>,
+<code>lzma</code> or <code>xz</code>. Other file extensions are handled as
+uncompressed files (with <code>cat</code>).</p>
+
+
         </section>
 
         <footer>
