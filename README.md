@@ -209,8 +209,41 @@ admin-www-logrotate
 
 admin-www-stats
 ---------------
+Processes HTTP access log files and generates summary statistics.
+Output can be generated in text and/or JSON format.
 
-**TODO:** Update docs.
+**Syntax:** `admin-www-stats [--json <file>] [--text <file>] <logs>`
+
+Option   | Description
+---------|-------------------------------------------------
+`--json` | Write JSON output to the specified file.
+`--text` | Write text output to the specified file.
+`<logs>` | Log files to process or `-` to read stdin.
+
+If no output option is specified, the default is a text report
+to stdout. The log files may be compressed (in bzip2, gzip, lzip
+or xz format).
+
+The tool attempts to automatically recognize the order of the
+fields in the HTTP access logs. The field order is therefore
+allowed to vary between files. In addition to recognizing the
+standard log fields, a number of additional parameters can be
+appended to each line. Here is a recommended Nginx format:
+
+```
+log_format custom '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" $host cache:$upstream_cache_status '
+                  'time:$request_time backend:$upstream_response_time';
+```
+
+This will print log files with entries similar to this edited one
+(with one line per entry):
+
+```
+66.249.73.70 - - [07/Dec/2012:00:05:17 +0000] "GET / HTTP/1.1" 200 3391
+"-" "Mozilla/5.0 ..." www.site.com cache:MISS time:0.451 backend:0.008
+```
 
 
 admin-www-webalizer
