@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" >
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Chivo:900">
+    <link rel="stylesheet" type="text/css" href="css/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="css/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="css/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>admin-www-stats | Simple-Admin for Ubuntu</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="inner">
+
+        <header>
+          <h1>Simple-Admin for Ubuntu</h1>
+          <h2>Scripts for simplified Ubuntu server administration.</h2>
+        </header>
+
+        <section class="links clearfix">
+          <a href="index.html" class="button back"><span>Start Page</span></a>
+        </section>
+
+        <hr>
+
+        <section class="main">
+
+<h2>admin-www-stats</h2>
+
+<p>Processes HTTP access log files and generates summary statistics. Output
+can be generated in text and/or JSON format.</p>
+
+<p><strong>Syntax:</strong> <code>admin-www-stats [--json &lt;file&gt;] [--text &lt;file&gt;] &lt;logs&gt;</code></p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>--json</td>
+<td>Write JSON output to the specified file.</td>
+</tr>
+<tr>
+<td>--text</td>
+<td>Write text output to the specified file.</td>
+</tr>
+<tr>
+<td>&lt;logs&gt;</td>
+<td>Log files to process or <code>-</code> to read from stdin.</td>
+</tr>
+</table>
+
+<p>If no output option is specified, the default is a text report to stdout.
+The log files may be compressed (in bzip2, gzip, lzip or xz format).</p>
+
+<p>The tool attempts to automatically recognize the order of the fields in the
+HTTP access logs. The field order is therefore allowed to vary between files.
+In addition to recognizing the standard log fields, a number of additional
+parameters can be appended to each line. Here is a recommended Nginx format:</p>
+
+<pre><code>log_format custom '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" $host cache:$upstream_cache_status '
+                  'time:$request_time backend:$upstream_response_time';
+</code></pre>
+
+<p>This will print log files with entries similar to this edited one (with one
+line per entry):</p>
+
+<pre><code>66.249.73.70 - - [07/Dec/2012:00:05:17 +0000] "GET / HTTP/1.1" 200 3391
+"-" "Mozilla/5.0 ..." www.site.com cache:MISS time:0.451 backend:0.008
+</code></pre>
+
+        </section>
+
+        <footer>
+          Simple-Admin for Ubuntu is maintained by <a href="https://github.com/cederberg">Per Cederberg</a><br>
+          This page was adapted from
+          <a href="http://pages.github.com">GitHub Pages</a> with tactile theme
+          by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+      </div>
+    </div>
+  </body>
+</html>

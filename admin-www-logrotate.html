@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" >
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Chivo:900">
+    <link rel="stylesheet" type="text/css" href="css/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="css/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="css/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>admin-www-logrotate | Simple-Admin for Ubuntu</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="inner">
+
+        <header>
+          <h1>Simple-Admin for Ubuntu</h1>
+          <h2>Scripts for simplified Ubuntu server administration.</h2>
+        </header>
+
+        <section class="links clearfix">
+          <a href="index.html" class="button back"><span>Start Page</span></a>
+        </section>
+
+        <hr>
+
+        <section class="main">
+
+<h2>admin-www-logrotate</h2>
+
+<p>Rotates HTTP access log files.</p>
+
+<p><strong>Syntax:</strong> <code>admin-www-logrotate [-v]</code></p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-v</td>
+<td>Print verbose output.</td>
+</tr>
+</table>
+
+<p>Configured in <code>/etc/admin-www-logrotate.conf</code> with a number of
+shell variables:</p>
+
+<pre><code># Shell command to release old log files
+COMMAND="/usr/sbin/nginx -s reopen"
+
+# Base directory for access log files
+LOG_DIR=/var/log/www
+
+# Maximum log file age (days)
+LOG_EXPIRES=356
+
+# Statistics directory
+STAT_DIR=/srv/logstats
+</code></pre>
+
+<p>The tool will rename any file matching <code>*.log</code> in the
+<code>LOG_DIR</code> directory hierarchy. Immediately afterwards the server
+command is run to create new log files. Finally the old log files are
+compressed and <code>admin-www-stats</code> is run to process their data.</p>
+
+        </section>
+
+        <footer>
+          Simple-Admin for Ubuntu is maintained by <a href="https://github.com/cederberg">Per Cederberg</a><br>
+          This page was adapted from
+          <a href="http://pages.github.com">GitHub Pages</a> with tactile theme
+          by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+      </div>
+    </div>
+  </body>
+</html>

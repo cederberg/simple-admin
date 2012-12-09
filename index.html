@@ -15,7 +15,7 @@
   </head>
 
   <body>
-    <div id="container">
+    <div class="container">
       <div class="inner">
 
         <header>
@@ -23,15 +23,15 @@
           <h2>Scripts for simplified Ubuntu server administration.</h2>
         </header>
 
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/downloads/cederberg/simple-admin/simple-admin-0.9.zip" id="download-zip" class="button"><span>Download ZIP</span></a>
-          <a href="https://github.com/downloads/cederberg/simple-admin/simple-admin-0.9.tgz" id="download-tar-gz" class="button"><span>Download TGZ</span></a>
-          <a href="https://github.com/cederberg/simple-admin" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        <section class="links clearfix">
+          <a href="https://github.com/downloads/cederberg/simple-admin/simple-admin-0.9.zip" class="button download-zip"><span>Download ZIP</span></a>
+          <a href="https://github.com/downloads/cederberg/simple-admin/simple-admin-0.9.tgz" class="button download-tar-gz"><span>Download TGZ</span></a>
+          <a href="https://github.com/cederberg/simple-admin" class="button github"><span>View on GitHub</span></a>
         </section>
 
         <hr>
 
-        <section id="main_content">
+        <section class="main">
 
 <h2>Requirements</h2>
 
@@ -53,371 +53,34 @@
 </ol>
 
 
-<h2 class="tool">admin-backup-files</h2>
-
-<p>Performs a filesystem backup for configured directories.</p>
-
-<p><strong>Syntax:</strong> <code>admin-backup-files [-v]</code></p>
-
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>-v</td>
-<td>Print verbose output.</td>
-</tr>
-</table>
-
-<p>Configured in <code>/etc/admin-backup-files.conf</code> with one line
-per directory to backup:</p>
-
-<pre><code>/etc
-/home
-/root
-/var/log   5
-</code></pre>
-
-<p>All the files in the directories specified will be recursively copied to a
-new directory <code>/backup/&lt;hostname&gt;/files/&lt;timestamp&gt;</code>.
-A symbolic link <code>/backup/&lt;hostname&gt;/files/latest</code> always points
-to the last completed backup directory. An optional number after each directory
-specifies the maximum number of days to store the files (differing from the
-standard retention policy below).</p>
-
-<p>In order to save space, identical files are hard linked between the current
-and the previous backup directories. Only modified files (and the directory
-structure) will require more space on the disk.</p>
-
-<p>The first backup every month and day are created with a different timestamp
-signature (omitting the hour and minute). The monthly backup directories are
-kept indefinitely, but the daily directories are only preserved for 30 days.
-Other timestamped backup directories will be preserved for 24 hours.</p>
-
-<p>The file backup can be run as frequently as every minute, but should
-probably be run at least once per day.</p>
-
-
-<h2 class="tool">admin-backup-mysql</h2>
-
-<p>Performs a MySQL dump of configured databases.</p>
-
-<p><strong>Syntax:</strong> <code>admin-backup-mysql [-v]</code></p>
-
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>-v</td>
-<td>Print verbose output.</td>
-</tr>
-</table>
-
-<p>Configured in <code>/etc/admin-backup-mysql.conf</code> with one line
-per database to backup:</p>
-
-<pre><code>database1 user password
-database2 user password --ignore-table=table1
-</code></pre>
-
-<p>The <code>/backup/&lt;hostname&gt;/mysql/</code> directory is used to
-store the output MySQL dump files (compressed). Backup files are
-kept for 30 days, except the first backup file from each month
-(which is kept indefinitely).</p>
-
-<p>The MySQL backup should be run once per day. More frequent runs
-will overwrite the previous backup.</p>
-
-
-<h2 class="tool">admin-backup-sync</h2>
-
-<p>Performs a remote file sync for configured directories.</p>
-
-<p><strong>Syntax:</strong> <code>admin-backup-sync [-v]</code></p>
-
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>-v</td>
-<td>Print verbose output.</td>
-</tr>
-</table>
-
-<p>Configured in <code>/etc/admin-backup-sync.conf</code> with one line
-for each pair of source and destination directories:</p>
-
-<pre><code>/backup/host01 root@host02:/backup/
-root@host02:/backup/host02 /backup/
-</code></pre>
-
-<p>The file syncronization uses <code>rsync</code> and will update and
-remove files on the receiving side, so be careful to sync the
-correct backup subdirectories.</p>
-
-
-<h2 class="tool">admin-freemem</h2>
-
-<p>Cleans filesystem cache (if possible) to recover memory.</p>
-
-<p><strong>Syntax:</strong> <code>admin-freemem</code></p>
-
-<p>Forces a filesystem sync followed by a write
-to <code>/proc/sys/vm/drop_caches</code>.</p>
-
-
-<h2 class="tool">admin-restart</h2>
-
-<p>Restarts a group of services in a predefined order.</p>
-
-<p><strong>Syntax:</strong> <code>admin-restart [-q] &lt;group&gt;</code></p>
-
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>-q</td>
-<td>Quiet mode. Only prints errors to stderr.</td>
-</tr>
-</table>
-
-<p>Configured in <code>/etc/admin-restart.conf</code> using shell script syntax
-for defining each group with description, start and stop:</p>
-
-<pre><code>group_web="Restart the Nginx and Jetty services"
-
-start_web() {
-    start jetty 10
-    wget --quiet --spider localhost:8080 || fail "jetty not running"
-    start nginx
-}
-
-stop_web() {
-    stop nginx 10 force
-    stop jetty 30 force
-}
-</code></pre>
-
-<p>A number of built-in commands are available to simplify monitoring the
-startup or shutdown of services:</p>
-
-<table>
-<tr>
-<th>Command</th>
-<th>Description</th>
-</tr>
-<tr>
-<td><code>start</code></td>
-<td>Starts a service and optionally waits for the process to start.</td>
-</tr>
-<tr>
-<td><code>stop</code></td>
-<td>Stops a service and optionally waits for the process to quit.</td>
-</tr>
-<tr>
-<td><code>alert</code></td>
-<td>Prints a message to stderr.</td>
-</tr>
-<tr>
-<td><code>fail</code></td>
-<td>Exits and prints a message to stderr.</td>
-</tr>
-<tr>
-<td><code>log</code></td>
-<td>Prints a log message (if not in quiet mode).</td>
-</tr>
-</table>
-
-
-<h2 class="tool">admin-status</h2>
-
-<p>Checks the status of a number of services on the machine.</p>
-
-<p><strong>Syntax:</strong> <code>admin-status</code></p>
-
-<p>Configured in <code>/etc/admin-status.conf</code> with one line
-per service (and PID file):</p>
-
-<pre><code>cron    /var/run/crond.pid
-sshd    /var/run/sshd.pid
-</code></pre>
-
-
-<h2 class="tool">admin-uptodate</h2>
-
-<p>Runs a check to determine if the system requires updates.</p>
-
-<p><strong>Syntax:</strong> <code>admin-uptodate [-s] [-m]</code>  </p>
-
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>-s</td>
-<td>Check only for security updates.</td>
-</tr>
-<tr>
-<td>-m</td>
-<td>Mail root instead of printing results.</td>
-</tr>
-</table>
-
-
-<h2 class="tool">admin-utf8</h2>
-
-<p>Converts files to UTF-8 (from ISO-8859-1) if needed.</p>
-
-<p><strong>Syntax:</strong> <code>admin-utf8 (check|convert) &lt;files or dirs&gt;</code></p>
-
-<p>Use either <code>check</code> to detect file encoding, or <code>convert</code> to
-convert all ISO-8859-1 files.</p>
-
-
-<h2 class="tool">admin-www-logrotate</h2>
-
-<p>Rotates HTTP access log files.</p>
-
-<p><strong>Syntax:</strong> <code>admin-www-logrotate [-v]</code></p>
-
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>-v</td>
-<td>Print verbose output.</td>
-</tr>
-</table>
-
-<p>Configured in <code>/etc/admin-www-logrotate.conf</code> with a number of
-shell variables:</p>
-
-<pre><code># Shell command to release old log files
-COMMAND="/usr/sbin/nginx -s reopen"
-
-# Base directory for access log files
-LOG_DIR=/var/log/www
-
-# Maximum log file age (days)
-LOG_EXPIRES=356
-
-# Statistics directory
-STAT_DIR=/srv/logstats
-</code></pre>
-
-<p>The tool will rename any file matching <code>*.log</code> in the
-<code>LOG_DIR</code> directory hierarchy. Immediately afterwards the server
-command is run to create new log files. Finally the old log files are
-compressed and <code>admin-www-stats</code> is run to process their data.</p>
-
-
-<h2 class="tool">admin-www-stats</h2>
-
-<p>Processes HTTP access log files and generates summary statistics. Output
-can be generated in text and/or JSON format.</p>
-
-<p><strong>Syntax:</strong> <code>admin-www-stats [--json &lt;file&gt;] [--text &lt;file&gt;] &lt;logs&gt;</code></p>
-
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>--json</td>
-<td>Write JSON output to the specified file.</td>
-</tr>
-<tr>
-<td>--text</td>
-<td>Write text output to the specified file.</td>
-</tr>
-<tr>
-<td>&lt;logs&gt;</td>
-<td>Log files to process or <code>-</code> to read from stdin.</td>
-</tr>
-</table>
-
-<p>If no output option is specified, the default is a text report to stdout.
-The log files may be compressed (in bzip2, gzip, lzip or xz format).</p>
-
-<p>The tool attempts to automatically recognize the order of the fields in the
-HTTP access logs. The field order is therefore allowed to vary between files.
-In addition to recognizing the standard log fields, a number of additional
-parameters can be appended to each line. Here is a recommended Nginx format:</p>
-
-<pre><code>log_format custom '$remote_addr - $remote_user [$time_local] "$request" '
-                  '$status $body_bytes_sent "$http_referer" '
-                  '"$http_user_agent" $host cache:$upstream_cache_status '
-                  'time:$request_time backend:$upstream_response_time';
-</code></pre>
-
-<p>This will print log files with entries similar to this edited one (with one
-line per entry):</p>
-
-<pre><code>66.249.73.70 - - [07/Dec/2012:00:05:17 +0000] "GET / HTTP/1.1" 200 3391
-"-" "Mozilla/5.0 ..." www.site.com cache:MISS time:0.451 backend:0.008
-</code></pre>
-
-
-<h2 class="tool">admin-www-webalizer</h2>
-
-<p>Processes HTTP access log files with Webalizer (not automatically installed).
-This tool is scheduled for removal in the future.</p>
-
-<p><strong>Syntax:</strong> <code>admin-www-webalizer [-v]</code></p>
-
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>-v</td>
-<td>Print verbose output.</td>
-</tr>
-</table>
-
-<p>Configured in <code>/etc/admin-www-webalizer.conf</code> with a number of
-shell variables:</p>
-
-<pre><code># Base directory for access log files (with webalizer.conf in subdirs)
-LOG_DIR=/var/log/www
-
-# Base directory for stats output (same subdirs as in LOG_DIR)
-OUTPUT_DIR=/srv/webstats
-
-# Extra Webalizer command-line options
-OPTIONS="-c /etc/webalizer/webalizer.conf"
-</code></pre>
-
-<p>A base <code>webalizer.conf</code> file is placed in <code>/etc</code>
-(or elsewhere) and additional (possibly empty) <code>webalizer.conf</code>
-files are placed in each HTTP access log directory to process (subdir to
-<code>LOG_DIR</code>).</p>
-
-
-<h2 class="tool">admin-zcat</h2>
-
-<p>Utility to output data from any compressed file.</p>
-
-<p><strong>Syntax:</strong> <code>admin-zcat &lt;files&gt;</code></p>
-
-<p>Works similar to <code>zcat</code> (from <code>zutils</code> package), but
-also supports the <code>lzma</code> format properly. File compression is
-detected from file extensions <code>bz2</code>, <code>gz</code>,
-<code>lzma</code> or <code>xz</code>. Other file extensions are handled as
-uncompressed files (with <code>cat</code>).</p>
-
+<h2>Commands</h2>
+
+<ul>
+  <li><a href="admin-backup-files.html">admin-backup-files</a> &ndash;
+      Performs a filesystem backup for configured directories</li>
+  <li><a href="admin-backup-mysql.html">admin-backup-mysql</a> &ndash;
+      Performs a MySQL dump of configured databases</li>
+  <li><a href="admin-backup-sync.html">admin-backup-sync</a> &ndash;
+      Performs a remote file sync for configured directories</li>
+  <li><a href="admin-freemem.html">admin-freemem</a> &ndash;
+      Cleans filesystem cache (if possible) to recover memory</li>
+  <li><a href="admin-restart.html">admin-restart</a> &ndash;
+      Restarts a group of services in a predefined order</li>
+  <li><a href="admin-status.html">admin-status</a> &ndash;
+      Checks the status of a number of services on the machine</li>
+  <li><a href="admin-uptodate.html">admin-uptodate</a> &ndash;
+      Runs a check to determine if the system requires updates</li>
+  <li><a href="admin-utf8.html">admin-utf8</a> &ndash;
+      Converts files to UTF-8 (from ISO-8859-1) if needed</li>
+  <li><a href="admin-www-logrotate.html">admin-www-logrotate</a> &ndash;
+      Rotates HTTP access log files</li>
+  <li><a href="admin-www-stats.html">admin-www-stats</a> &ndash;
+      Processes HTTP log files to generate overview statistics</li>
+  <li><a href="admin-www-webalizer.html">admin-www-webalizer</a> &ndash;
+      Processes HTTP log files with Webalizer</li>
+  <li><a href="admin-zcat.html">admin-zcat</a> &ndash;
+      Utility to output data from any compressed file</li>
+</ul>
 
         </section>
 
