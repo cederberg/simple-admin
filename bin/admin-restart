@@ -21,18 +21,18 @@ set -o pipefail
 
 # Function for logging an error to stderr without exiting
 alert() {
-    echo "ALERT:" $* >&2
+    echo "ALERT:" "$*" >&2
 }
 
 # Function for logging an error to stderr and exiting
 fail() {
-    echo "ERROR:" $* >&2
+    echo "ERROR:" "$*" >&2
     exit 1
 }
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: $*
+    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$*"
 }
 
 # Function for printing command-line usage info
