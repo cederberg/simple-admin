@@ -32,7 +32,7 @@ fail() {
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$*"
+    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$*" || true
 }
 
 # Load config to stdin
