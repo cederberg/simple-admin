@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-#no warnings "misc";
 use Geo::IPfree;
 use JSON::XS;
 
@@ -300,26 +299,32 @@ sub process_line {
         $stat_host_time{$host} += $resptime;
         $stat_host_download{$host} += ($bytes >> 10) + 1;
     } else {
-        if ($respcode eq '403' or $respcode eq '405') {
+        if ($respcode eq '400') {
+            $stat_errortype{$respcode.' bad request syntax'}++;
+        } elsif ($respcode eq '403' or $respcode eq '405') {
             $stat_errortype{$respcode.' bot probe (WebDAV)'}++;
-#        } elsif ($respcode eq '404' and $referer eq '-') {
-#            $stat_errortype{$respcode.' bot, invalid url (no referer)'}++;
-#        } elsif ($respcode eq '444') {
-#            $stat_errortype{$respcode.' <blank host>'}++;
+        } elsif ($respcode eq '408') {
+            $stat_errortype{$respcode.' timeout waiting for request'}++;
         } elsif ($respcode eq '499') {
             $stat_errortype{$respcode.' client closed connection'}++;
+        } elsif ($host eq '<blank>') {
+            $stat_errortype{$respcode.' <blank host>'}++;
+        } elsif ($url =~ /cgi/i) {
+            $stat_errortype{$respcode.' bot probe (cgi-bin)'}++;
         } elsif ($url =~ /phpMyAdmin/i) {
             $stat_errortype{$respcode.' bot probe (phpMyAdmin)'}++;
         } elsif ($url =~ /\.php/) {
             $stat_errortype{$respcode.' bot probe (php)'}++;
-#        } elsif ($url =~ /\+uri/) {
-#            $stat_errortype{$respcode.' bot, invalid url (+uri)'}++;
-#        } elsif ($url =~ /\/null$/) {
-#            $stat_errortype{$respcode.' ad invalid (null)'}++;
-#        } elsif ($url =~ /data:image\/png;base64/) {
-#            $stat_errortype{$respcode.' ad invalid (base64 image)'}++;
+        } elsif ($url =~ /\.(pl|perl)/) {
+            $stat_errortype{$respcode.' bot probe (perl)'}++;
+        } elsif ($url eq '/robots.txt') {
+            $stat_errortype{$respcode.' missing /robots.txt'}++;
         } elsif ($url eq '/favicon.ico') {
-            $stat_errortype{$respcode.' missing favicon.ico'}++;
+            $stat_errortype{$respcode.' missing /favicon.ico'}++;
+	} elsif ($url =~ /^\/apple-touch-icon.*\.png$/) {
+            $stat_errortype{$respcode.' missing /apple-touch-icon.png'}++;
+        } elsif ($url eq '/sitemap.xml') {
+            $stat_errortype{$respcode.' missing /sitemap.xml'}++;
         } else {
             $stat_errortype{$respcode.' '.$host.$url}++;
         }
