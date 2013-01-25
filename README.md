@@ -91,6 +91,13 @@ The MySQL backup should be run once per day. More frequent runs
 will overwrite the previous backup.
 
 
+admin-backup-status
+-------------------
+Prints backup status information.
+
+**Syntax:** `admin-backup-status`
+
+
 admin-backup-sync
 -----------------
 Performs a remote file sync for configured directories.

@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Prints backup status information.
+#
+# Syntax: admin-backup-status
+#
+
+echo Backups:
+du -h --max-depth=1 --time /backup
+
+echo
+df -h /backup
