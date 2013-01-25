@@ -65,25 +65,32 @@ procstatus() {
     sed -e 's/:\s*/=/' -e 's/ kB//' -e 's/[^A-Za-z0-9=]//g' /proc/$PID/status > $TMPFILE
     . $TMPFILE
     rm $TMPFILE
-    RSS=`echo $VmRSS | awk '{OFMT="%.1f" ; print $1 / 1024}'`
-    SWAP=`echo $VmSwap | awk '{OFMT="%.0f" ; print $1 / 1024}'`
+    RSS=`echo ${VmRSS:-0} | awk '{OFMT="%.1f" ; print $1 / 1024}'`
+    SWAP=`echo ${VmSwap:-0} | awk '{OFMT="%.0f" ; print $1 / 1024}'`
     printf "pid: %5s,  rss: %5s MB,  swap: %3s MB" $PID $RSS $SWAP
 }
 
 # Function for printing service status
 servicestatus() {
     NAME=$1
-    PIDFILE=$2
+    PIDFILE=${2:--}
+    MATCH=${3:-${NAME}}
     STATUS=99
     if [ -f "$PIDFILE" ] ; then
         PID=`cat $PIDFILE | awk '{print $1}'`
-        if ps -p $PID > /dev/null ; then
+        if ps -p ${PID:-0} > /dev/null ; then
+            STATUS=0
+            DETAILS=`procstatus $PID`
+        fi
+    elif [ "$PIDFILE" == "-" ] ; then
+        PID=`ps --ppid 1 -o pid,args | grep $MATCH | awk '{print $1}'`
+        if [ ${PID:-0} -ne 0 ] ; then
             STATUS=0
             DETAILS=`procstatus $PID`
         fi
     fi
     if [ $STATUS -ne 0 ] ; then
-        if ps -e | grep $NAME > /dev/null ; then
+        if ps --ppid 1 -o pid,args | grep $MATCH > /dev/null ; then
             STATUS=1
             DETAILS="invalid PID file $PIDFILE, process exists"
         else
@@ -118,8 +125,8 @@ storagestatus
 
 # Checking all services
 RETVAL=0
-while read NAME PIDFILE ; do
-    if ! servicestatus $NAME $PIDFILE ; then
+while read NAME PIDFILE MATCH ; do
+    if ! servicestatus $NAME $PIDFILE $MATCH; then
         RETVAL=`expr $RETVAL + 1`
     fi
 done
