@@ -2,8 +2,12 @@
 
 use strict;
 use warnings;
+use File::Basename;
 use Geo::IPfree;
 use JSON::XS;
+use Text::Glob;
+$Text::Glob::strict_leading_dot = undef;
+$Text::Glob::strict_wildcard_slash = undef;
 
 # HTTP request log parser
 {
@@ -116,6 +120,7 @@ my $total = 0;
 my $totaltime = 0.0;
 my $totalkb = 1;
 my $totalbytes = 0;
+my @conf_errors = ();
 my %timeofday = ();
 my %prcstime = ();
 my %stat_top_count = ();
@@ -251,6 +256,30 @@ sub normalize_browser_platform {
     }
 }
 
+# Normalize error message
+sub normalize_error_msg {
+    my ($respcode, $host, $url) = @_;
+    if ($respcode eq '400') {
+        return 'bad request syntax';
+    } elsif ($respcode eq '403' or $respcode eq '405') {
+        return 'bot probe (WebDAV)';
+    } elsif ($respcode eq '408') {
+        return 'timeout waiting for request';
+    } elsif ($respcode eq '499') {
+        return 'client closed connection';
+    } elsif ($host eq '<blank>') {
+        return '<blank host>';
+    }
+    for (my $i = 0; $i < $#conf_errors; $i++) {
+        my $re = $conf_errors[$i][0];
+        my $msg = $conf_errors[$i][1];
+        if ($url =~ /$re/i) {
+            return $msg;
+        }
+    }
+    return $host.$url;
+}
+
 # Processes an HTTP log file line
 sub process_line {
     my ($line) = @_;
@@ -299,35 +328,7 @@ sub process_line {
         $stat_host_time{$host} += $resptime;
         $stat_host_download{$host} += ($bytes >> 10) + 1;
     } else {
-        if ($respcode eq '400') {
-            $stat_errortype{$respcode.' bad request syntax'}++;
-        } elsif ($respcode eq '403' or $respcode eq '405') {
-            $stat_errortype{$respcode.' bot probe (WebDAV)'}++;
-        } elsif ($respcode eq '408') {
-            $stat_errortype{$respcode.' timeout waiting for request'}++;
-        } elsif ($respcode eq '499') {
-            $stat_errortype{$respcode.' client closed connection'}++;
-        } elsif ($host eq '<blank>') {
-            $stat_errortype{$respcode.' <blank host>'}++;
-        } elsif ($url =~ /cgi/i) {
-            $stat_errortype{$respcode.' bot probe (cgi-bin)'}++;
-        } elsif ($url =~ /phpMyAdmin/i) {
-            $stat_errortype{$respcode.' bot probe (phpMyAdmin)'}++;
-        } elsif ($url =~ /\.php/) {
-            $stat_errortype{$respcode.' bot probe (php)'}++;
-        } elsif ($url =~ /\.(pl|perl)/) {
-            $stat_errortype{$respcode.' bot probe (perl)'}++;
-        } elsif ($url eq '/robots.txt') {
-            $stat_errortype{$respcode.' missing /robots.txt'}++;
-        } elsif ($url eq '/favicon.ico') {
-            $stat_errortype{$respcode.' missing /favicon.ico'}++;
-	} elsif ($url =~ /^\/apple-touch-icon.*\.png$/) {
-            $stat_errortype{$respcode.' missing /apple-touch-icon.png'}++;
-        } elsif ($url eq '/sitemap.xml') {
-            $stat_errortype{$respcode.' missing /sitemap.xml'}++;
-        } else {
-            $stat_errortype{$respcode.' '.$host.$url}++;
-        }
+        $stat_errortype{"$respcode ".normalize_error_msg($respcode, $host, $url)}++;
     }
 }
 
@@ -354,6 +355,31 @@ sub process_file {
         process_line($_);
     }
     close($fh);
+}
+
+# Processes the config file
+sub process_config {
+    my ($filename) = @_;
+    my $fh;
+    open($fh, "<$filename") or die $!;
+    while (<$fh>) {
+        s/^\s*(.*?)\s*$/$1/;
+        my ($glob, $msg) = split(/\s+/, $_, 2);
+        my $re = Text::Glob::glob_to_regex($glob);
+        my @arr = ($re, $msg);
+        push(@conf_errors, \@arr);
+    }
+    close($fh);
+}
+
+# Read config file
+my $config_file = "/etc/admin-www-stats.conf";
+if (-f $config_file) {
+    process_config($config_file);
+} elsif (-f dirname($0) . "/..$config_file") {
+    process_config(dirname($0) . "/..$config_file");
+} else {
+    die "ERROR: missing config file $config_file";
 }
 
 # Process command-line arguments
