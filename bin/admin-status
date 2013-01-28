@@ -45,7 +45,7 @@ memstatus() {
 
 # Function for printing storage status
 storagestatus() {
-    df -x tmpfs -x devtmpfs -k | tail -n +2 | while read DEVICE TOTALK USEDK FREEK USEDPERCENT MOUNT ; do
+    df -k / | tail -n +2 | while read DEVICE TOTALK USEDK FREEK USEDPERCENT MOUNT ; do
         TOTAL=`echo $TOTALK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
         USED=`echo $USEDK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
         FREE=`echo $FREEK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
