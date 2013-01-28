@@ -94,7 +94,7 @@ rm -f $BACKUP_LATEST_DIR
 cd $BACKUP_BASE_DIR ; ln -s `basename $BACKUP_CURRENT_DIR` `basename $BACKUP_LATEST_DIR`
 
 # Remove outdated backup dirs
-find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +2 -exec rm -rf {} \;
+find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +1 -exec rm -rf {} \;
 find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {} \;
 
 # Finished backup
