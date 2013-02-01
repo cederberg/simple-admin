@@ -14,7 +14,7 @@
 # Configuration variables
 CONFIG=/etc/admin-backup-mysql.conf
 LOCALDIR=`dirname $0`/..
-HOST=`hostname --fqdn`
+HOST=`hostname`
 DATE=`date '+%Y-%m-%d'`
 DUMP_DIR=/backup/$HOST/mysql
 OPTIONS="--opt --quote-names --skip-add-locks --skip-lock-tables"

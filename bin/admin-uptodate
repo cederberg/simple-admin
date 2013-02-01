@@ -10,7 +10,7 @@
 #
 
 # Configuration parameters
-HOST=`hostname --fqdn`
+HOST=`hostname`
 SENDMAIL=/usr/sbin/sendmail
 SECURITY=false
 MAIL=false
