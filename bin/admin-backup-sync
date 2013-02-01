@@ -55,10 +55,10 @@ fi
 
 # Perform synchronization
 log "init sync from $HOST" 
-while read SRC DST ; do
+while read SRC DST EXTRAS ; do
     log "syncing from: $SRC"
     log "          to: $DST"
-    rsync $OPTIONS $SRC $DST
+    rsync $OPTIONS $EXTRAS $SRC $DST
 done
 /usr/local/bin/admin-freemem
 log "done sync from $HOST"
