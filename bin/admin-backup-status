@@ -10,3 +10,5 @@ du -h --max-depth=1 --time /backup
 
 echo
 df -h /backup
+
+/usr/local/bin/admin-freemem
