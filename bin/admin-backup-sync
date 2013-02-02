@@ -59,6 +59,8 @@ while read SRC DST EXTRAS ; do
     log "syncing from: $SRC"
     log "          to: $DST"
     rsync $OPTIONS $EXTRAS $SRC $DST
+    /usr/local/bin/admin-freemem
+    log "sleeping 10 secs..."
+    sleep 10
 done
-/usr/local/bin/admin-freemem
 log "done sync from $HOST"
