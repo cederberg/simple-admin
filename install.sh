@@ -38,6 +38,11 @@ install bin/admin-www-stats /usr/local/bin/
 install bin/admin-www-webalizer /usr/local/bin/
 install bin/admin-zcat /usr/local/bin/
 
+# Install man pages
+echo "Installing man pages..."
+mkdir -p /usr/local/share/man/man1
+cp man/man1/* /usr/local/share/man/man1/
+
 # Finished
 echo "...done"
 echo "Note: Config files must be installed manually."
