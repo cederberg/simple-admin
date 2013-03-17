@@ -1,0 +1,25 @@
+.TH "admin\-freemem" "1" "March 2013" "Simple-Admin 1\&.1" "Simple-Admin 1\&.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-freemem \- Cleans filesystem cache (if possible) to recover memory\&.
+.SH "SYNOPSIS"
+.sp
+.nf
+.B admin-freemem
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Forces a filesystem sync followed by writing
+.B 1
+to the
+.B /proc/sys/vm/drop_caches
+file. This results in the Linux kernel cleaning its filesystem caches and
+making that memory available for other uses. This operation may degrade
+performance for some applications.
+
