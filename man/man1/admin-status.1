@@ -19,7 +19,7 @@
 .\" * MAIN CONTENT STARTS HERE *
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin-status \- Checks the status of a number of services on the machine
+admin-status \- Checks and prints the machine and process status\&.
 .SH "SYNOPSIS"
 .sp
 .nf
@@ -47,10 +47,10 @@ utility.
 .sp
 .SH "CONFIGURATION"
 .sp
-The services to watch are configured in
+The processes to check are configured in
 .B /etc/admin-status.conf
-with one line per service\&. No comment or blank lines are allowed\&. Each line contains the
-service name, pid file and optional text to match the command with:
+with one line per process\&. No comment or blank lines are allowed\&. Each line contains the
+process or service name, pid file and optional command-line match:
 .sp
 .nf
     cron    /var/run/crond.pid
@@ -58,9 +58,11 @@ service name, pid file and optional text to match the command with:
     local   -       local-command
 .fi
 .sp
-The pid file may be specified as
+If
 .B -
-in which case process lookup is made by name only (using the match if available)\&.
+is specified as the pid file, the process lookup is made by name (optionally using the
+command-line match)\&. Process lookup is also made by name if the pid file didn't exist
+or didn't match a running process\&.
 .sp
 .SH "FILES"
 .sp
