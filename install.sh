@@ -42,6 +42,7 @@ install bin/admin-zcat /usr/local/bin/
 echo "Installing man pages..."
 mkdir -p /usr/local/share/man/man1
 cp man/man1/* /usr/local/share/man/man1/
+gzip /usr/local/share/man/man1/admin-*.1
 
 # Finished
 echo "...done"
