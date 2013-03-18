@@ -11,12 +11,38 @@
 # Configuration variables
 CONFIG=/etc/admin-status.conf
 LOCALDIR=`dirname $0`/..
+SHORT="false"
 
 # Set caution flags
 set -o nounset
 set -o errtrace
 set -o errexit
 set -o pipefail
+
+# Setup color codes
+case $TERM in
+    *color)
+        COLOR_OFF=`echo -en '\033[0m'`
+        COLOR_OK=`echo -en '\033[32m'`
+        COLOR_ERR=`echo -en '\033[1;31m'`
+        ;;
+    *)
+        COLOR_OFF=''
+        COLOR_OK=''
+        COLOR_ERR=''
+        ;;
+esac
+
+# Function for logging a warning to stderr without exiting
+warn() {
+    echo "${COLOR_ERR}WARNING:${COLOR_OFF}" "$*" >&2
+}
+
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "${COLOR_ERR}ERROR:${COLOR_OFF}" "$*" >&2
+    exit 1
+}
 
 # Function for printing CPU load average
 cpustatus() {
@@ -118,11 +144,13 @@ servicestatus() {
         fi
     fi
     if [ $STATUS -eq 0 ] ; then
+        STATUSCOLOR=""
         STATUSNAME="OK"
     else
+        STATUSCOLOR="$COLOR_ERR"
         STATUSNAME="ERROR"
     fi
-    FMT="* %-9s %-22s -- %s\n"
+    FMT="${STATUSCOLOR}* %-9s %-22s${COLOR_OFF} -- %s\n"
     printf "$FMT" "$NAME:" $STATUSNAME "$DETAILS"
     return $STATUS
 }
@@ -133,8 +161,13 @@ if [ -f $CONFIG ] ; then
 elif [ -f $LOCALDIR/$CONFIG ] ; then
     exec < $LOCALDIR/$CONFIG
 else
-    echo "ERROR: Missing config file $CONFIG"
-    exit 1
+    fail "Missing config file $CONFIG"
+fi
+
+# Parse command-line arguments
+if [ "${1:-}" == "-s" ] ; then
+    shift
+    SHORT="true"
 fi
 
 # System statistics
@@ -144,9 +177,15 @@ storagestatus
 
 # Checking all services
 RETVAL=0
-while read NAME PIDFILE MATCH ; do
+while [ $SHORT = "false" ] && read NAME PIDFILE MATCH ; do
     if ! servicestatus $NAME $PIDFILE $MATCH; then
         RETVAL=`expr $RETVAL + 1`
     fi
 done
+
+# Checking for admin-restart
+if ps -o pid,args | egrep [a]dmin-restart > /dev/null ; then
+    warn "admin-restart is currently running"
+fi
+
 exit $RETVAL
