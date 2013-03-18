@@ -184,8 +184,8 @@ while [ $SHORT = "false" ] && read NAME PIDFILE MATCH ; do
 done
 
 # Checking for admin-restart
-if ps -o pid,args | egrep [a]dmin-restart > /dev/null ; then
-    warn "admin-restart is currently running"
+if ps -eo pid,args | egrep [a]dmin-restart > /dev/null ; then
+    warn "admin-restart seems to be running"
 fi
 
 exit $RETVAL
