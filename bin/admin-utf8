@@ -38,7 +38,7 @@ shift
 DIRS=$*
 
 # Check or convert all files
-FILES=`find $DIRS -type f -not -path "*.svn*"`
+FILES=`find $DIRS -type f -not -path "*/.*"`
 for FILE in $FILES ; do
     if [ $MODE == "convert" ] ; then
         convert_file $FILE
