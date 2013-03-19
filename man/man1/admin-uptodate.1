@@ -1,0 +1,38 @@
+.TH "admin-uptodate" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-uptodate -- checks if the system requires (security) updates
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBadmin-uptodate\fR [-\fBs\fR] [-\fBm\fR]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Synchronizes the package index with \fBapt-get update\fR and then runs a
+simulated check for updates and prints the results. Can also filter the updates
+for security-related issues.
+
+If no updates are available, no output is printed.
+.sp
+.SH "OPTIONS"
+.sp
+-\fBs\fR
+.RS 4
+Checks only for security updates.
+.RE
+
+-\fBm\fR
+.RS 4
+E-mail the output to \fBroot@localhost\fR instead of the standard output.
+.RE
+.sp
+.SH "SEE ALSO"
+.sp
+\fBapt-get\fR(8)

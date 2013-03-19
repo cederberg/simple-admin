@@ -1,0 +1,31 @@
+.TH "admin-utf8" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-utf8 -- converts files to UTF-8 (from ISO-8859-1) if needed
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBadmin-utf8 check\fR \fIfile\fR ...
+\fBadmin-utf8 convert\fR \fIfile\fR ...
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+The \fIfile\fR arguments may be either files or directories. All directories
+will be searched recursively while ignoring any hidden files (\fB.*\fR).
+
+The \fBcheck\fR command is used to detect text file encoding of text files.
+The results per file are printed to the standard output.
+
+The \fBconvert\fR command is used to convert all text files in the ISO-8859-1
+encoding to UTF-8. Information about converted files are printed to the
+standard output.
+.sp
+.SH "SEE ALSO"
+.sp
+\fBfile\fR(1), \fBiconv\fR(1)
