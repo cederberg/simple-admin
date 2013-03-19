@@ -1,0 +1,41 @@
+.TH "admin-backup-status" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-backup-status -- prints info for the backup sync status per machine
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBadmin-backup-status\fR
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Prints disk usage and disk size information for the \fB/backup\fR
+directory. This can be very slow, since calculating disk usage may have to
+check the size of a very large number of files. An example output:
+.sp
+.nf
+    Backups:
+    168M    2013-03-19 01:13    /backup/host06
+    5.4G    2013-03-19 01:13    /backup/host04
+    5.5G    2013-03-19 01:13    /backup
+
+    Filesystem      Size  Used Avail Use% Mounted on
+    /dev/xvda        24G  7.2G   17G  31% /
+.fi
+.sp
+.SH "FILES"
+.sp
+.B /backup
+.RS 4
+Backup directory with subdirectories per hostname.
+.RE
+.sp
+.SH "SEE ALSO"
+.sp
+\fBdu\fR(1), \fBdf\fR(1)
