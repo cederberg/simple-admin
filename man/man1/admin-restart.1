@@ -1,0 +1,104 @@
+.TH "admin-restart" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-restart -- restarts a group of services in a predefined order
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBadmin-restart\fR [-\fBq\fR] \fIgroupname\fR
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Restarts a \fIgroupname\fR of services in a predefined order. Optionally also
+checks that processes are created or disappear as expected. An example output:
+.sp
+.nf
+    2013-03-19 11:20:47: stopping service nginx (pid: 3903)...
+    2013-03-19 11:20:47: service nginx (pid: 3903) stopped
+    2013-03-19 11:20:47: stopping service jetty (pid: 3565)...
+    2013-03-19 11:20:51: service jetty (pid: 3565) stopped
+    2013-03-19 11:20:51: starting service jetty...
+    2013-03-19 11:21:07: service jetty (pid: 10938) started
+    2013-03-19 11:21:07: starting service nginx...
+    2013-03-19 11:21:07: service nginx (pid: 10977) started
+.fi
+.sp
+.SH "OPTIONS"
+.sp
+-\fBq\fR
+.RS 4
+Quiet mode. Only prints errors to the standard error.
+.RE
+.sp
+.SH "CONFIGURATION"
+.sp
+The \fIgroupname\fR names and corresponding start and stop commands are configured
+in \fB/etc/admin-restart.conf\fR using shell script syntax:
+.sp
+.nf
+    group_web="Restart the Nginx and Jetty services"
+
+    start_web() {
+        start jetty 10
+        wget --quiet --spider localhost:8080 || fail "jetty not running"
+        start nginx
+    }
+
+    stop_web() {
+        stop nginx 10 force
+        stop jetty 30 force
+    }
+.fi
+.sp
+Each service group must define the shell variables \fBgroup_\fIgroupname\fR,
+\fBstart_\fIgroupname\fR and \fBstop_\fIgroupname\fR containing a description
+and the start and stop commands. A number of built-in helper commands are
+available to simplify the startup or shutdown of services:
+
+.RS 4
+.B start \fIservice\fR [\fIwait\fR]
+.RS 4
+Starts a service (with \fBservice \fIservice\fB start\fR) and optionally waits
+\fIwait\fR seconds for the process to start.
+.RE
+
+.B stop \fIservice\fR [\fIwait\fR] [\fBforce\fR]
+.RS 4
+Stops a service (with \fBservice \fIservice\fB stop\fR) and optionally waits
+\fIwait\fR seconds for the process to terminate. If \fBforce\fR is specified,
+the process will be signalled with \fBTERM\fR and \fBKILL\fR if it doesn't
+exit gracefully.
+.RE
+
+.B warn \fImessage\fR
+.RS 4
+Prints a message to the standard error.
+.RE
+
+.B fail \fImessage\fR
+.RS 4
+Prints a message to the standard error and exits with an error code.
+.RE
+
+.B log \fImessage\fR
+.RS 4
+Prints a log message to the standard output (if not in quiet mode).
+.RE
+.RE
+.sp
+.SH "FILES"
+.sp
+.B /etc/admin-restart.conf
+.RS 4
+Service group configuration file in shell syntax.
+.RE
+.sp
+.SH "SEE ALSO"
+.sp
+\fBservice\fR(8)
