@@ -1,0 +1,57 @@
+.TH "admin-www-stats" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-www-stats -- generates HTTP access log summary statistics
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBadmin-www-stats\fR [\fB--json \fIfile\fR] [\fB--text \fIfile\fR] \fIlogs\fR
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Processes HTTP access log files and generates summary statistics. Output can
+be generated in text and/or JSON format. If no output option is specified, the
+default is a text report to the standard output.
+
+The \fBadmin-www-stats\fR tool automatically recognizes the fields in the
+\fIlogs\fR. The field order is therefore allowed to vary between files. The
+\fIlogs\fR may be compressed (using \fB.bz2\fR, \fB.gz\fR, \fB.lzma\fR or
+\fB.xz\fR file extensions) or specified as \fB-\fR to read from standard input.
+.sp
+.SH "OPTIONS"
+.sp
+\fB--json \fIfile\fR
+.RS 4
+Write JSON output to the specified \fIfile\fR.
+.RE
+
+\fB--text \fIfile\fR
+.RS 4
+Write text output to the specified \fIfile\fR.
+.RE
+.sp
+.SH "CONFIGURATION"
+.sp
+In addition to the standard HTTP log fields, a number of additional parameters
+are recognized. Here is a recommended Nginx format:
+
+.nf
+    log_format custom '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" $host cache:$upstream_cache_status '
+                      'time:$request_time backend:$upstream_response_time';
+.fi
+
+This will print log files with entries similar to this edited one (with one
+line per entry):
+
+.nf
+    66.249.73.70 - - [07/Dec/2012:00:05:17 +0000] "GET / HTTP/1.1" 200 3391
+    "-" "Mozilla/5.0 ..." www.site.com cache:MISS time:0.451 backend:0.008
+.fi
