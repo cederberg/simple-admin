@@ -1,4 +1,4 @@
-.TH "admin\-freemem" "1" "March 2013" "Simple-Admin 1\&.1" "Simple-Admin 1\&.1"
+.TH "admin-freemem" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -6,20 +6,23 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin-freemem \- Cleans filesystem cache (if possible) to recover memory\&.
+admin-freemem -- cleans file system cache (if possible) to recover memory
 .SH "SYNOPSIS"
 .sp
 .nf
-.B admin-freemem
+\fBadmin-freemem\fR
 .fi
 .sp
 .SH "DESCRIPTION"
 .sp
-Forces a filesystem sync followed by writing
-.B 1
-to the
-.B /proc/sys/vm/drop_caches
-file. This results in the Linux kernel cleaning its filesystem caches and
-making that memory available for other uses. This operation may degrade
-performance for some applications.
+Forces a file system sync followed by writing \fB1\fR to the
+\fB/proc/sys/vm/drop_caches\fR file. This results in the Linux kernel cleaning
+its file system caches and making that memory available for other uses.
 
+Using \fBadmin-freemem\fR may degrade performance for some applications, since
+files must be re-read from the file system. Clearing the file system cache may
+also be beneficial if recent large file reads will not be re-used.
+.sp
+.SH "SEE ALSO"
+.sp
+\fBproc\fR(5)
