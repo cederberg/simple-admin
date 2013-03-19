@@ -1,0 +1,49 @@
+.TH "admin-backup-sync" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-backup-sync -- performs a remote file sync for configured directories
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBadmin-backup-sync\fR [-\fBv\fR]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Syncronizes one or more directories using \fBrsync\fR. This command will set
+the appropriate flags to update and remove files on the receiving side, so be
+careful to sync the correct directories (see \fBrsync\fR).
+.sp
+.SH "OPTIONS"
+.sp
+-\fBv\fR
+.RS 4
+Print verbose output.
+.RE
+.sp
+.SH "CONFIGURATION"
+.sp
+The syncronization is configured in \fB/etc/admin-backup-sync.conf\fR with one
+line for each pair of directories. No comment or blank lines are allowed. Each
+line contains the source dir, destination dir and optional command-line
+switches to \fBrsync\fR:
+.sp
+.nf
+    /backup/host01 root@host02:/backup/
+    root@host02:/backup/host02 /backup/ --bwlimit=10
+.fi
+.sp
+.SH "FILES"
+.sp
+.B /etc/admin-backup-sync.conf
+.RS 4
+Configuration file for the directory synchronization.
+.sp
+.SH "SEE ALSO"
+.sp
+\fBrsync\fR(1)
