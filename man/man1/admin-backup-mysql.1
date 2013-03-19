@@ -1,0 +1,53 @@
+.TH "admin-backup-mysql" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-backup-mysql -- performs a MySQL backup of configured databases
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBadmin-backup-mysql\fR [-\fBv\fR]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Performs a MySQL backup with \fBmysqldump\fR of the databases listed in
+\fB/etc/admin-backup-mysql.conf\fR. The \fB/backup/\fIhostname\fB/mysql/\fR
+directory is used to store the output MySQL backup SQL files (compressed with
+\fBlzma\fR).
+
+Backup files are stored for 30 days, except the files from the 1st each month
+(which are kept indefinitely). The MySQL backup should be run once per
+day. More frequent runs will overwrite previous backups.
+.sp
+.SH "OPTIONS"
+.sp
+-\fBv\fR
+.RS 4
+Print verbose output.
+.RE
+.sp
+.SH "CONFIGURATION"
+.sp
+The backup is configured in \fB/etc/admin-backup-mysql.conf\fR with one line
+per database. No comment or blank lines are allowed. Each line contains the
+database, user, password and optional command-line switches:
+.sp
+.nf
+    database1 user password
+    database2 user password --ignore-table=table1
+.fi
+.sp
+.SH "FILES"
+.sp
+.B /etc/admin-backup-mysql.conf
+.RS 4
+Backup configuration file with one line per database.
+.sp
+.SH "SEE ALSO"
+.sp
+\fBmysqldump\fR(1)
