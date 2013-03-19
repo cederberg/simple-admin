@@ -35,7 +35,6 @@ install --mode=0744 bin/admin-uptodate /usr/local/bin/
 install bin/admin-utf8 /usr/local/bin/
 install --mode=0744 bin/admin-www-logrotate /usr/local/bin/
 install bin/admin-www-stats /usr/local/bin/
-install bin/admin-www-webalizer /usr/local/bin/
 install bin/admin-zcat /usr/local/bin/
 
 # Install man pages
