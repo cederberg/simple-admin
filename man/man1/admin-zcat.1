@@ -1,0 +1,29 @@
+.TH "admin-zcat" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+admin-zcat -- concatenates and prints compressed files
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBadmin-zcat\fR \fIfile\fR ...
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Reads \fIfile\fR and outputs the uncompressed contents to the standard
+output. If multiple \fIfile\fR arguments are present, they are processed in
+command-line order.
+
+Files with the extensions \fB.bz2\fR, \fB.gz\fR, \fB.lzma\fR or \fB.xz\fR are
+uncompressed with the corresponding utility. Other files are handled as
+uncompressed files (with \fBcat\fR). This is similar to \fBzcat\fR (from the
+\fBzutils\fR package), but supports the \fB.lzma\fR format properly.
+.sp
+.SH "SEE ALSO"
+.sp
+\fBcat\fR(1), \fBbzcat\fR(1), \fBlzcat\fR(1), \fBxzcat\fR(1), \fBzcat\fR(1)
