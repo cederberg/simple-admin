@@ -1,4 +1,4 @@
-.TH "admin\-status" "1" "March 2013" "Simple\-Admin 1\&.1" "Simple\-Admin 1\&.1"
+.TH "admin-status" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -6,62 +6,57 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin\-status \- Checks and prints the machine and process status\&.
+admin-status -- checks and prints the machine and process status
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin\-status\fR [\-\fBs\fR]
+\fBadmin-status\fR [-\fBs\fR]
 .fi
 .sp
 .SH "DESCRIPTION"
 .sp
-Prints a summary of the most important machine and process metrics\&. Processes
-are checked for existance only, not probed in any other way\&. An example output:
+Prints a summary of the most important machine and process metrics. Processes
+are checked for existance only, not probed in any other way. An example output:
 .sp
 .nf
-    loadavg:    0.00, 0.01, 0.05       \-\- 4 processors
-    memory:     298 MB (60.1%) free    \-\- 108 rss, 90 cache, 9 swap, 496 total (MB)
-    storage:    16.3 GB (69.4%) free   \-\- 7.2 GB used, 23.6 GB total on /dev/xvda
-    * cron:     OK                     \-\- pid:  2223,  rss:   0.8 MB,  swap:   0 MB
-    * ntp:      OK                     \-\- pid:  2659,  rss:   1.8 MB,  swap:   0 MB
+    loadavg:    0.00, 0.01, 0.05       -- 4 processors
+    memory:     298 MB (60.1%) free    -- 108 rss, 90 cache, 9 swap, 496 total (MB)
+    storage:    16.3 GB (69.4%) free   -- 7.2 GB used, 23.6 GB total on /dev/xvda
+    * cron:     OK                     -- pid:  2223,  rss:   0.8 MB,  swap:   0 MB
+    * ntp:      OK                     -- pid:  2659,  rss:   1.8 MB,  swap:   0 MB
 .fi
 .sp
-Information is read from the
-.B /proc
-filesystem or via the
-.B ps
+Information is read from the \fB/proc\fR filesystem or via the \fBps\fR
 utility.
 .sp
 .SH "OPTIONS"
 .sp
-.PP
-\-\fBs\fR
+-\fBs\fR
 .RS 4
-Prints a short summary without listing process status\&.
+Prints a short summary without listing process status.
 .sp
 .SH "CONFIGURATION"
 .sp
-The processes to check are configured in
-.B /etc/admin\-status.conf
-with one line per process\&. No comment or blank lines are allowed\&. Each line contains the
-process or service name, pid file and optional command\-line match:
+The processes to check are configured in \fB/etc/admin-status.conf\fR with one
+line per process. No comment or blank lines are allowed. Each line contains the
+process or service name, pid file and optional command-line match:
 .sp
 .nf
     cron    /var/run/crond.pid
     sshd    /var/run/sshd.pid
-    local   \-       local\-command
+    local   -       local-command
 .fi
 .sp
-If
-.B \-
-is specified as the pid file, the process lookup is made by name (optionally using the
-command\-line match)\&. Process lookup is also made by name if the pid file didn't exist
-or didn't match a running process\&.
+If \fB-\fR is specified as the pid file, the process lookup is made by name
+(optionally using the command-line match). Process lookup is also made by name
+if the pid file didn't exist or didn't match a running process.
 .sp
 .SH "FILES"
 .sp
-.PP
-.B /etc/admin\-status.conf
+.B /etc/admin-status.conf
 .RS 4
-Service configuration file with one line per service\&.
-
+Service configuration file with one line per service.
+.sp
+.SH "SEE ALSO"
+.sp
+\fBdf\fR(1), \fBps\fR(1), \fBpstree\fR(1), \fBproc\fR(5), \fBpidof\fR(8)
