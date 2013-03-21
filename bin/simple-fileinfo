@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+#
+# Prints information about a command or a file.
+#
+# Syntax: simple-fileinfo <file>
+#
+
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
+
+# Function for printing command-line usage info
+usage() {
+    echo "Prints information about a command or a file."
+    echo
+    echo "Syntax: simple-fileinfo <file>"
+    exit 1
+}
+
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "ERROR:" "$*" >&2
+    exit 1
+}
+
+# Parse command-line arguments
+if [ ! $# -eq 1 ] ; then
+    usage
+fi
+FILE=$1
+
+# Locate file & follow symlinks
+if [ -d "$FILE" ] ; then
+    cd $FILE
+    FILE=`pwd`
+elif [ -e "$FILE" ] ; then
+    cd `dirname $FILE`
+    FILE=`pwd`/`basename $FILE`
+else
+    NEXT=`which "$FILE"` || fail "no such file or command: $FILE"
+    FILE=$NEXT
+fi
+while NEXT=`readlink $FILE` ; do
+    echo "$FILE -->"
+    FILE=$NEXT
+done
+printf "%s:\n\n" "$FILE"
+
+# Print file information
+[ -e "$FILE" ] || fail "file not found: $FILE"
+stat --format "%A %h %U %G %s %y %F" $FILE | sed -e "s/\.00*\( +0000\)\?//"
+if [ ! -d $FILE ] ; then
+    echo
+    md5sum $FILE | sed -e "s/ .*//" -e "s/^/MD5:    /"
+    sha256sum $FILE | sed -e "s/ .*//" -e "s/^/SHA256: /"
+    echo
+    file --brief $FILE
+fi
