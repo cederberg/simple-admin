@@ -10,7 +10,7 @@ admin-www-stats -- generates HTTP access log summary statistics
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin-www-stats\fR [\fB--json \fIfile\fR] [\fB--text \fIfile\fR] \fIlogs\fR
+\fBadmin-www-stats\fR [\fB--json \fIfile\fR] [\fB--text \fIfile\fR] \fIlogfile\fR ...
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -20,9 +20,10 @@ be generated in text and/or JSON format. If no output option is specified, the
 default is a text report to the standard output.
 
 The \fBadmin-www-stats\fR tool automatically recognizes the fields in the
-\fIlogs\fR. The field order is therefore allowed to vary between files. The
-\fIlogs\fR may be compressed (using \fB.bz2\fR, \fB.gz\fR, \fB.lzma\fR or
-\fB.xz\fR file extensions) or specified as \fB-\fR to read from standard input.
+\fIlogfile\fR. The field order is therefore allowed to vary when multiple files
+are specified on the command line. The \fIlogfile\fR may be compressed (using
+\fB.bz2\fR, \fB.gz\fR, \fB.lzma\fR or \fB.xz\fR file extensions) or specified
+as \fB-\fR to read from standard input.
 .sp
 .SH "OPTIONS"
 .sp
