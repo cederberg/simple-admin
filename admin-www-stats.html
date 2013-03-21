@@ -32,10 +32,13 @@
 
 <h2>admin-www-stats</h2>
 
-<p>Processes HTTP access log files and generates summary statistics. Output
-can be generated in text and/or JSON format.</p>
+<p>Generates HTTP access log summary statistics.</p>
 
-<p><strong>Syntax:</strong> <code>admin-www-stats [--json &lt;file&gt;] [--text &lt;file&gt;] &lt;logs&gt;</code></p>
+<h3>Usage:</h3>
+
+<blockquote>
+<code>admin-www-stats [--json &lt;file&gt;] [--text &lt;file&gt;] &lt;logfile&gt; ...</code>
+</blockquote>
 
 <table>
 <tr>
@@ -43,26 +46,30 @@ can be generated in text and/or JSON format.</p>
 <th>Description</th>
 </tr>
 <tr>
-<td>--json</td>
+<td>--json &lt;file&gt;</td>
 <td>Write JSON output to the specified file.</td>
 </tr>
 <tr>
-<td>--text</td>
+<td>--text &lt;file&gt;</td>
 <td>Write text output to the specified file.</td>
-</tr>
-<tr>
-<td>&lt;logs&gt;</td>
-<td>Log files to process or <code>-</code> to read from stdin.</td>
 </tr>
 </table>
 
-<p>If no output option is specified, the default is a text report to stdout.
-The log files may be compressed (in bzip2, gzip, lzip or xz format).</p>
+<p>Processes HTTP access log files and generates summary statistics. Output can
+be generated in text and/or JSON format. If no output option is specified, the
+default is a text report to the standard output.</p>
 
-<p>The tool attempts to automatically recognize the order of the fields in the
-HTTP access logs. The field order is therefore allowed to vary between files.
-In addition to recognizing the standard log fields, a number of additional
-parameters can be appended to each line. Here is a recommended Nginx format:</p>
+<p>The <code>admin-www-stats</code> tool automatically recognizes the fields in
+the <code>logfile</code>. The field order is therefore allowed to vary when
+multiple files are specified on the command line. The <code>logfile</code> may
+be compressed (using <code>.bz2</code>, <code>.gz</code>, <code>.lzma</code> or
+<code>.xz</code> file extensions) or specified as <code>-</code> to read from
+standard input.</p>
+
+<h3>Configuration:</h3>
+
+<p>In addition to the standard HTTP log fields, a number of additional
+parameters are recognized. Here is a recommended Nginx format:</p>
 
 <pre><code>log_format custom '$remote_addr - $remote_user [$time_local] "$request" '
                   '$status $body_bytes_sent "$http_referer" '

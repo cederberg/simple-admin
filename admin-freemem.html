@@ -32,12 +32,29 @@
 
 <h2>admin-freemem</h2>
 
-<p>Cleans filesystem cache (if possible) to recover memory.</p>
+<p>Cleans file system cache (if possible) to recover memory.</p>
 
-<p><strong>Syntax:</strong> <code>admin-freemem</code></p>
+<h3>Usage:</h3>
 
-<p>Forces a filesystem sync followed by a write
-to <code>/proc/sys/vm/drop_caches</code>.</p>
+<blockquote>
+<code>admin-freemem</code>
+</blockquote>
+
+<p>Forces a file system sync followed by writing <code>1</code> to the
+<code>/proc/sys/vm/drop_caches</code> file. This results in the Linux kernel
+cleaning its file system caches and making that memory available for other
+uses.</p>
+
+<p>Using <code>admin-freemem</code> may degrade performance for some
+applications, since files must be re-read from the file system. Clearing the
+file system cache may also be beneficial if recent large file reads will not
+be re-used.</p>
+
+<h3>See Also:</h3>
+
+<ul>
+  <li><a href="http://manpages.ubuntu.com/manpages/man5/proc.5.html">proc</a></li>
+</ul>
 
         </section>
 

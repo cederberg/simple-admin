@@ -34,10 +34,30 @@
 
 <p>Converts files to UTF-8 (from ISO-8859-1) if needed.</p>
 
-<p><strong>Syntax:</strong> <code>admin-utf8 (check|convert) &lt;files or dirs&gt;</code></p>
+<h3>Usage:</h3>
 
-<p>Use either <code>check</code> to detect file encoding, or <code>convert</code> to
-convert all ISO-8859-1 files.</p>
+<blockquote>
+<code>admin-utf8 check &lt;file&gt; ...</code><br/>
+<code>admin-utf8 convert &lt;file&gt; ...</code>
+</blockquote>
+
+<p>The <code>&lt;file&gt;</code> arguments may be either files or directories.
+All directories will be searched recursively while ignoring any hidden files
+(<code>.*</code>).</p>
+
+<p>The <code>check</code> command is used to detect text file encoding of text
+files.  The results per file are printed to the standard output.</p>
+
+<p>The <code>convert</code> command is used to convert all text files in the
+ISO-8859-1 encoding to UTF-8. Information about converted files are printed to
+the standard output.</p>
+
+<h3>See Also:</h3>
+
+<ul>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/file.1.html">file</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/iconv.1.html">iconv</a></li>
+</ul>
 
         </section>
 

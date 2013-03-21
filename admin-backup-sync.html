@@ -34,7 +34,11 @@
 
 <p>Performs a remote file sync for configured directories.</p>
 
-<p><strong>Syntax:</strong> <code>admin-backup-sync [-v]</code></p>
+<h3>Usage:</h3>
+
+<blockquote>
+<code>admin-backup-sync [-v]</code>
+</blockquote>
 
 <table>
 <tr>
@@ -47,16 +51,26 @@
 </tr>
 </table>
 
-<p>Configured in <code>/etc/admin-backup-sync.conf</code> with one line
-for each pair of source and destination directories:</p>
+<p>Syncronizes one or more directories using <code>rsync</code>. This command
+will set the appropriate flags to update and remove files on the receiving
+side, so be careful to sync the correct directories (see <code>rsync</code>).</p>
+
+<h3>Configuration:</h3>
+
+<p>The syncronization is configured in <code>/etc/admin-backup-sync.conf</code>
+with one line for each pair of directories. No comment or blank lines are
+allowed. Each line contains the source dir, destination dir and optional
+command-line switches to rsync:</p>
 
 <pre><code>/backup/host01 root@host02:/backup/
-root@host02:/backup/host02 /backup/
-</code></pre>
+root@host02:/backup/host02 /backup/ --bwlimit=10</code></pre>
 
-<p>The file syncronization uses <code>rsync</code> and will update and
-remove files on the receiving side, so be careful to sync the
-correct backup subdirectories.</p>
+<h3>See Also:</h3>
+
+<ul>
+  <li><code>/etc/admin-backup-sync.conf</code></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/rsync.1.html">rsync</a></li>
+</ul>
 
         </section>
 

@@ -32,16 +32,64 @@
 
 <h2>admin-status</h2>
 
-<p>Checks the status of a number of services on the machine.</p>
+<p>Checks and prints the machine and process status.</p>
 
-<p><strong>Syntax:</strong> <code>admin-status</code></p>
+<h3>Usage:</h3>
 
-<p>Configured in <code>/etc/admin-status.conf</code> with one line
-per service (and PID file):</p>
+<blockquote>
+<code>admin-status [-s]</code>
+</blockquote>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-s</td>
+<td>Prints a short summary without listing process status.</td>
+</tr>
+</table>
+
+<p>Prints a summary of the most important machine and process metrics.
+Processes are checked for existence only, not probed in any other way. An
+example output:</p>
+
+<pre><code>loadavg:    0.00, 0.01, 0.05       -- 4 processors
+memory:     298 MB (60.1%) free    -- 108 rss, 90 cache, 9 swap, 496 total (MB)
+storage:    16.3 GB (69.4%) free   -- 7.2 GB used, 23.6 GB total on /dev/xvda
+* cron:     OK                     -- pid:  2223,  rss:   0.8 MB,  swap:   0 MB
+* ntp:      OK                     -- pid:  2659,  rss:   1.8 MB,  swap:   0 MB</code></pre>
+
+<p>Information is read from the <code>/proc</code> filesystem or via the
+<code>ps</code> utility.</p>
+
+<h3>Configuration:</h3>
+
+<p>The processes to check are configured in <code>/etc/admin-status.conf</code>
+with one line per process. No comment or blank lines are allowed. Each line
+contains the process or service name, pid file and optional command-line
+match:</p>
 
 <pre><code>cron    /var/run/crond.pid
 sshd    /var/run/sshd.pid
-</code></pre>
+local   -       local-command</code></pre>
+
+<p>If <code>-</code> is specified as the pid file, the process lookup is made
+by name (optionally using the command-line match). Process lookup is also made
+by name if the pid file didn't exist or didn't match a running process.</p>
+
+<h3>See Also:</h3>
+
+<ul>
+  <li><code>/etc/admin-status.conf</code></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/df.1.html">df</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/ps.1.html">ps</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/pstree.1.html">pstree</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man5/proc.5.html">proc</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man8/pidof.8.html">pidof</a></li>
+</ul>
+
 
         </section>
 

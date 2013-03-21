@@ -34,7 +34,11 @@
 
 <p>Prints info for the backup sync status per machine.</p>
 
-<p><strong>Syntax:</strong> <code>admin-backup-status</code></p>
+<h3>Usage:</h3>
+
+<blockquote>
+<code>admin-backup-status</code>
+</blockquote>
 
 <p>Prints disk usage and disk size information for the <code>/backup</code>
 directory. This can be very slow, since calculating disk usage may have to
@@ -48,12 +52,13 @@ check the size of a very large number of files. An example output:</p>
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/xvda        24G  7.2G   17G  31% /</code></pre>
 
-<h4>See Also:</h4>
+<h3>See Also:</h3>
 
-<dl>
-  <dt><code>/backup</code></dt>
-  <dd>Backup directory with subdirectories per hostname.</dd>
-</dl>
+<ul>
+  <li><code>/backup</code></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/df.1.html">df</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/du.1.html">du</a></li>
+</ul>
 
         </section>
 

@@ -32,9 +32,13 @@
 
 <h2>admin-uptodate</h2>
 
-<p>Runs a check to determine if the system requires updates.</p>
+<p>Checks if the system requires (security) updates.</p>
 
-<p><strong>Syntax:</strong> <code>admin-uptodate [-s] [-m]</code>  </p>
+<h3>Usage:</h3>
+
+<blockquote>
+<code>admin-uptodate [-s] [-m]</code>
+</blockquote>
 
 <table>
 <tr>
@@ -47,9 +51,22 @@
 </tr>
 <tr>
 <td>-m</td>
-<td>Mail root instead of printing results.</td>
+<td>E-mail the output to <code>root@localhost</code> instead of the standard output.</td>
 </tr>
 </table>
+
+<p>Synchronizes the package index with <code>apt-get update</code> and then
+runs a simulated check for updates and prints the results. Can also filter the
+updates for security-related issues.</p>
+
+<p>If no updates are available, no output is printed.</p>
+
+<h3>See Also:</h3>
+
+<ul>
+  <li><a href="http://manpages.ubuntu.com/manpages/man8/apt-get.8.html">apt-get</a></li>
+</ul>
+
 
         </section>
 

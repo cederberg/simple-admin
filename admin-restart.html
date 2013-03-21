@@ -34,7 +34,11 @@
 
 <p>Restarts a group of services in a predefined order.</p>
 
-<p><strong>Syntax:</strong> <code>admin-restart [-q] &lt;group&gt;</code></p>
+<h3>Usage:</h3>
+
+<blockquote>
+<code>admin-restart [-q] &lt;groupname&gt;</code>
+</blockquote>
 
 <table>
 <tr>
@@ -43,12 +47,28 @@
 </tr>
 <tr>
 <td>-q</td>
-<td>Quiet mode. Only prints errors to stderr.</td>
+<td>Quiet mode. Only prints errors to the standard error.</td>
 </tr>
 </table>
 
-<p>Configured in <code>/etc/admin-restart.conf</code> using shell script syntax
-for defining each group with description, start and stop:</p>
+<p>Restarts a <code>&lt;groupname&gt;</code> of services in a predefined order.
+Optionally also checks that processes are created or disappear as expected. An
+example output:</p>
+
+<pre><code>2013-03-19 11:20:47: stopping service nginx (pid: 3903)...
+2013-03-19 11:20:47: service nginx (pid: 3903) stopped
+2013-03-19 11:20:47: stopping service jetty (pid: 3565)...
+2013-03-19 11:20:51: service jetty (pid: 3565) stopped
+2013-03-19 11:20:51: starting service jetty...
+2013-03-19 11:21:07: service jetty (pid: 10938) started
+2013-03-19 11:21:07: starting service nginx...
+2013-03-19 11:21:07: service nginx (pid: 10977) started</code></pre>
+
+<h3>Configuration:</h3>
+
+<p>The <code>&lt;groupname&gt;</code> names and corresponding start and stop commands
+are configured in <code>/etc/admin-restart.conf</code> using shell script
+syntax:</p>
 
 <pre><code>group_web="Restart the Nginx and Jetty services"
 
@@ -64,35 +84,50 @@ stop_web() {
 }
 </code></pre>
 
-<p>A number of built-in commands are available to simplify monitoring the
-startup or shutdown of services:</p>
+<p>Each service group must define the shell variables
+<code>group_&lt;groupname&gt;</code>, <code>start_&lt;groupname&gt;</code> and
+<code>stop_&lt;groupname&gt;</code> containing a description and the start and
+stop commands. A number of built-in helper commands are available to simplify
+the startup or shutdown of services:</p>
 
 <table>
 <tr>
-<th>Command</th>
+<th style="width: 44%;"">Command</th>
 <th>Description</th>
 </tr>
 <tr>
-<td><code>start</code></td>
-<td>Starts a service and optionally waits for the process to start.</td>
+<td><code>start &lt;service&gt; [&lt;wait&gt;]</code></td>
+<td>Starts a service (with <code>service &lt;service&gt; start</code>) and
+    optionally waits <code>wait</code> seconds for the process to start.</td>
 </tr>
 <tr>
-<td><code>stop</code></td>
-<td>Stops a service and optionally waits for the process to quit.</td>
+<td><code>stop &lt;service&gt; [&lt;wait&gt; [force]]</code></td>
+<td>Stops a service (with <code>service &lt;service&gt; start</code>) and
+    optionally waits <code>wait</code> seconds for the process to terminate.
+    If <code>force</code> is specified, the process will be signalled with
+    <code>TERM</code> and <code>KILL</code> if it doesn't exit gracefully.</td>
 </tr>
 <tr>
-<td><code>alert</code></td>
-<td>Prints a message to stderr.</td>
+<td><code>warn &lt;message&gt;</code></td>
+<td>Prints a message to the standard error.</td>
 </tr>
 <tr>
-<td><code>fail</code></td>
-<td>Exits and prints a message to stderr.</td>
+<td><code>fail &lt;message&gt;</code></td>
+<td>Prints a message to the standard error and exits with an error code.</td>
 </tr>
 <tr>
-<td><code>log</code></td>
-<td>Prints a log message (if not in quiet mode).</td>
+<td><code>log &lt;message&gt;</code></td>
+<td>Prints a log message to the standard output (if not in quiet mode).</td>
 </tr>
 </table>
+
+<h3>See Also:</h3>
+
+<ul>
+  <li><code>/etc/admin-restart.conf</code></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man8/service.8.html">service</a></li>
+</ul>
+
 
         </section>
 

@@ -32,15 +32,33 @@
 
 <h2>admin-zcat</h2>
 
-<p>Utility to output data from any compressed file.</p>
+<p>Concatenates and prints compressed files.</p>
 
-<p><strong>Syntax:</strong> <code>admin-zcat &lt;files&gt;</code></p>
+<h3>Usage:</h3>
 
-<p>Works similar to <code>zcat</code> (from <code>zutils</code> package), but
-also supports the <code>lzma</code> format properly. File compression is
-detected from file extensions <code>bz2</code>, <code>gz</code>,
-<code>lzma</code> or <code>xz</code>. Other file extensions are handled as
-uncompressed files (with <code>cat</code>).</p>
+<blockquote>
+<code>admin-zcat &lt;file&gt; ...</code>
+</blockquote>
+
+<p>Reads <code>&lt;file&gt;</code> and outputs the uncompressed contents to the
+standard output. If multiple file arguments are present, they are processed in
+command-line order.</p>
+
+<p>Files with the extensions <code>.bz2</code>, <code>.gz</code>,
+<code>.lzma</code> or <code>.xz</code> are uncompressed with the corresponding
+utility. Other files are handled as uncompressed files (with <code>cat</code>).
+This is similar to <code>zcat</code> (from the <code>zutils</code> package),
+but supports the <code>.lzma</code> format properly.
+
+<h3>See Also:</h3>
+
+<ul>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/cat.1.html">cat</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/bzcat.1.html">bzcat</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/lzcat.1.html">lzcat</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/xzcat.1.html">xzcat</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/zcat.1.html">zcat</a></li>
+</ul>
 
         </section>
 

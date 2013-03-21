@@ -34,7 +34,11 @@
 
 <p>Rotates HTTP access log files.</p>
 
-<p><strong>Syntax:</strong> <code>admin-www-logrotate [-v]</code></p>
+<h3>Usage:</h3>
+
+<blockquote>
+<code>admin-www-logrotate [-v]</code>
+</blockquote>
 
 <table>
 <tr>
@@ -47,8 +51,18 @@
 </tr>
 </table>
 
-<p>Configured in <code>/etc/admin-www-logrotate.conf</code> with a number of
-shell variables:</p>
+<p>Rotates HTTP access log files by renaming <code>*.log</code> files in a
+directory hierarchy. Immediately afterwards a command is run to create new log
+files.</p>
+
+<p>The old log files are compressed with <code>lzma</code> and processed with
+<code>admin-www-stats</code>. After a configurable number of days, the old log
+files are removed.</p>
+
+<h3>Configuration:</h3>
+
+<p>The <code>/etc/admin-www-logrotate.conf</code> file contains a number of
+shell variables that controls the log file rotation:</p>
 
 <pre><code># Shell command to release old log files
 COMMAND="/usr/sbin/nginx -s reopen"
@@ -63,10 +77,14 @@ LOG_EXPIRES=356
 STAT_DIR=/srv/logstats
 </code></pre>
 
-<p>The tool will rename any file matching <code>*.log</code> in the
-<code>LOG_DIR</code> directory hierarchy. Immediately afterwards the server
-command is run to create new log files. Finally the old log files are
-compressed and <code>admin-www-stats</code> is run to process their data.</p>
+<h3>See Also:</h3>
+
+<ul>
+  <li><code>/etc/admin-www-logrotate.conf</code></li>
+  <li><code>admin-www-stats</code></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/lzma.1.html">lzma</a></li>
+</ul>
+
 
         </section>
 

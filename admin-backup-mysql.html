@@ -34,7 +34,11 @@
 
 <p>Performs a MySQL dump of configured databases.</p>
 
-<p><strong>Syntax:</strong> <code>admin-backup-mysql [-v]</code></p>
+<h3>Usage:</h3>
+
+<blockquote>
+<code>admin-backup-mysql [-v]</code>
+</blockquote>
 
 <table>
 <tr>
@@ -47,20 +51,31 @@
 </tr>
 </table>
 
-<p>Configured in <code>/etc/admin-backup-mysql.conf</code> with one line
-per database to backup:</p>
+<p>Performs a MySQL backup with <code>mysqldump</code> of the databases listed
+in <code>/etc/admin-backup-mysql.conf</code>. The
+<code>/backup/&lt;hostname&gt;/mysql/</code> directory is used to store the
+output MySQL backup SQL files (compressed with <code>lzma</code>).</p>
+
+<p>Backup files are stored for 30 days, except the files from the 1st each
+month (which are kept indefinitely). The MySQL backup should be run once per
+day. More frequent runs will overwrite previous backups.</p>
+
+<h3>Configuration:</h3>
+
+<p>The backup is configured in <code>/etc/admin-backup-mysql.conf</code> with
+one line per database. No comment or blank lines are allowed. Each line
+contains the database, user, password and optional command-line switches:</p>
 
 <pre><code>database1 user password
-database2 user password --ignore-table=table1
-</code></pre>
+database2 user password --ignore-table=table1</code></pre>
 
-<p>The <code>/backup/&lt;hostname&gt;/mysql/</code> directory is used to
-store the output MySQL dump files (compressed). Backup files are
-kept for 30 days, except the first backup file from each month
-(which is kept indefinitely).</p>
+<h3>See Also:</h3>
 
-<p>The MySQL backup should be run once per day. More frequent runs
-will overwrite the previous backup.</p>
+<ul>
+  <li><code>/etc/admin-backup-mysql.conf</code></li>
+  <li><code>/backup</code></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/mysqldump.1.html">mysqldump</a></li>
+</ul>
 
         </section>
 
