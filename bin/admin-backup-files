@@ -72,6 +72,7 @@ BACKUP_CURRENT_DIR=$BACKUP_BASE_DIR/$NAME
 log "init backup to $BACKUP_CURRENT_DIR"
 mkdir -p $BACKUP_CURRENT_DIR
 while read SRC EXPIRES ; do
+    [ "$SRC" != "" -a "${SRC:0:1}" != "#" ] || continue
     log "syncing dir $SRC"
     DST=$BACKUP_CURRENT_DIR$SRC
     LNK=$BACKUP_LATEST_DIR$SRC

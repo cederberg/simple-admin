@@ -178,6 +178,7 @@ storagestatus
 # Checking all services
 RETVAL=0
 while [ $SHORT = "false" ] && read NAME PIDFILE MATCH ; do
+    [ "$NAME" != "" -a "${NAME:0:1}" != "#" ] || continue
     if ! servicestatus $NAME $PIDFILE $MATCH; then
         RETVAL=`expr $RETVAL + 1`
     fi

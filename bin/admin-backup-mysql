@@ -57,6 +57,7 @@ fi
 log "init MySQL backup on $HOST"
 mkdir -p $DUMP_DIR
 while read DATABASE USER PWD EXTRAS ; do
+    [ "$DATABASE" != "" -a "${DATABASE:0:1}" != "#" ] || continue
     log "starting MySQL dump of $DATABASE"
     FILE=$DUMP_DIR/$DATABASE.$DATE.sql
     rm -f $FILE $FILE.lzma
