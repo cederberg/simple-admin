@@ -1,4 +1,4 @@
-.TH "admin-backup-mysql" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.TH "simple-backup-mysql" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -6,17 +6,17 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin-backup-mysql -- performs a MySQL backup of configured databases
+simple-backup-mysql -- performs a MySQL backup of configured databases
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin-backup-mysql\fR [-\fBv\fR]
+\fBsimple-backup-mysql\fR [-\fBv\fR]
 .fi
 .sp
 .SH "DESCRIPTION"
 .sp
 Performs a MySQL backup with \fBmysqldump\fR of the databases listed in
-\fB/etc/admin-backup-mysql.conf\fR. The \fB/backup/\fIhostname\fB/mysql/\fR
+\fB/etc/simple-backup-mysql.conf\fR. The \fB/backup/\fIhostname\fB/mysql/\fR
 directory is used to store the output MySQL backup SQL files (compressed with
 \fBlzma\fR).
 
@@ -33,7 +33,7 @@ Print verbose output.
 .sp
 .SH "CONFIGURATION"
 .sp
-The backup is configured in \fB/etc/admin-backup-mysql.conf\fR with one line
+The backup is configured in \fB/etc/simple-backup-mysql.conf\fR with one line
 per database. Comment or blank lines are ignored. Each line contains the
 database, user, password and optional command-line switches:
 .sp
@@ -44,7 +44,7 @@ database, user, password and optional command-line switches:
 .sp
 .SH "FILES"
 .sp
-.B /etc/admin-backup-mysql.conf
+.B /etc/simple-backup-mysql.conf
 .RS 4
 Backup configuration file with one line per database.
 .RE

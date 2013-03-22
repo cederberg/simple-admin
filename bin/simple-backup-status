@@ -2,7 +2,7 @@
 #
 # Prints backup status information.
 #
-# Syntax: admin-backup-status
+# Syntax: simple-backup-status
 #
 
 echo Backups:

@@ -2,17 +2,17 @@
 #
 # Performs a filesystem backup for configured directories.
 #
-# Syntax: admin-backup-files [-v]
+# Syntax: simple-backup-files [-v]
 #
 # Options:
 #   -v  Print verbose output.
 #
 # Files:
-#   /etc/admin-backup-files.conf
+#   /etc/simple-backup-files.conf
 #
 
 # Configuration variables
-CONFIG=/etc/admin-backup-files.conf
+CONFIG=/etc/simple-backup-files.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
 BACKUP_BASE_DIR=/backup/$HOST/files
@@ -41,7 +41,7 @@ log() {
 }
 
 # Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to run admin-backup-files"
+[ `whoami` == 'root' ] || fail "only root is allowed to run simple-backup-files"
 
 # Load config to stdin
 if [ -f $CONFIG ] ; then

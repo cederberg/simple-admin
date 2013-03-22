@@ -1,4 +1,4 @@
-.TH "admin-backup-sync" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.TH "simple-backup-sync" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -6,11 +6,11 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin-backup-sync -- performs a remote file sync for configured directories
+simple-backup-sync -- performs a remote file sync for configured directories
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin-backup-sync\fR [-\fBv\fR]
+\fBsimple-backup-sync\fR [-\fBv\fR]
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -28,7 +28,7 @@ Print verbose output.
 .sp
 .SH "CONFIGURATION"
 .sp
-The syncronization is configured in \fB/etc/admin-backup-sync.conf\fR with one
+The syncronization is configured in \fB/etc/simple-backup-sync.conf\fR with one
 line for each pair of directories. Comment or blank lines are ignored. Each
 line contains the source dir, destination dir and optional command-line
 switches to \fBrsync\fR:
@@ -40,7 +40,7 @@ switches to \fBrsync\fR:
 .sp
 .SH "FILES"
 .sp
-.B /etc/admin-backup-sync.conf
+.B /etc/simple-backup-sync.conf
 .RS 4
 Configuration file for the directory synchronization.
 .sp

@@ -2,17 +2,17 @@
 #
 # Performs a remote file sync for configured directories.
 #
-# Syntax: admin-backup-sync [-v]
+# Syntax: simple-backup-sync [-v]
 #
 # Options:
 #   -v  Print verbose output.
 #
 # Files:
-#   /etc/admin-backup-sync.conf
+#   /etc/simple-backup-sync.conf
 #
 
 # Configuration variables
-CONFIG=/etc/admin-backup-sync.conf
+CONFIG=/etc/simple-backup-sync.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
 OPTIONS="--archive --hard-links --delete --compress"

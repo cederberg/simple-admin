@@ -24,10 +24,10 @@ apt-get -qq install rsync lzma libgeo-ipfree-perl libjson-xs-perl libtext-glob-p
 
 # Install script files
 echo "Installing simple-admin scripts..."
-install --mode=0744 bin/admin-backup-files /usr/local/bin/
-install bin/admin-backup-mysql /usr/local/bin/
-install bin/admin-backup-status /usr/local/bin/
-install bin/admin-backup-sync /usr/local/bin/
+install --mode=0744 bin/simple-backup-files /usr/local/bin/
+install bin/simple-backup-mysql /usr/local/bin/
+install bin/simple-backup-status /usr/local/bin/
+install bin/simple-backup-sync /usr/local/bin/
 install bin/simple-fileinfo /usr/local/bin/
 install bin/simple-freemem /usr/local/bin/
 install --mode=0744 bin/simple-restart /usr/local/bin/
