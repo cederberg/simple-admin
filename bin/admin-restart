@@ -165,6 +165,11 @@ STOP=stop_$GROUP
 compgen -A function $START > /dev/null || fail "no function $START in $CONFIG"
 compgen -A function $STOP > /dev/null || fail "no function $STOP in $CONFIG"
 
+# Check if already running
+if ps -o pid,args -N --pid $$ | egrep [a]dmin-restart > /dev/null ; then
+    fail "admin-restart seems to be already running"
+fi
+
 # Restart services
 $STOP
 $START
