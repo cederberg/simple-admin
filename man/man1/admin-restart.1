@@ -10,7 +10,7 @@ admin-restart -- restarts a group of services in a predefined order
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin-restart\fR [-\fBq\fR] \fIgroupname\fR
+\fBadmin-restart\fR [-\fBm\fR] [-\fBq\fR] \fIgroupname\fR
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -30,6 +30,11 @@ checks that processes are created or disappear as expected. An example output:
 .fi
 .sp
 .SH "OPTIONS"
+.sp
+-\fBm\fR
+.RS 4
+E-mail the output to \fBroot@localhost\fR instead of the standard output.
+.RE
 .sp
 -\fBq\fR
 .RS 4
