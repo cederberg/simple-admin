@@ -56,7 +56,7 @@ for CONF in $FILES ; do
     LOGS=`ls $DIR/access*.{lzma,gz} 2> /dev/null` || true
     if [ "$LOGS" != "" ] ; then
         log "found `echo $LOGS | wc -w` log files to process"
-        /usr/local/bin/admin-zcat $LOGS | webalizer $OPTIONS -c $CONF -
+        /usr/local/bin/simple-zcat $LOGS | webalizer $OPTIONS -c $CONF -
     else
         log "found no log files to process"
     fi

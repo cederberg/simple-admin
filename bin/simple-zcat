@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Utility to output data from any compressed file.
+# Concatenates and prints compressed files.
 #
-# Syntax: admin-zcat <files>
+# Syntax: simple-zcat <file> ...
 #
 
 # Set caution flags

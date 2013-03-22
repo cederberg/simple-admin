@@ -2,7 +2,7 @@
 #
 # Converts files to UTF-8 (from ISO-8859-1) if needed.
 #
-# Syntax: admin-utf8 (check|convert) <files or dirs>
+# Syntax: simple-utf8 (check|convert) <files or dirs>
 #
 
 # Set caution flags
@@ -15,7 +15,7 @@ set -o pipefail
 usage() {
     echo "Converts files to UTF-8 (from ISO-8859-1) if needed."
     echo
-    echo "Syntax: admin-utf8 (check|convert) <files or dirs>"
+    echo "Syntax: simple-utf8 (check|convert) <files or dirs>"
     exit 1
 }
 
