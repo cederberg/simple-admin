@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# Checks the status of the services on this machine.
+# Checks and prints the machine and process status.
 #
-# Syntax: admin-status
+# Syntax: simple-status
 #
 # Files:
-#   /etc/admin-status.conf
+#   /etc/simple-status.conf
 #
 
 # Configuration variables
-CONFIG=/etc/admin-status.conf
+CONFIG=/etc/simple-status.conf
 LOCALDIR=`dirname $0`/..
 SHORT="false"
 
@@ -54,7 +54,7 @@ cpustatus() {
 
 # Function for printing memory status
 memstatus() {
-    TMPFILE=/tmp/admin-status.vars
+    TMPFILE=/tmp/simple-status.vars
     sed -e 's/:\s*/=/' -e 's/ kB//' -e 's/[^A-Za-z0-9=]//g' /proc/meminfo > $TMPFILE
     . $TMPFILE
     rm $TMPFILE
@@ -87,7 +87,7 @@ storagestatus() {
 # Function for printing a process tree with RSS and swap memory (in kb)
 proctree() {
     PID=$1
-    TMPFILE=/tmp/admin-status.vars
+    TMPFILE=/tmp/simple-status.vars
     sed -e 's/:\s*/=/' -e 's/ kB//' -e 's/[^A-Za-z0-9=]//g' /proc/$PID/status > $TMPFILE
     . $TMPFILE
     rm $TMPFILE
@@ -100,15 +100,15 @@ proctree() {
 # Function for printing process status
 procstatus() {
     PID=$1
-    proctree $1 > /tmp/admin-status.total 2> /dev/null
-    exec < /tmp/admin-status.total
+    proctree $1 > /tmp/simple-status.total 2> /dev/null
+    exec < /tmp/simple-status.total
     TOTAL_RSS=0
     TOTAL_SWAP=0
     while read CHILD RSS SWAP ; do
         TOTAL_RSS=`echo $TOTAL_RSS ${RSS:-0} | awk '{print $1 + $2}'`
         TOTAL_SWAP=`echo $TOTAL_SWAP ${SWAP:-0} | awk '{print $1 + $2}'`
     done
-    rm /tmp/admin-status.total
+    rm /tmp/simple-status.total
     PID=$1
     RSS=`echo $TOTAL_RSS | awk '{OFMT="%.1f" ; print $1 / 1024}'`
     SWAP=`echo $TOTAL_SWAP | awk '{OFMT="%.0f" ; print $1 / 1024}'`
@@ -184,9 +184,9 @@ while [ $SHORT = "false" ] && read NAME PIDFILE MATCH ; do
     fi
 done
 
-# Checking for admin-restart
-if ps -eo pid,args | egrep [a]dmin-restart > /dev/null ; then
-    warn "admin-restart seems to be running"
+# Checking for simple-restart
+if ps -eo pid,args | egrep [s]imple-restart > /dev/null ; then
+    warn "simple-restart seems to be running"
 fi
 
 exit $RETVAL

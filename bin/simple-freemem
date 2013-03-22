@@ -2,7 +2,7 @@
 #
 # Cleans filesystem cache (if possible) to recover memory.
 #
-# Syntax: admin-freemem
+# Syntax: simple-freemem
 #
 
 sync

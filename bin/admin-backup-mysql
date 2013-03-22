@@ -72,5 +72,5 @@ done
 find $DUMP_DIR -type f -mtime +30 \! -name "*.????-??-01.*" -delete
 
 # Finished backup
-/usr/local/bin/admin-freemem
+/usr/local/bin/simple-freemem
 log "done MySQL backup on $HOST"

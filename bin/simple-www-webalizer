@@ -62,5 +62,5 @@ for CONF in $FILES ; do
     fi
     log "done webstats for $CONF"
 done
-/usr/local/bin/admin-freemem
+/usr/local/bin/simple-freemem
 

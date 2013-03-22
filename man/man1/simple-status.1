@@ -1,4 +1,4 @@
-.TH "admin-status" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.TH "simple-status" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -6,11 +6,11 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin-status -- checks and prints the machine and process status
+simple-status -- checks and prints the machine and process status
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin-status\fR [-\fBs\fR]
+\fBsimple-status\fR [-\fBs\fR]
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -38,7 +38,7 @@ Prints a short summary without listing process status.
 .sp
 .SH "CONFIGURATION"
 .sp
-The processes to check are configured in \fB/etc/admin-status.conf\fR with one
+The processes to check are configured in \fB/etc/simple-status.conf\fR with one
 line per process. Comment or blank lines are ignored. Each line contains the
 process or service name, pid file and optional command-line match:
 .sp
@@ -54,7 +54,7 @@ if the pid file didn't exist or didn't match a running process.
 .sp
 .SH "FILES"
 .sp
-.B /etc/admin-status.conf
+.B /etc/simple-status.conf
 .RS 4
 Service configuration file with one line per service.
 .RE

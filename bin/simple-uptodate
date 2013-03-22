@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Runs a check to determine if the system requires updates.
+# Checks if the system requires (security) updates.
 #
-# Syntax: admin-uptodate [-s] [-m]
+# Syntax: simple-uptodate [-s] [-m]
 #
 # Options:
 #   -s  Check only for security updates.
@@ -28,7 +28,7 @@ fail() {
 }
 
 # Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to run admin-uptodate"
+[ `whoami` == 'root' ] || fail "only root is allowed to run simple-uptodate"
 
 # Parse command-line arguments
 if [ "${1:-}" == "-s" ] ; then
@@ -42,7 +42,7 @@ fi
 
 # Check for update
 apt-get update > /dev/null || fail "couldn't update package lists with apt-get"
-OUTFILE=/tmp/admin-uptodate.txt
+OUTFILE=/tmp/simple-uptodate.txt
 apt-get --simulate --quiet upgrade > $OUTFILE || fail "couldn't simulate package upgrade"
 if [ "$SECURITY" == "true" ] ; then
     TYPE="security updates"
@@ -63,4 +63,4 @@ if [ $FOUND -ne 0 ] ; then
     fi
 fi
 rm $OUTFILE
-/usr/local/bin/admin-freemem
+/usr/local/bin/simple-freemem

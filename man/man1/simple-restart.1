@@ -1,4 +1,4 @@
-.TH "admin-restart" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.TH "simple-restart" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -6,11 +6,11 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin-restart -- restarts a group of services in a predefined order
+simple-restart -- restarts a group of services in a predefined order
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin-restart\fR [-\fBm\fR] [-\fBq\fR] \fIgroupname\fR
+\fBsimple-restart\fR [-\fBm\fR] [-\fBq\fR] \fIgroupname\fR
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -44,7 +44,7 @@ Quiet mode. Only prints errors to the standard error.
 .SH "CONFIGURATION"
 .sp
 The \fIgroupname\fR names and corresponding start and stop commands are configured
-in \fB/etc/admin-restart.conf\fR using shell script syntax:
+in \fB/etc/simple-restart.conf\fR using shell script syntax:
 .sp
 .nf
     group_web="Restart the Nginx and Jetty services"
@@ -99,7 +99,7 @@ Prints a log message to the standard output (if not in quiet mode).
 .sp
 .SH "FILES"
 .sp
-.B /etc/admin-restart.conf
+.B /etc/simple-restart.conf
 .RS 4
 Service group configuration file in shell syntax.
 .RE

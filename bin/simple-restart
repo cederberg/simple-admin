@@ -2,14 +2,14 @@
 #
 # Restarts a group of services in a predefined order.
 #
-# Syntax: admin-restart [-m] [-q] <groupname>
+# Syntax: simple-restart [-m] [-q] <groupname>
 #
 # Files:
-#   /etc/admin-restart.conf
+#   /etc/simple-restart.conf
 #
 
 # Configuration variables
-CONFIG=/etc/admin-restart.conf
+CONFIG=/etc/simple-restart.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
 SENDMAIL=/usr/sbin/sendmail
@@ -56,7 +56,7 @@ log() {
 usage() {
     echo "Restarts a group of services in a predefined order."
     echo
-    echo "Syntax: admin-restart [-m] [-q] <group>"
+    echo "Syntax: simple-restart [-m] [-q] <group>"
     echo
     echo "Options:"
     echo "  -m       -- E-mail output to root@localhost."
@@ -142,7 +142,7 @@ stop() {
 }
 
 # Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to run admin-restart"
+[ `whoami` == 'root' ] || fail "only root is allowed to run simple-restart"
 
 # Load config (shell)
 if [ -f $CONFIG ] ; then
@@ -174,8 +174,8 @@ compgen -A function $START > /dev/null || fail "no function $START in $CONFIG"
 compgen -A function $STOP > /dev/null || fail "no function $STOP in $CONFIG"
 
 # Check if already running
-if ps -o pid,args -N --pid $$ | egrep [a]dmin-restart > /dev/null ; then
-    fail "admin-restart seems to be already running"
+if ps -o pid,args -N --pid $$ | egrep [s]imple-restart > /dev/null ; then
+    fail "simple-restart seems to be already running"
 fi
 
 # Restart services
@@ -185,7 +185,7 @@ if [ $MAIL == "true" ] ; then
     COLOR_ERR=''
     (
         printf "To: root\n" ;
-        printf "Subject: admin-restart $GROUP ($HOST `date +'%F %T'`)\n\n" ;
+        printf "Subject: simple-restart $GROUP ($HOST `date +'%F %T'`)\n\n" ;
         ( $STOP ; $START ) || true
     ) 2>&1 | $SENDMAIL root
 else

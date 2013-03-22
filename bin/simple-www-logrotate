@@ -90,4 +90,4 @@ if [ -d $STAT_DIR -a "$LOG_FILES" != "" ] ; then
     log "processing stats to $STAT_DIR"
     /usr/local/bin/simple-www-stats --json $JSON_FILE --text $TEXT_FILE $LOG_FILES
 fi
-/usr/local/bin/admin-freemem
+/usr/local/bin/simple-freemem

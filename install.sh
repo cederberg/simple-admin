@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Installs the admin-scripts to /usr/local/bin.
+# Installs the simple-admin to /usr/local/bin.
 #
 
 # Set caution flags
@@ -16,23 +16,23 @@ fail() {
 }
 
 # Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to install admin-scripts"
+[ `whoami` == 'root' ] || fail "only root is allowed to install simple-admin"
 
 # Install required packages
 echo "Installing dependencies..."
 apt-get -qq install rsync lzma libgeo-ipfree-perl libjson-xs-perl libtext-glob-perl
 
 # Install script files
-echo "Installing admin scripts..."
+echo "Installing simple-admin scripts..."
 install --mode=0744 bin/admin-backup-files /usr/local/bin/
 install bin/admin-backup-mysql /usr/local/bin/
 install bin/admin-backup-status /usr/local/bin/
 install bin/admin-backup-sync /usr/local/bin/
 install bin/simple-fileinfo /usr/local/bin/
-install bin/admin-freemem /usr/local/bin/
-install --mode=0744 bin/admin-restart /usr/local/bin/
-install bin/admin-status /usr/local/bin/
-install --mode=0744 bin/admin-uptodate /usr/local/bin/
+install bin/simple-freemem /usr/local/bin/
+install --mode=0744 bin/simple-restart /usr/local/bin/
+install bin/simple-status /usr/local/bin/
+install --mode=0744 bin/simple-uptodate /usr/local/bin/
 install bin/simple-utf8 /usr/local/bin/
 install --mode=0744 bin/simple-www-logrotate /usr/local/bin/
 install bin/simple-www-stats /usr/local/bin/
@@ -42,7 +42,7 @@ install bin/simple-zcat /usr/local/bin/
 echo "Installing man pages..."
 mkdir -p /usr/local/share/man/man1
 cp man/man1/* /usr/local/share/man/man1/
-gzip -f /usr/local/share/man/man1/admin-*.1
+gzip -f /usr/local/share/man/man1/simple-*.1
 
 # Finished
 echo "...done"

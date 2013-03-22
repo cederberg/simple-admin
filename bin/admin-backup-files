@@ -99,5 +99,5 @@ find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +1 -exe
 find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {} \;
 
 # Finished backup
-/usr/local/bin/admin-freemem
+/usr/local/bin/simple-freemem
 log "done backup to $BACKUP_CURRENT_DIR"
