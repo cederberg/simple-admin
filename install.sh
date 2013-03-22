@@ -34,8 +34,8 @@ install --mode=0744 bin/admin-restart /usr/local/bin/
 install bin/admin-status /usr/local/bin/
 install --mode=0744 bin/admin-uptodate /usr/local/bin/
 install bin/simple-utf8 /usr/local/bin/
-install --mode=0744 bin/admin-www-logrotate /usr/local/bin/
-install bin/admin-www-stats /usr/local/bin/
+install --mode=0744 bin/simple-www-logrotate /usr/local/bin/
+install bin/simple-www-stats /usr/local/bin/
 install bin/simple-zcat /usr/local/bin/
 
 # Install man pages

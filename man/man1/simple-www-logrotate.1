@@ -1,4 +1,4 @@
-.TH "admin-www-logrotate" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.TH "simple-www-logrotate" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -6,11 +6,11 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin-www-logrotate -- rotates HTTP access log files
+simple-www-logrotate -- rotates HTTP access log files
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin-www-logrotate\fR [-\fBv\fR]
+\fBsimple-www-logrotate\fR [-\fBv\fR]
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -19,7 +19,7 @@ Rotates HTTP access log files by renaming \fB*.log\fR files in a directory
 hierarchy. Immediately afterwards a command is run to create new log files.
 
 The old log files are compressed with \fBlzma\fR and processed with
-\fBadmin-www-stats\fR. After a configurable number of days, the old log files
+\fBsimple-www-stats\fR. After a configurable number of days, the old log files
 are removed.
 .sp
 .SH "OPTIONS"
@@ -31,7 +31,7 @@ Print verbose output.
 .sp
 .SH "CONFIGURATION"
 .sp
-The \fB/etc/admin-www-logrotate.conf\fR file contains a number of shell
+The \fB/etc/simple-www-logrotate.conf\fR file contains a number of shell
 variables that controls the log file rotation:
 .sp
 .nf
@@ -50,11 +50,11 @@ variables that controls the log file rotation:
 .sp
 .SH "FILES"
 .sp
-.B /etc/admin-www-logrotate.conf
+.B /etc/simple-www-logrotate.conf
 .RS 4
 Configuration file with shell variables.
 .RE
 .sp
 .SH "SEE ALSO"
 .sp
-\fBadmin-www-stats\fR(1), \fBlzma\fR(1)
+\fBsimple-www-stats\fR(1), \fBlzma\fR(1)

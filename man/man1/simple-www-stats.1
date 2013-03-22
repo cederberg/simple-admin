@@ -1,4 +1,4 @@
-.TH "admin-www-stats" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.TH "simple-www-stats" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -6,11 +6,11 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-admin-www-stats -- generates HTTP access log summary statistics
+simple-www-stats -- generates HTTP access log summary statistics
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBadmin-www-stats\fR [\fB--json \fIfile\fR] [\fB--text \fIfile\fR] \fIlogfile\fR ...
+\fBsimple-www-stats\fR [\fB--json \fIfile\fR] [\fB--text \fIfile\fR] \fIlogfile\fR ...
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -19,7 +19,7 @@ Processes HTTP access log files and generates summary statistics. Output can
 be generated in text and/or JSON format. If no output option is specified, the
 default is a text report to the standard output.
 
-The \fBadmin-www-stats\fR tool automatically recognizes the fields in the
+The \fBsimple-www-stats\fR tool automatically recognizes the fields in the
 \fIlogfile\fR. The field order is therefore allowed to vary when multiple files
 are specified on the command line. The \fIlogfile\fR may be compressed (using
 \fB.bz2\fR, \fB.gz\fR, \fB.lzma\fR or \fB.xz\fR file extensions) or specified

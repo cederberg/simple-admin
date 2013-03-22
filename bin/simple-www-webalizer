@@ -2,14 +2,14 @@
 #
 # Processes HTTP access log files with Webalizer.
 #
-# Syntax: admin-www-webalizer [-v]
+# Syntax: simple-www-webalizer [-v]
 #
 # Files:
-#   /etc/admin-www-webalizer.conf
+#   /etc/simple-www-webalizer.conf
 #
 
 # Configuration variables
-CONFIG=/etc/admin-www-webalizer.conf
+CONFIG=/etc/simple-www-webalizer.conf
 LOCALDIR=`dirname $0`/..
 VERBOSE="false"
 

@@ -2,14 +2,14 @@
 #
 # Rotates HTTP access log files.
 #
-# Syntax: admin-www-logrotate [-v]
+# Syntax: simple-www-logrotate [-v]
 #
 # Files:
-#   /etc/admin-www-logrotate.conf
+#   /etc/simple-www-logrotate.conf
 #
 
 # Configuration variables
-CONFIG=/etc/admin-www-logrotate.conf
+CONFIG=/etc/simple-www-logrotate.conf
 LOCALDIR=`dirname $0`/..
 VERBOSE="false"
 
@@ -31,7 +31,7 @@ log() {
 }
 
 # Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to run admin-www-logrotate"
+[ `whoami` == 'root' ] || fail "only root is allowed to run simple-www-logrotate"
 
 # Load config (shell)
 if [ -f $CONFIG ] ; then
@@ -88,6 +88,6 @@ if [ -d $STAT_DIR -a "$LOG_FILES" != "" ] ; then
     JSON_FILE=$STAT_DIR/logstats.$YESTERDAY.json
     TEXT_FILE=$STAT_DIR/logstats.$YESTERDAY.txt
     log "processing stats to $STAT_DIR"
-    /usr/local/bin/admin-www-stats --json $JSON_FILE --text $TEXT_FILE $LOG_FILES
+    /usr/local/bin/simple-www-stats --json $JSON_FILE --text $TEXT_FILE $LOG_FILES
 fi
 /usr/local/bin/admin-freemem

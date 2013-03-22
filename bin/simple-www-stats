@@ -373,7 +373,7 @@ sub process_config {
 }
 
 # Read config file
-my $config_file = "/etc/admin-www-stats.conf";
+my $config_file = "/etc/simple-www-stats.conf";
 if (-f $config_file) {
     process_config($config_file);
 } elsif (-f dirname($0) . "/..$config_file") {
