@@ -2,7 +2,7 @@
 #
 # Restarts a group of services in a predefined order.
 #
-# Syntax: admin-restart [-q] <group>
+# Syntax: admin-restart [-m] [-q] <groupname>
 #
 # Files:
 #   /etc/admin-restart.conf
@@ -11,6 +11,9 @@
 # Configuration variables
 CONFIG=/etc/admin-restart.conf
 LOCALDIR=`dirname $0`/..
+HOST=`hostname`
+SENDMAIL=/usr/sbin/sendmail
+MAIL="false"
 VERBOSE="true"
 
 # Set caution flags
@@ -53,9 +56,10 @@ log() {
 usage() {
     echo "Restarts a group of services in a predefined order."
     echo
-    echo "Syntax: admin-restart [-q] <group>"
+    echo "Syntax: admin-restart [-m] [-q] <group>"
     echo
     echo "Options:"
+    echo "  -m       -- E-mail output to root@localhost."
     echo "  -q       -- Quiet mode (prints no output)."
     echo
     echo "Groups:"
@@ -150,9 +154,13 @@ else
 fi
 
 # Parse command-line arguments
+if [ "${1:-}" == "-m" ] ; then
+    shift
+    MAIL="true"
+fi
 if [ "${1:-}" == "-q" ] ; then
     shift
-    VERBOSE=false
+    VERBOSE="false"
 fi
 if [ -z "${1:-}" ] ; then
     usage
@@ -171,5 +179,16 @@ if ps -o pid,args -N --pid $$ | egrep [a]dmin-restart > /dev/null ; then
 fi
 
 # Restart services
-$STOP
-$START
+if [ $MAIL == "true" ] ; then
+    COLOR_OFF=''
+    COLOR_OK=''
+    COLOR_ERR=''
+    (
+        printf "To: root\n" ;
+        printf "Subject: admin-restart $GROUP ($HOST `date +'%F %T'`)\n\n" ;
+        ( $STOP ; $START ) || true
+    ) 2>&1 | $SENDMAIL root
+else
+    $STOP
+    $START
+fi
