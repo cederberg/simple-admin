@@ -1,0 +1,78 @@
+.TH "simple-backup-files" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+simple-backup-files -- performs a file system backup for configured directories
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBsimple-backup-files\fR [-\fBv\fR]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Performs a file system backup with \fBrsync\fR of the directories listed in
+\fB/etc/simple-backup-files.conf\fR. All the files will be recursively copied
+to a new directory \fB/backup/\fIhostname\fB/files/\fItimestamp\fR. A symbolic
+link \fB/backup/\fIhostname\fB/files/latest\fR always points to the last
+complete backup.
+
+The first backup every day and every month have a different timestamp format
+(omitting hours and minutes). The monthly backup directories are kept
+indefinitely, but daily backups are only preserved for 30 days. Other
+timestamped backup directories are preserved for 48 hours.
+
+In order to save space, identical files are hard linked between the current
+and the previous backup directory. The directory structure itself cannot be
+hard linked however, so each backup will require some disk usage. Backups of
+large number of files and directories will require many MBs of disk space even
+if all files remain unmodified.
+
+The backup can be run as frequently as every minute, but should probably be
+run once per day to keep disk usage down.
+.sp
+.SH "OPTIONS"
+.sp
+-\fBv\fR
+.RS 4
+Print verbose output.
+.RE
+.sp
+.SH "CONFIGURATION"
+.sp
+The backup is configured in \fB/etc/simple-backup-files.conf\fR with one line
+per directory. Comment or blank lines are ignored. Each line contains a
+directory path and an optional number retention days:
+.sp
+.nf
+    /etc
+    /home
+    /root
+    /var/log   5
+.fi
+.sp
+The optional retention days specifies the maximum number of days to keep the
+files from that directory. This value only reduces the default file retention
+(as specified above).
+.sp
+.SH "FILES"
+.sp
+.B /etc/simple-backup-files.conf
+.RS 4
+Backup configuration file with one line per directory.
+.RE
+
+.B /backup
+.RS 4
+Backup directory with subdirectories per hostname.
+.RE
+.sp
+.SH "SEE ALSO"
+.sp
+\fBsimple-backup-status\fR(1),
+\fBrsync\fR(1),
+<http://cederberg.github.com/simple-admin/>
