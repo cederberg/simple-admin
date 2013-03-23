@@ -32,7 +32,7 @@
 
 <h2>simple-backup-files</h2>
 
-<p>Performs a filesystem backup for configured directories.</p>
+<p>Performs a file system backup for configured directories.</p>
 
 <h3>Usage:</h3>
 
@@ -51,33 +51,50 @@
 </tr>
 </table>
 
-<p>Configured in <code>/etc/simple-backup-files.conf</code> with one line
-per directory to backup:</p>
+<p>Performs a file system backup with <code>rsync</code> of the directories
+listed in <code>/etc/simple-backup-files.conf</code>. All the files will be
+recursively copied to a new directory
+<code>/backup/&lt;hostname&gt;/files/&lt;timestamp&gt;</code>. A symbolic link
+<code>/backup/&lt;hostname&gt;/files/latest</code> always points to the last
+complete backup.</p>
+
+<p>The first backup every day and every month have a different timestamp format
+(omitting hours and minutes). The monthly backup directories are kept
+indefinitely, but daily backups are only preserved for 30 days. Other
+timestamped backup directories are preserved for 48 hours.</p>
+
+<p>In order to save space, identical files are hard linked between the current
+and the previous backup directory. The directory structure itself cannot be
+hard linked however, so each backup will require some disk usage. Backups of
+large number of files and directories will require many MBs of disk space even
+if all files remain unmodified.</p>
+
+<p>The backup can be run as frequently as every minute, but should probably be
+run once per day to keep disk usage down.</p>
+
+<h3>Configuration:</h3>
+
+<p>The backup is configured in <code>/etc/simple-backup-files.conf</code> with
+one line per directory. Comment or blank lines are ignored. Each line contains
+a directory path and an optional number retention days:</p>
 
 <pre><code>/etc
 /home
 /root
-/var/log   5
-</code></pre>
+/var/log   5</code></pre>
 
-<p>All the files in the directories specified will be recursively copied to a
-new directory <code>/backup/&lt;hostname&gt;/files/&lt;timestamp&gt;</code>.
-A symbolic link <code>/backup/&lt;hostname&gt;/files/latest</code> always points
-to the last completed backup directory. An optional number after each directory
-specifies the maximum number of days to store the files (differing from the
-standard retention policy below).</p>
+<p>The optional retention days specifies the maximum number of days to keep the
+files from that directory. This value only reduces the default file retention
+(as specified above).</p>
 
-<p>In order to save space, identical files are hard linked between the current
-and the previous backup directories. Only modified files (and the directory
-structure) will require more space on the disk.</p>
+<h3>See Also:</h3>
 
-<p>The first backup every month and day are created with a different timestamp
-signature (omitting the hour and minute). The monthly backup directories are
-kept indefinitely, but the daily directories are only preserved for 30 days.
-Other timestamped backup directories will be preserved for 48 hours.</p>
-
-<p>The file backup can be run as frequently as every minute, but should
-probably be run at least once per day.</p>
+<ul>
+  <li><code>/etc/simple-backup-files.conf</code></li>
+  <li><code>/backup</code></li>
+  <li><a href="simple-backup-status.html">simple-backup-status.html</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/rsync.1.html">rsync</a></li>
+</ul>
 
         </section>
 
