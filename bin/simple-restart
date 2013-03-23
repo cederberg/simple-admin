@@ -174,9 +174,14 @@ compgen -A function $START > /dev/null || fail "no function $START in $CONFIG"
 compgen -A function $STOP > /dev/null || fail "no function $STOP in $CONFIG"
 
 # Check if already running
-if ps -o pid,args -N --pid $$ | egrep [s]imple-restart > /dev/null ; then
-    fail "simple-restart seems to be already running"
+LOCKFILE=/tmp/simple-restart.pid
+if [ -f $LOCKFILE ] ; then
+    PID=`cat $LOCKFILE`
+    if ps -o pid,args --pid $PID > /dev/null ; then
+        fail "simple-restart (pid: $PID) is already running"
+    fi
 fi
+printf $$ > $LOCKFILE
 
 # Restart services
 if [ $MAIL == "true" ] ; then
@@ -192,3 +197,4 @@ else
     $STOP
     $START
 fi
+rm -f $LOCKFILE

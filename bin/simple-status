@@ -184,9 +184,13 @@ while [ $SHORT = "false" ] && read NAME PIDFILE MATCH ; do
     fi
 done
 
-# Checking for simple-restart
-if ps -eo pid,args | egrep [s]imple-restart > /dev/null ; then
-    warn "simple-restart seems to be running"
+# Check for running simple-restart
+LOCKFILE=/tmp/simple-restart.pid
+if [ -f $LOCKFILE ] ; then
+    PID=`cat $LOCKFILE`
+    if ps -o pid,args --pid $PID > /dev/null ; then
+        warn "simple-restart (pid: $PID) is running"
+    fi
 fi
 
 exit $RETVAL
