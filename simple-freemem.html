@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>admin-utf8 | Simple-Admin for Ubuntu</title>
+    <title>simple-freemem | Simple-Admin for Ubuntu</title>
   </head>
 
   <body>
@@ -30,33 +30,30 @@
 
         <section class="main">
 
-<h2>admin-utf8</h2>
+<h2>simple-freemem</h2>
 
-<p>Converts files to UTF-8 (from ISO-8859-1) if needed.</p>
+<p>Cleans file system cache (if possible) to recover memory.</p>
 
 <h3>Usage:</h3>
 
 <blockquote>
-<code>admin-utf8 check &lt;file&gt; ...</code><br/>
-<code>admin-utf8 convert &lt;file&gt; ...</code>
+<code>simple-freemem</code>
 </blockquote>
 
-<p>The <code>&lt;file&gt;</code> arguments may be either files or directories.
-All directories will be searched recursively while ignoring any hidden files
-(<code>.*</code>).</p>
+<p>Forces a file system sync followed by writing <code>1</code> to the
+<code>/proc/sys/vm/drop_caches</code> file. This results in the Linux kernel
+cleaning its file system caches and making that memory available for other
+uses.</p>
 
-<p>The <code>check</code> command is used to detect text file encoding of text
-files.  The results per file are printed to the standard output.</p>
-
-<p>The <code>convert</code> command is used to convert all text files in the
-ISO-8859-1 encoding to UTF-8. Information about converted files are printed to
-the standard output.</p>
+<p>Using <code>simple-freemem</code> may degrade performance for some
+applications, since files must be re-read from the file system. Clearing the
+file system cache may also be beneficial if recent large file reads will not
+be re-used.</p>
 
 <h3>See Also:</h3>
 
 <ul>
-  <li><a href="http://manpages.ubuntu.com/manpages/man1/file.1.html">file</a></li>
-  <li><a href="http://manpages.ubuntu.com/manpages/man1/iconv.1.html">iconv</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man5/proc.5.html">proc</a></li>
 </ul>
 
         </section>

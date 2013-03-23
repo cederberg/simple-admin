@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>admin-uptodate | Simple-Admin for Ubuntu</title>
+    <title>simple-backup-files | Simple-Admin for Ubuntu</title>
   </head>
 
   <body>
@@ -30,14 +30,14 @@
 
         <section class="main">
 
-<h2>admin-uptodate</h2>
+<h2>simple-backup-files</h2>
 
-<p>Checks if the system requires (security) updates.</p>
+<p>Performs a filesystem backup for configured directories.</p>
 
 <h3>Usage:</h3>
 
 <blockquote>
-<code>admin-uptodate [-s] [-m]</code>
+<code>simple-backup-files [-v]</code>
 </blockquote>
 
 <table>
@@ -46,27 +46,38 @@
 <th>Description</th>
 </tr>
 <tr>
-<td>-s</td>
-<td>Check only for security updates.</td>
-</tr>
-<tr>
-<td>-m</td>
-<td>E-mail the output to <code>root@localhost</code> instead of the standard output.</td>
+<td>-v</td>
+<td>Print verbose output.</td>
 </tr>
 </table>
 
-<p>Synchronizes the package index with <code>apt-get update</code> and then
-runs a simulated check for updates and prints the results. Can also filter the
-updates for security-related issues.</p>
+<p>Configured in <code>/etc/simple-backup-files.conf</code> with one line
+per directory to backup:</p>
 
-<p>If no updates are available, no output is printed.</p>
+<pre><code>/etc
+/home
+/root
+/var/log   5
+</code></pre>
 
-<h3>See Also:</h3>
+<p>All the files in the directories specified will be recursively copied to a
+new directory <code>/backup/&lt;hostname&gt;/files/&lt;timestamp&gt;</code>.
+A symbolic link <code>/backup/&lt;hostname&gt;/files/latest</code> always points
+to the last completed backup directory. An optional number after each directory
+specifies the maximum number of days to store the files (differing from the
+standard retention policy below).</p>
 
-<ul>
-  <li><a href="http://manpages.ubuntu.com/manpages/man8/apt-get.8.html">apt-get</a></li>
-</ul>
+<p>In order to save space, identical files are hard linked between the current
+and the previous backup directories. Only modified files (and the directory
+structure) will require more space on the disk.</p>
 
+<p>The first backup every month and day are created with a different timestamp
+signature (omitting the hour and minute). The monthly backup directories are
+kept indefinitely, but the daily directories are only preserved for 30 days.
+Other timestamped backup directories will be preserved for 48 hours.</p>
+
+<p>The file backup can be run as frequently as every minute, but should
+probably be run at least once per day.</p>
 
         </section>
 

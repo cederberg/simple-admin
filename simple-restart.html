@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>admin-restart | Simple-Admin for Ubuntu</title>
+    <title>simple-restart | Simple-Admin for Ubuntu</title>
   </head>
 
   <body>
@@ -30,14 +30,14 @@
 
         <section class="main">
 
-<h2>admin-restart</h2>
+<h2>simple-restart</h2>
 
 <p>Restarts a group of services in a predefined order.</p>
 
 <h3>Usage:</h3>
 
 <blockquote>
-<code>admin-restart [-q] &lt;groupname&gt;</code>
+<code>simple-restart [-q] &lt;groupname&gt;</code>
 </blockquote>
 
 <table>
@@ -67,7 +67,7 @@ example output:</p>
 <h3>Configuration:</h3>
 
 <p>The <code>&lt;groupname&gt;</code> names and corresponding start and stop commands
-are configured in <code>/etc/admin-restart.conf</code> using shell script
+are configured in <code>/etc/simple-restart.conf</code> using shell script
 syntax:</p>
 
 <pre><code>group_web="Restart the Nginx and Jetty services"
@@ -124,7 +124,7 @@ the startup or shutdown of services:</p>
 <h3>See Also:</h3>
 
 <ul>
-  <li><code>/etc/admin-restart.conf</code></li>
+  <li><code>/etc/simple-restart.conf</code></li>
   <li><a href="http://manpages.ubuntu.com/manpages/man8/service.8.html">service</a></li>
 </ul>
 

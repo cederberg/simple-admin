@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>admin-freemem | Simple-Admin for Ubuntu</title>
+    <title>simple-backup-mysql | Simple-Admin for Ubuntu</title>
   </head>
 
   <body>
@@ -30,30 +30,51 @@
 
         <section class="main">
 
-<h2>admin-freemem</h2>
+<h2>simple-backup-mysql</h2>
 
-<p>Cleans file system cache (if possible) to recover memory.</p>
+<p>Performs a MySQL dump of configured databases.</p>
 
 <h3>Usage:</h3>
 
 <blockquote>
-<code>admin-freemem</code>
+<code>simple-backup-mysql [-v]</code>
 </blockquote>
 
-<p>Forces a file system sync followed by writing <code>1</code> to the
-<code>/proc/sys/vm/drop_caches</code> file. This results in the Linux kernel
-cleaning its file system caches and making that memory available for other
-uses.</p>
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-v</td>
+<td>Print verbose output.</td>
+</tr>
+</table>
 
-<p>Using <code>admin-freemem</code> may degrade performance for some
-applications, since files must be re-read from the file system. Clearing the
-file system cache may also be beneficial if recent large file reads will not
-be re-used.</p>
+<p>Performs a MySQL backup with <code>mysqldump</code> of the databases listed
+in <code>/etc/simple-backup-mysql.conf</code>. The
+<code>/backup/&lt;hostname&gt;/mysql/</code> directory is used to store the
+output MySQL backup SQL files (compressed with <code>lzma</code>).</p>
+
+<p>Backup files are stored for 30 days, except the files from the 1st each
+month (which are kept indefinitely). The MySQL backup should be run once per
+day. More frequent runs will overwrite previous backups.</p>
+
+<h3>Configuration:</h3>
+
+<p>The backup is configured in <code>/etc/simple-backup-mysql.conf</code> with
+one line per database. No comment or blank lines are allowed. Each line
+contains the database, user, password and optional command-line switches:</p>
+
+<pre><code>database1 user password
+database2 user password --ignore-table=table1</code></pre>
 
 <h3>See Also:</h3>
 
 <ul>
-  <li><a href="http://manpages.ubuntu.com/manpages/man5/proc.5.html">proc</a></li>
+  <li><code>/etc/simple-backup-mysql.conf</code></li>
+  <li><code>/backup</code></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/mysqldump.1.html">mysqldump</a></li>
 </ul>
 
         </section>

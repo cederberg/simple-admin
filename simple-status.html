@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>admin-status | Simple-Admin for Ubuntu</title>
+    <title>simple-status | Simple-Admin for Ubuntu</title>
   </head>
 
   <body>
@@ -30,14 +30,14 @@
 
         <section class="main">
 
-<h2>admin-status</h2>
+<h2>simple-status</h2>
 
 <p>Checks and prints the machine and process status.</p>
 
 <h3>Usage:</h3>
 
 <blockquote>
-<code>admin-status [-s]</code>
+<code>simple-status [-s]</code>
 </blockquote>
 
 <table>
@@ -66,7 +66,7 @@ storage:    16.3 GB (69.4%) free   -- 7.2 GB used, 23.6 GB total on /dev/xvda
 
 <h3>Configuration:</h3>
 
-<p>The processes to check are configured in <code>/etc/admin-status.conf</code>
+<p>The processes to check are configured in <code>/etc/simple-status.conf</code>
 with one line per process. No comment or blank lines are allowed. Each line
 contains the process or service name, pid file and optional command-line
 match:</p>
@@ -82,7 +82,7 @@ by name if the pid file didn't exist or didn't match a running process.</p>
 <h3>See Also:</h3>
 
 <ul>
-  <li><code>/etc/admin-status.conf</code></li>
+  <li><code>/etc/simple-status.conf</code></li>
   <li><a href="http://manpages.ubuntu.com/manpages/man1/df.1.html">df</a></li>
   <li><a href="http://manpages.ubuntu.com/manpages/man1/ps.1.html">ps</a></li>
   <li><a href="http://manpages.ubuntu.com/manpages/man1/pstree.1.html">pstree</a></li>

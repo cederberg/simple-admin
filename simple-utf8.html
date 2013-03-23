@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>admin-backup-sync | Simple-Admin for Ubuntu</title>
+    <title>simple-utf8 | Simple-Admin for Ubuntu</title>
   </head>
 
   <body>
@@ -30,46 +30,33 @@
 
         <section class="main">
 
-<h2>admin-backup-sync</h2>
+<h2>simple-utf8</h2>
 
-<p>Performs a remote file sync for configured directories.</p>
+<p>Converts files to UTF-8 (from ISO-8859-1) if needed.</p>
 
 <h3>Usage:</h3>
 
 <blockquote>
-<code>admin-backup-sync [-v]</code>
+<code>simple-utf8 check &lt;file&gt; ...</code><br/>
+<code>simple-utf8 convert &lt;file&gt; ...</code>
 </blockquote>
 
-<table>
-<tr>
-<th>Option</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>-v</td>
-<td>Print verbose output.</td>
-</tr>
-</table>
+<p>The <code>&lt;file&gt;</code> arguments may be either files or directories.
+All directories will be searched recursively while ignoring any hidden files
+(<code>.*</code>).</p>
 
-<p>Syncronizes one or more directories using <code>rsync</code>. This command
-will set the appropriate flags to update and remove files on the receiving
-side, so be careful to sync the correct directories (see <code>rsync</code>).</p>
+<p>The <code>check</code> command is used to detect text file encoding of text
+files.  The results per file are printed to the standard output.</p>
 
-<h3>Configuration:</h3>
-
-<p>The syncronization is configured in <code>/etc/admin-backup-sync.conf</code>
-with one line for each pair of directories. No comment or blank lines are
-allowed. Each line contains the source dir, destination dir and optional
-command-line switches to rsync:</p>
-
-<pre><code>/backup/host01 root@host02:/backup/
-root@host02:/backup/host02 /backup/ --bwlimit=10</code></pre>
+<p>The <code>convert</code> command is used to convert all text files in the
+ISO-8859-1 encoding to UTF-8. Information about converted files are printed to
+the standard output.</p>
 
 <h3>See Also:</h3>
 
 <ul>
-  <li><code>/etc/admin-backup-sync.conf</code></li>
-  <li><a href="http://manpages.ubuntu.com/manpages/man1/rsync.1.html">rsync</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/file.1.html">file</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/iconv.1.html">iconv</a></li>
 </ul>
 
         </section>

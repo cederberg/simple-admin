@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>admin-backup-mysql | Simple-Admin for Ubuntu</title>
+    <title>simple-uptodate | Simple-Admin for Ubuntu</title>
   </head>
 
   <body>
@@ -30,14 +30,14 @@
 
         <section class="main">
 
-<h2>admin-backup-mysql</h2>
+<h2>simple-uptodate</h2>
 
-<p>Performs a MySQL dump of configured databases.</p>
+<p>Checks if the system requires (security) updates.</p>
 
 <h3>Usage:</h3>
 
 <blockquote>
-<code>admin-backup-mysql [-v]</code>
+<code>simple-uptodate [-s] [-m]</code>
 </blockquote>
 
 <table>
@@ -46,36 +46,27 @@
 <th>Description</th>
 </tr>
 <tr>
-<td>-v</td>
-<td>Print verbose output.</td>
+<td>-s</td>
+<td>Check only for security updates.</td>
+</tr>
+<tr>
+<td>-m</td>
+<td>E-mail the output to <code>root@localhost</code> instead of the standard output.</td>
 </tr>
 </table>
 
-<p>Performs a MySQL backup with <code>mysqldump</code> of the databases listed
-in <code>/etc/admin-backup-mysql.conf</code>. The
-<code>/backup/&lt;hostname&gt;/mysql/</code> directory is used to store the
-output MySQL backup SQL files (compressed with <code>lzma</code>).</p>
+<p>Synchronizes the package index with <code>apt-get update</code> and then
+runs a simulated check for updates and prints the results. Can also filter the
+updates for security-related issues.</p>
 
-<p>Backup files are stored for 30 days, except the files from the 1st each
-month (which are kept indefinitely). The MySQL backup should be run once per
-day. More frequent runs will overwrite previous backups.</p>
-
-<h3>Configuration:</h3>
-
-<p>The backup is configured in <code>/etc/admin-backup-mysql.conf</code> with
-one line per database. No comment or blank lines are allowed. Each line
-contains the database, user, password and optional command-line switches:</p>
-
-<pre><code>database1 user password
-database2 user password --ignore-table=table1</code></pre>
+<p>If no updates are available, no output is printed.</p>
 
 <h3>See Also:</h3>
 
 <ul>
-  <li><code>/etc/admin-backup-mysql.conf</code></li>
-  <li><code>/backup</code></li>
-  <li><a href="http://manpages.ubuntu.com/manpages/man1/mysqldump.1.html">mysqldump</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man8/apt-get.8.html">apt-get</a></li>
 </ul>
+
 
         </section>
 
