@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" >
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Chivo:900">
+    <link rel="stylesheet" type="text/css" href="css/stylesheet.css">
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="favicon.ico">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>simple-fileinfo | Simple-Admin for Ubuntu</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="inner">
+
+        <header>
+          <h1>Simple-Admin for Ubuntu</h1>
+          <h2>Scripts for simplified Ubuntu server administration.</h2>
+        </header>
+
+        <section class="links clearfix">
+          <a href="index.html" class="button back"><span>Start Page</span></a>
+        </section>
+
+        <hr>
+
+        <section class="main">
+
+<h2>simple-fileinfo</h2>
+
+<p>Prints information about a file or command.</p>
+
+<h3>Usage:</h3>
+
+<blockquote>
+<code>simple-fileinfo &lt;file&gt;</code>
+</blockquote>
+
+<p>Locates the absolute path to <code>&lt;file&gt;</code> and outputs information
+about the file and its contents. If <code>&lt;file&gt;</code> is a command, it will
+be located from the <code>PATH</code>. Symlinks are followed and printed
+recursively.</p>
+
+<p>The example below shows the output for <code>simple-fileinfo java</code>:
+
+<pre><code>/usr/bin/java -->
+/etc/alternatives/java -->
+/usr/lib/jvm/java-7-openjdk-i386/jre/bin/java:
+
+-rwxr-xr-x 1 root root 5588 2012-10-25 01:19:49 regular file
+
+MD5:    64082d66c90c1d83b83d3034a7073e92
+SHA256: 1c6c39d9062a75c34d5bb1ee36f35ef452749666805c722dcff7cb9164c479fb
+
+ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV),
+dynamically linked (uses shared libs), for GNU/Linux 2.6.24,
+BuildID[sha1]=0xb874b1992cdc9a6497cb0172a482af7fffd0b1eb, stripped</code></pre>
+
+<h3>See Also:</h3>
+
+<ul>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/readlink.1.html">readlink</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/stat.1.html">stat</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/file.1.html">file</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/md5sum.1.html">md5sum</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/sha256sum.1.html">sha256sum</a></li>
+
+</ul>
+
+        </section>
+
+        <footer>
+          Simple-Admin for Ubuntu is maintained by <a href="https://github.com/cederberg">Per Cederberg</a><br>
+          This page was adapted from
+          <a href="http://pages.github.com">GitHub Pages</a> with tactile theme
+          by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+      </div>
+    </div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7324321-5']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+</html>
