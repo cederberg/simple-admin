@@ -58,9 +58,9 @@ side, so be careful to sync the correct directories (see <code>rsync</code>).</p
 <h3>Configuration:</h3>
 
 <p>The syncronization is configured in <code>/etc/simple-backup-sync.conf</code>
-with one line for each pair of directories. No comment or blank lines are
-allowed. Each line contains the source dir, destination dir and optional
-command-line switches to rsync:</p>
+with one line for each pair of directories. Comment or blank lines are ignored.
+Each line contains the source dir, destination dir and optional command-line
+switches to rsync:</p>
 
 <pre><code>/backup/host01 root@host02:/backup/
 root@host02:/backup/host02 /backup/ --bwlimit=10</code></pre>
