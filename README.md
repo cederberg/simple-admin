@@ -3,7 +3,7 @@ simple-admin
 Scripts for simplified Ubuntu server administration and
 maintenance.
 
-Web Site: http://cederberg.github.com/simple-admin
+Web Site: http://www.simple-admin.org/
 
 
 Requirements
