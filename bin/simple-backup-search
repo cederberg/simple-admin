@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+#
+# Searches available backups for a file name (or path) pattern.
+#
+# Syntax: simple-backup-search <pattern>
+#
+
+# Configuration variables
+FIND=/usr/bin/find
+HOST=`hostname`
+SNAP_DIR=/backup/$HOST/current
+DIFF_DIR=/backup/$HOST/history
+
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
+
+# Setup color codes
+case $TERM in
+    *color)
+        COLOR_OFF=`echo -en '\033[0m'`
+        COLOR_ON=`echo -en '\033[36m'`
+        COLOR_ERR=`echo -en '\033[1;31m'`
+        ;;
+    *)
+        COLOR_OFF=''
+        COLOR_ON=''
+        COLOR_ERR=''
+        ;;
+esac
+
+# Function for printing command-line usage info
+usage() {
+    echo "Searches available backups for a file name (or path) pattern."
+    echo
+    echo "Syntax: simple-backup-search <pattern>"
+    exit 1
+}
+
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "ERROR:" "$*" >&2
+    exit 1
+}
+
+# Parse command-line arguments
+if [ ! $# -eq 1 ] ; then
+    usage
+fi
+PATTERN=$1
+
+# Find files
+ROOTS=`echo $DIFF_DIR/* $SNAP_DIR`
+PATHS=`find $ROOTS -type f -iwholename "*$PATTERN*" -printf "%P\n" | sort | uniq`
+for PATH in $PATHS ; do
+    NOTFOUND=""
+    [ -e /$PATH ] || NOTFOUND="$COLOR_ERR[deleted]$COLOR_OFF"
+    printf "$COLOR_ON%s$COLOR_OFF: $NOTFOUND\n" "/$PATH"
+    for ROOT in $ROOTS ; do
+        /usr/bin/find $ROOT -type f -path "$ROOT/$PATH" -printf "  %CY-%Cm-%Cd %CH:%CM %s %H\n"
+    done
+    echo
+done
