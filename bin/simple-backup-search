@@ -59,7 +59,7 @@ for PATH in $PATHS ; do
     [ -e /$PATH ] || NOTFOUND="$COLOR_ERR[deleted]$COLOR_OFF"
     printf "$COLOR_ON%s$COLOR_OFF: $NOTFOUND\n" "/$PATH"
     for ROOT in $ROOTS ; do
-        /usr/bin/find $ROOT -type f -path "$ROOT/$PATH" -printf "  %CY-%Cm-%Cd %CH:%CM %s %H\n"
+        /usr/bin/find $ROOT -type f -path "$ROOT/$PATH" -printf "  %CY-%Cm-%Cd %CH:%CM  %H\n"
     done
     echo
 done
