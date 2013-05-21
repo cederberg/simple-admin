@@ -17,9 +17,9 @@ Installation
 The install script will install required command-line tools and
 Perl modules.
 
-* With curl: `curl -L get.simple-admin.org | bash`
-* With wget: `wget -qO - get.simple-admin.org | bash`
-* Or download, unpack and run install script: `./install.sh`
+* `curl -L get.simple-admin.org | bash` -- for curl supporters
+* `wget -qO - get.simple-admin.org | bash` -- for wget fans
+* ...or download, unpack and run install script: `./install.sh`
 
 Configuration files can be copied & modified from `etc/*.conf` examples.
 
