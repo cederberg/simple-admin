@@ -6,8 +6,11 @@
     <base href="http://www.simple-admin.org/">
     <link rel="stylesheet" type="text/css" href="css/stylesheet.css">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Chivo:900">
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.0.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
     <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="favicon.ico">
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome-ie7.min.css">
+    <![endif]-->
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -31,9 +34,8 @@
         </header>
 
         <section class="links clearfix">
-          <a href="downloads/simple-admin-1.1.zip" class="button"><i class="icon-cloud-download"></i>Download ZIP</a>
-          <a href="downloads/simple-admin-1.1.tgz" class="button"><i class="icon-cloud-download"></i>Download TGZ</a>
-          <a href="https://github.com/cederberg/simple-admin" class="button"><i class="icon-github-alt"></i>View on GitHub</a>
+          <a href="https://github.com/cederberg/simple-admin/archive/master.zip" class="button"><i class="icon-cloud-download"></i>Download ZIP</a>
+          <a href="https://github.com/cederberg/simple-admin" class="button right"><i class="icon-github"></i>View on GitHub</a>
         </section>
 
         <hr>
@@ -44,7 +46,7 @@
 
 <ul>
 <li>Ubuntu 10.04 LTS (or later)</li>
-<li>...and some command-line tools (auto-installed)</li>
+<li>...and some command-line tools (installed if missing)</li>
 </ul>
 
 
@@ -52,10 +54,14 @@
 
 <p>The install script will install required command-line tools and Perl modules.
 
-<ol>
-<li>Run install script: <code>./install.sh</code></li>
-<li>Copy &amp; modify config files from <code>etc</code>.</li>
-</ol>
+<ul>
+<li><code>curl -L get.simple-admin.org | bash</code> &mdash; for curl supporters</li>
+<li><code>wget -qO - get.simple-admin.org | bash</code> &mdash; for wget fans</li>
+<li>...or download, unpack and run install script: <code>./install.sh</code></li>
+</ul>
+
+<p>Configuration files can be copied & modified from <code>etc/*.conf</code>
+examples.</p>
 
 
 <h2>Commands</h2>

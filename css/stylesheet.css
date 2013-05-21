@@ -198,29 +198,34 @@ em {
 
 code, pre {
   font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal;
-  color: #222;
   margin-bottom: 20px;
   font-size: 0.9em;
 }
 
 code {
+  color: #222;
   background-color: #f2f2f2;
   border: solid 1px #ddd;
-  padding: 0 3px;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+pre,
+pre code {
+  border: none;
+  color: #f2f2f2;
+  background-color: #303030;
+  text-shadow: none;
 }
 
 pre {
+  border-radius: 4px;
   padding: 6px 20px;
-  background: #303030;
-  color: #f2f2f2;
-  text-shadow: none;
+  box-shadow: 0 0 3px #000;
   overflow: auto;
 }
 
 pre code {
-  color: #f2f2f2;
-  background-color: #303030;
-  border: none;
   padding: 0;
 }
 
@@ -324,8 +329,15 @@ a.button:hover {
   box-shadow: 0px 1px 1px rgba(0,0,0,0.3);
 }
 
+a.button.right {
+  float: right;
+  margin-right: 40px;
+}
+
 a.button i {
   margin-right: 10px;
+  font-size: 1.3em;
+  vertical-align: -2px;
 }
 
 .clearfix:after {
