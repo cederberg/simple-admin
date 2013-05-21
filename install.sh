@@ -19,11 +19,21 @@ fail() {
 [ `whoami` == 'root' ] || fail "only root is allowed to install simple-admin"
 
 # Install required packages
-echo "Installing dependencies..."
-apt-get -qq install aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl libtext-glob-perl
+echo -n "Checking dependencies... "
+DEPS="aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl libtext-glob-perl"
+if apt-get --simulate install $DEPS | tail -n1 | grep '0 upgraded, 0 newly installed' > /dev/null ; then
+    echo "installed"
+else
+    echo "not installed"
+    echo "The following packages will be installed or updated:"
+    echo "    $DEPS"
+    echo -n "Press <Ctrl-C> to cancel, or <Enter> to continue: "
+    read
+    apt-get --yes install $DEPS
+fi
 
 # Install script files
-echo "Installing simple-admin scripts..."
+echo "Installing simple-admin scripts to /usr/local/bin/..."
 install --mode=0744 bin/simple-backup-files /usr/local/bin/
 install bin/simple-backup-mysql /usr/local/bin/
 install bin/simple-backup-status /usr/local/bin/
@@ -39,11 +49,14 @@ install bin/simple-www-stats /usr/local/bin/
 install bin/simple-zcat /usr/local/bin/
 
 # Install man pages
-echo "Installing man pages..."
+echo "Installing man pages to /usr/local/share/man/..."
 mkdir -p /usr/local/share/man/man1
 cp man/man1/* /usr/local/share/man/man1/
 gzip -f /usr/local/share/man/man1/simple-*.1
 
 # Finished
-echo "...done"
-echo "Note: Config files must be installed manually."
+echo "Installation successful."
+echo
+echo "Simple-Admin for Ubuntu is now installed -- http://www.simple-admin.org/"
+echo
+echo "NOTE: Config files must be manually installed. See web site for examples."
