@@ -33,7 +33,7 @@ install_deps() {
             echo -n "Press <Ctrl-C> to cancel, or <Enter> to continue: "
             read
         else
-            echo -n "Press <Ctrl-C> to cancel. The installation starts in 5 seconds..."
+            echo "Press <Ctrl-C> to cancel. The installation starts in 5 seconds..."
             sleep 5
         fi
         apt-get --yes install $DEPS
