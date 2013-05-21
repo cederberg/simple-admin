@@ -42,15 +42,17 @@ fi
 
 # Check for update
 apt-get update > /dev/null || fail "couldn't update package lists with apt-get"
-OUTFILE=/tmp/simple-uptodate.txt
-apt-get --simulate --quiet upgrade > $OUTFILE || fail "couldn't simulate package upgrade"
+apt-get clean || true
 if [ "$SECURITY" == "true" ] ; then
     TYPE="security updates"
-    FOUND=`grep "Inst " $OUTFILE | grep -c "security"` || true
+    SEARCH='~U ~Asecurity'
 else
     TYPE="updates"
-    FOUND=`grep -c "Inst " $OUTFILE` || true
+    SEARCH='~U'
 fi
+OUTFILE=/tmp/simple-uptodate.txt
+aptitude search -F '%16p# %V# -- %d' "$SEARCH" > $OUTFILE || fail "couldn't search for $TYPE"
+FOUND=`cat $OUTFILE | wc -l`
 if [ $FOUND -ne 0 ] ; then
     if [ $MAIL == "true" ] ; then
         printf "Subject: System $TYPE for $HOST\n\n" > $OUTFILE.1
