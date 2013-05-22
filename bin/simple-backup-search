@@ -5,11 +5,12 @@
 # Syntax: simple-backup-search <pattern>
 #
 
-# Configuration variables
+# Global variables
 FIND=/usr/bin/find
 HOST=`hostname`
-SNAP_DIR=/backup/$HOST/current
-DIFF_DIR=/backup/$HOST/history
+BACKUP_BASE_DIR=/backup/$HOST/files
+BACKUP_LATEST_DIR=$BACKUP_BASE_DIR/latest
+BACKUP_HISTORY_DIRS=$BACKUP_BASE_DIR/????-*
 
 # Set caution flags
 set -o nounset
@@ -52,14 +53,14 @@ fi
 PATTERN=$1
 
 # Find files
-ROOTS=`echo $DIFF_DIR/* $SNAP_DIR`
+ROOTS=`echo $BACKUP_HISTORY_DIRS $BACKUP_LATEST_DIR`
 PATHS=`find $ROOTS -type f -iwholename "*$PATTERN*" -printf "%P\n" | sort | uniq`
 for PATH in $PATHS ; do
     NOTFOUND=""
     [ -e /$PATH ] || NOTFOUND="$COLOR_ERR[deleted]$COLOR_OFF"
     printf "$COLOR_ON%s$COLOR_OFF: $NOTFOUND\n" "/$PATH"
     for ROOT in $ROOTS ; do
-        /usr/bin/find $ROOT -type f -path "$ROOT/$PATH" -printf "  %CY-%Cm-%Cd %CH:%CM  %H\n"
+        /usr/bin/find $ROOT -type f -path "$ROOT/$PATH" -printf "  %TY-%Tm-%Td %TH:%TM %10s  %H\n"
     done
     echo
 done
