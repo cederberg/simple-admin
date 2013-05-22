@@ -1,0 +1,40 @@
+.TH "simple-backup-search" "1" "Simple-Admin" "" "Simple-Admin"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+simple-backup-search -- searches for matching files in the backup dir
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBsimple-backup-search\fR \fIpattern\fR
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+Searches for all matching file paths in the \fB/backup/\fIhostname\fB/files\fR
+directory. For each file found, the locations to all existing backups are
+listed.
+
+The search \fIpattern\fR matches partial file paths, and may contain wildcards
+or directory separators. The example below shows the output for
+\fBsimple-backup-search fontconfig\fR:
+.sp
+.nf
+    /etc/java-6-sun/fontconfig.properties: [deleted]
+      2010-10-21 00:29      18035  /backup/host06/files/2012-11
+
+    /etc/java-7-openjdk/fontconfig.properties:
+      2012-10-24 19:00      14538  /backup/host06/files/2013-05
+      2012-10-24 19:00      14538  /backup/host06/files/2013-05-22
+      2013-04-23 14:03      13959  /backup/host06/files/latest
+.fi
+.sp
+.SH "SEE ALSO"
+.sp
+\fBsimple-backup-files\fR(1),
+\fBfind\fR(1),
+<http://www.simple-admin.org/>
