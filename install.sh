@@ -91,6 +91,7 @@ fi
 echo "Installing scripts to /usr/local/bin/..."
 install --mode=0744 bin/simple-backup-files /usr/local/bin/
 install bin/simple-backup-mysql /usr/local/bin/
+install bin/simple-backup-search /usr/local/bin/
 install bin/simple-backup-status /usr/local/bin/
 install bin/simple-backup-sync /usr/local/bin/
 install bin/simple-fileinfo /usr/local/bin/
