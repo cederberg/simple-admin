@@ -11,16 +11,19 @@
 #   /etc/simple-backup-files.conf
 #
 
-# Configuration variables
-CONFIG=/etc/simple-backup-files.conf
+# Global variables
+CONFIG=simple-backup-files.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
-BACKUP_BASE_DIR=/backup/$HOST/files
-BACKUP_LATEST_DIR=$BACKUP_BASE_DIR/latest
-OPTIONS="--archive --one-file-system --quiet"
 DATE_MONTH=`date '+%Y-%m'`
 DATE_DAY=`date '+%Y-%m-%d'`
 DATE_MINUTE=`date '+%Y-%m-%d-%H%M'`
+BACKUP_BASE_DIR=/backup/$HOST/files
+BACKUP_LATEST_DIR=$BACKUP_BASE_DIR/latest
+BACKUP_MONTH_DIR=$BACKUP_BASE_DIR/$DATE_MONTH
+BACKUP_DAY_DIR=$BACKUP_BASE_DIR/$DATE_DAY
+BACKUP_MINUTE_DIR=$BACKUP_BASE_DIR/$DATE_MINUTE
+OPTIONS="--archive --delete --quiet"
 VERBOSE="false"
 
 # Set caution flags
@@ -44,12 +47,12 @@ log() {
 [ `whoami` == 'root' ] || fail "only root is allowed to run simple-backup-files"
 
 # Load config to stdin
-if [ -f $CONFIG ] ; then
-    exec < $CONFIG
-elif [ -f $LOCALDIR/$CONFIG ] ; then
-    exec < $LOCALDIR/$CONFIG
+if [ -f /etc/$CONFIG ] ; then
+    exec < /etc/$CONFIG
+elif [ -f $LOCALDIR/etc/$CONFIG ] ; then
+    exec < $LOCALDIR/etc/$CONFIG
 else
-    fail "missing config file $CONFIG"
+    fail "missing config file /etc/$CONFIG"
 fi
 
 # Parse command-line arguments
@@ -58,19 +61,10 @@ if [ "${1:-}" == "-v" ] ; then
     VERBOSE=true
 fi
 
-# Create backup dir
-if [ ! -d $BACKUP_BASE_DIR/$DATE_MONTH ] ; then
-    NAME=$DATE_MONTH
-elif [ ! -d $BACKUP_BASE_DIR/$DATE_DAY ] ; then
-    NAME=$DATE_DAY
-else
-    NAME=$DATE_MINUTE
-fi
-BACKUP_CURRENT_DIR=$BACKUP_BASE_DIR/$NAME
-
 # Perform backup
-log "init backup to $BACKUP_CURRENT_DIR"
-mkdir -p $BACKUP_CURRENT_DIR
+log "init backup to $BACKUP_BASE_DIR"
+mkdir -p $BACKUP_LATEST_DIR $BACKUP_MONTH_DIR $BACKUP_DAY_DIR $BACKUP_MINUTE_DIR
+touch $BACKUP_LATEST_DIR
 while read SRC EXPIRES ; do
     [ "$SRC" != "" -a "${SRC:0:1}" != "#" ] || continue
     if [ ! -d $SRC ] ; then
@@ -78,25 +72,23 @@ while read SRC EXPIRES ; do
         continue
     fi
     log "syncing dir $SRC"
-    DST=$BACKUP_CURRENT_DIR$SRC
-    LNK=$BACKUP_LATEST_DIR$SRC
+    DST=$BACKUP_LATEST_DIR$SRC
+    DIFF=$BACKUP_MINUTE_DIR$SRC
     mkdir -p $DST
-    if [ -d $LNK ] ; then
-        RSYNC_OPTS="$OPTIONS --link-dest=$LNK/"
-    else
-        RSYNC_OPTS="$OPTIONS"
-    fi
-    rsync $RSYNC_OPTS $SRC/ $DST/
-    touch $DST
+    rsync $OPTIONS --backup --backup-dir=$DIFF $SRC/ $DST/
     if [ "$EXPIRES" != "" ] ; then
         log "removing $SRC backups older than $EXPIRES days"
-        find $BACKUP_BASE_DIR/????-*$SRC -maxdepth 0 -type d -mtime +$EXPIRES -exec rm -rf {} \;
+        find $BACKUP_BASE_DIR/????-*$SRC -maxdepth 0 -type d -mtime +$EXPIRES -exec rm -rf {} \; 2> /dev/null || true
     fi
 done
 
-# Change latest backup dir
-rm -f $BACKUP_LATEST_DIR
-cd $BACKUP_BASE_DIR ; ln -s `basename $BACKUP_CURRENT_DIR` `basename $BACKUP_LATEST_DIR`
+# Remove empty dirs & update daily and montly dirs
+find $BACKUP_MINUTE_DIR -type d -delete 2> /dev/null || true
+if [ -d $BACKUP_MINUTE_DIR ] ; then
+    log updating daily and monthly diff dirs
+    cp -fluR $BACKUP_MINUTE_DIR/* $BACKUP_DAY_DIR/
+    cp -fluR $BACKUP_DAY_DIR/* $BACKUP_MONTH_DIR/
+fi
 
 # Remove outdated backup dirs
 find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +1 -exec rm -rf {} \;
@@ -104,4 +96,4 @@ find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm
 
 # Finished backup
 /usr/local/bin/simple-freemem
-log "done backup to $BACKUP_CURRENT_DIR"
+log "done backup to $BACKUP_BASE_DIR"
