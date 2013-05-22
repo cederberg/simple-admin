@@ -1,4 +1,4 @@
-.TH "simple-backup-files" "1" "Simple-Admin 1.1" "" "Simple-Admin 1.1"
+.TH "simple-backup-files" "1" "Simple-Admin" "" "Simple-Admin"
 .\" -----------------------------------------------------------------
 .\" * disable hyphenation
 .nh
@@ -16,21 +16,19 @@ simple-backup-files -- performs a file system backup for configured directories
 .SH "DESCRIPTION"
 .sp
 Performs a file system backup with \fBrsync\fR of the directories listed in
-\fB/etc/simple-backup-files.conf\fR. All the files will be recursively copied
-to a new directory \fB/backup/\fIhostname\fB/files/\fItimestamp\fR. A symbolic
-link \fB/backup/\fIhostname\fB/files/latest\fR always points to the last
-complete backup.
+\fB/etc/simple-backup-files.conf\fR. All files will be recursively copied
+to the \fB/backup/\fIhostname\fB/files/latest\fR directory with timestamps
+and permissions intact.
 
-The first backup every day and every month have a different timestamp format
-(omitting hours and minutes). The monthly backup directories are kept
-indefinitely, but daily backups are only preserved for 30 days. Other
-timestamped backup directories are preserved for 48 hours.
+Files removed or modified since the last backup will be moved to a new
+\fB/backup/\fIhostname\fB/files/\fItimestamp\fR directory. Additional
+timestamped directories for the day and month are also created and updated
+with these modifications.
 
-In order to save space, identical files are hard linked between the current
-and the previous backup directory. The directory structure itself cannot be
-hard linked however, so each backup will require some disk usage. Backups of
-large number of files and directories will require many MBs of disk space even
-if all files remain unmodified.
+The monthly backup directories are kept indefinitely, daily backups are
+preserved for 30 days, and any other timestamped backup directory is
+preserved for 48 hours. In order to save space, identical files are hard
+linked between the timestamped backup directories.
 
 The backup can be run as frequently as every minute, but should probably be
 run once per day to keep disk usage down.
@@ -73,6 +71,7 @@ Backup directory with subdirectories per hostname.
 .sp
 .SH "SEE ALSO"
 .sp
+\fBsimple-backup-search\fR(1),
 \fBsimple-backup-status\fR(1),
 \fBrsync\fR(1),
-<http://cederberg.github.com/simple-admin/>
+<http://www.simple-admin.org/>
