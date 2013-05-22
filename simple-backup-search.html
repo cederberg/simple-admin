@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <base href="http://www.simple-admin.org/">
+    <link rel="stylesheet" type="text/css" href="css/stylesheet.css">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Chivo:900">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="favicon.ico">
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome-ie7.min.css">
+    <![endif]-->
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta property="og:url" content="http://www.simple-admin.org/simple-backup-search.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="simple-admin.org">
+    <title>simple-backup-search | Simple-Admin for Ubuntu</title>
+    <meta property="og:title" content="simple-backup-search | Simple-Admin for Ubuntu">
+    <meta property="og:description" content="Command-line tools for simplified server administration">
+    <meta property="og:image" content="http://www.simple-admin.org/favicon.png">
+    <meta property="fb:admins" content="627548736">
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="inner">
+
+        <header>
+          <h1>Simple-Admin <span>for Ubuntu</span></h1>
+          <h2>Command-line tools for simplified server administration</h2>
+        </header>
+
+        <section class="links clearfix">
+          <a href="index.html" class="button"><i class="icon-arrow-left"></i>Start Page</a>
+        </section>
+
+        <hr>
+
+        <section class="main">
+
+<h2>simple-backup-search</h2>
+
+<p>Searches for matching files in the backup directory.</p>
+
+<h3>Usage:</h3>
+
+<blockquote>
+<code>simple-backup-search &lt;pattern&gt;</code>
+</blockquote>
+
+<p>Searches for all matching file paths in the
+<code>/backup/&lt;hostname&gt;/files</code> directory. For each file found,
+the locations to all existing backups are listed.</p>
+
+<p>The search <code>&lt;pattern&gt;</code> matches partial file paths, and
+may contain wildcards or directory separators. The example below shows the
+output for <code>simple-backup-search fontconfig</code>:</p>
+
+<pre><code>/etc/java-6-sun/fontconfig.properties: [deleted]
+  2010-10-21 00:29      18035  /backup/host06/files/2012-11
+
+/etc/java-7-openjdk/fontconfig.properties:
+  2012-10-24 19:00      14538  /backup/host06/files/2013-05
+  2012-10-24 19:00      14538  /backup/host06/files/2013-05-22
+  2013-04-23 14:03      13959  /backup/host06/files/latest</code></pre>
+
+<h3>See Also:</h3>
+
+<ul>
+  <li><a href="simple-backup-files.html">simple-backup-files</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/find.1.html">find</a></li>
+</ul>
+
+        </section>
+
+        <footer>
+          Simple-Admin for Ubuntu is maintained by <a href="https://github.com/cederberg">Per Cederberg</a><br>
+          This page was adapted from
+          <a href="http://pages.github.com">GitHub Pages</a> with tactile theme
+          by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+      </div>
+    </div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7324321-5']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+</html>
