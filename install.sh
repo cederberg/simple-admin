@@ -63,7 +63,7 @@ if [ `basename $PROG` != 'install.sh' ] ; then
     if which curl > /dev/null ; then
         curl -s -L -O "$URL"
     else
-        wget -q "$URL"
+        wget -O master.zip -q "$URL"
     fi
     unzip -q -u -o master.zip
     rm -f master.zip
