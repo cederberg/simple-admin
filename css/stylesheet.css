@@ -339,6 +339,7 @@ a.button i {
   margin-right: 10px;
   font-size: 1.3em;
   vertical-align: -2px;
+  color: #666666;
 }
 
 .clearfix:after {
