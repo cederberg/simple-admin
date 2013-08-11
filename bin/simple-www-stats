@@ -83,6 +83,11 @@ $Text::Glob::strict_wildcard_slash = undef;
             $path = '';
             $version = '<Invalid>';
         }
+        my $file = ($path =~ /(.*)(\?.*)/) ? $1 : $path;
+        my $filetype = 'none';
+        if ($file =~ m/\.([a-z0-9]+)$/i) {
+            $filetype = lc($1);
+        }
         my $time = defined($self->{TIME}) ? $parts[$self->{TIME}] : "";
         my $ip = defined($self->{IP}) ? $parts[$self->{IP}] : "";
         $ip =~ s/^(0:0:0:0:0|:)(:FFFF:|:0:|:)((\d{1,3}\.){3}\d{1,3})$/$3/i;
@@ -100,6 +105,8 @@ $Text::Glob::strict_wildcard_slash = undef;
         return (
             METHOD => $method,
             PATH => $path,
+            FILE => $file,
+            FILETYPE => $filetype,
             HTTP => $version,
             DATETIME => $time,
             IP => $ip,
@@ -126,6 +133,7 @@ my %stat_top_count = ();
 my %stat_top_time = ();
 my %stat_top_download = ();
 my %stat_source = ();
+my %stat_filetype = ();
 my %stat_host = ();
 my %stat_host_time = ();
 my %stat_host_download = ();
@@ -322,6 +330,17 @@ sub process_line {
     $stat_httpmethod{$data{'METHOD'}}++;
     $stat_httpversion{$data{'HTTP'} || '<blank>'}++;
     $stat_useragent{$data{'BROWSER'}}++;
+    if ($data{'FILETYPE'} =~ /^(gif|ico|jpe?g|png)$/) {
+        $stat_filetype{'Images'}++;
+    } elsif ($data{'FILETYPE'} =~ /^(css|less|sass)$/) {
+        $stat_filetype{'Styles'}++;
+    } elsif ($data{'FILETYPE'} =~ /^(js|coffee|dart)$/) {
+        $stat_filetype{'Scripts'}++;
+    } elsif ($data{'FILETYPE'} =~ /^(rss|xml|json)$/) {
+        $stat_filetype{'Data'}++;
+    } else {
+        $stat_filetype{'Markup'}++;
+    }
     my $referer = $data{'REFERRER'};
     my $url = $data{'PATH'};
     if ($respcode =~ /^[23]0[0-9]$/) {
@@ -435,6 +454,7 @@ if (defined($output_json)) {
     printf $fh qq#  "backend_time": %s,\n#, encode_json(\%stat_prcstime);
     printf $fh qq#  "time_of_day": %s,\n#, encode_json(\%stat_timeofday);
     printf $fh qq#  "data_source": %s,\n#, encode_json(\%stat_source);
+    printf $fh qq#  "file_types": %s,\n#, encode_json(\%stat_filetype);
     printf $fh qq#  "http_method": %s,\n#, encode_json(\%stat_httpmethod);
     printf $fh qq#  "http_version": %s,\n#, encode_json(\%stat_httpversion);
     printf $fh qq#  "http_code": %s,\n#, encode_json(\%stat_httpcode);
@@ -476,6 +496,8 @@ if (!defined($output_json) or defined($output_text)) {
     }
     print $fh "Data Sources:\n";
     print_histogram($fh, \%stat_source);
+    print $fh "File Types:\n";
+    print_histogram($fh, \%stat_filetype);
     print $fh "Request Methods:\n";
     print_histogram($fh, \%stat_httpmethod);
     print $fh "Request Versions:\n";
