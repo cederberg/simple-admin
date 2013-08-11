@@ -230,13 +230,18 @@ sub normalize_browser_platform {
         if ($agent =~ m#Version/(\d+)#i) {
             $$ref_data{'BROWSER_VERSION'} = $1;
         }
-    } elsif ($agent =~ /Bing|Facebook|Google|Yahoo/i or
-             $agent =~ /Java|PubSub|Reeder/i or
-             $agent =~ /bot|crawler|search|spider/i or
-             $agent =~ /archive|check|link|monitor|valid/i) {
-        $$ref_data{'BROWSER'} = 'Bot';
-    } elsif ($agent =~ /^-?$/) {
-        $$ref_data{'BROWSER'} = '<blank>';
+    } elsif ($agent =~ /Trident/i) {
+        $$ref_data{'BROWSER'} = 'MSIE';
+        if ($agent =~ m/rv:(\d+)/i) {
+            $$ref_data{'BROWSER_VERSION'} = $1;
+        }
+    } elsif ($agent =~ /Bing|Facebook|Google|NING|Pinterest|Yahoo/i or
+             $agent =~ /curl|Java|PubSub|Reeder|wget/i or
+             $agent =~ /bot|crawler|fetch|proxy|search|spider|swarm/i or
+             $agent =~ /archive|check|link|monitor|policy|subscribe|valid/i or
+             $agent =~ /^Mozilla\/4\.0 \(compatible;\)$/ or
+             $agent =~ /^-?$/) {
+        $$ref_data{'BROWSER'} = 'Bot-like';
     } else {
         $$ref_data{'BROWSER'} = 'Other';
     }
