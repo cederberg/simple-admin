@@ -288,7 +288,7 @@ sub process_line {
     normalize_browser_platform(\%data);
     my $hour = $data{'DATETIME'};
     $hour =~ s/^.*?\d{4}:(\d{2}):.*/$1/;
-    $timeofday{''.(int($hour) >> 2)}++;
+    $timeofday{''.(int($hour) / 3)}++;
     my $host = $data{'HOST'} || '<blank>';
     $stat_host{$host}++;
     my $ip = $data{'IP'};
@@ -404,7 +404,7 @@ if (!@filenames) {
 # Format time-of-day keys
 foreach my $key (sort keys %timeofday) {
     my $count = $timeofday{$key};
-    my $timekey = sprintf("%02d:00-%02d:59", int($key) * 4, int($key) * 4 + 3);
+    my $timekey = sprintf("%02d:00-%02d:59", int($key) * 3, int($key) * 3 + 2);
     $stat_timeofday{$timekey} = $count;
 }
 
@@ -467,7 +467,7 @@ if (!defined($output_json) or defined($output_text)) {
     foreach my $key (sort keys %stat_prcstime) {
         printf $fh "  %5.1f%% within: %8s seconds\n", $key * 100.0, $stat_prcstime{$key};
     }
-    print $fh "Time of Day:\n";
+    print $fh "Time of Day Distribution:\n";
     foreach my $key (sort keys %stat_timeofday) {
         my $count = $stat_timeofday{$key};
         printf $fh "  %-15s %7d (%4.1f%%) requests\n", $key.':', $count, $count * 100.0 / $total;
