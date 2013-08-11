@@ -119,7 +119,6 @@ $Text::Glob::strict_wildcard_slash = undef;
 my $total = 0;
 my $totaltime = 0.0;
 my $totalkb = 1;
-my $totalbytes = 0;
 my @conf_errors = ();
 my %timeofday = ();
 my %prcstime = ();
@@ -303,9 +302,7 @@ sub process_line {
     my $respcode = $data{'CODE'};
     $stat_httpcode{"HTTP $respcode"}++;
     my $bytes = int($data{'BYTES'});
-    $totalbytes += $bytes;
-    $totalkb += $totalbytes >> 10;
-    $totalbytes &= 0x3FF;
+    $totalkb += 1 + ($bytes >> 10);
     my $backendtime = 0.0;
     if ($data{'BACKEND'} eq '-' and $data{'CACHE'} eq '-') {
         $stat_source{'File'}++;
