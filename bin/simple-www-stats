@@ -289,9 +289,6 @@ sub process_line {
     my $hour = $data{'DATETIME'};
     $hour =~ s/^.*?\d{4}:(\d{2}):.*/$1/;
     $timeofday{''.(int($hour) >> 2)}++;
-    my $resptime = 0.0 + $data{'DELAY'};
-    $totaltime += $resptime;
-    $prcstime{$resptime}++;
     my $host = $data{'HOST'} || '<blank>';
     $stat_host{$host}++;
     my $ip = $data{'IP'};
@@ -309,13 +306,17 @@ sub process_line {
     $totalbytes += $bytes;
     $totalkb += $totalbytes >> 10;
     $totalbytes &= 0x3FF;
+    my $backendtime = 0.0;
     if ($data{'BACKEND'} eq '-' and $data{'CACHE'} eq '-') {
         $stat_source{'File'}++;
     } elsif ($data{'BACKEND'} ne '-') {
         $stat_source{'Backend'}++;
+        $backendtime = 0.0 + $data{'BACKEND'};
     } else {
         $stat_source{'Cache'}++;
     }
+    $totaltime += $backendtime;
+    $prcstime{$backendtime}++;
     $stat_httpmethod{$data{'METHOD'}}++;
     $stat_httpversion{$data{'HTTP'} || '<blank>'}++;
     $stat_useragent{$data{'BROWSER'}}++;
@@ -323,9 +324,9 @@ sub process_line {
     my $url = $data{'PATH'};
     if ($respcode =~ /^[23]0[0-9]$/) {
         $stat_top_count{$host.$url}++;
-        $stat_top_time{$host.$url} += $resptime;
+        $stat_top_time{$host.$url} += $backendtime;
         $stat_top_download{$host.$url} += ($bytes >> 10) + 1;
-        $stat_host_time{$host} += $resptime;
+        $stat_host_time{$host} += $backendtime;
         $stat_host_download{$host} += ($bytes >> 10) + 1;
     } else {
         $stat_errortype{"$respcode ".normalize_error_msg($respcode, $host, $url)}++;
@@ -429,7 +430,7 @@ if (defined($output_json)) {
     printf $fh qq#  "error_type": %s,\n#, encode_json(\%stat_errortype);
     printf $fh qq#  "hostname": %s,\n#, encode_json(\%stat_host);
     printf $fh qq#  "country": %s,\n#, encode_json(\%stat_country);
-    printf $fh qq#  "processing_time": %s,\n#, encode_json(\%stat_prcstime);
+    printf $fh qq#  "backend_time": %s,\n#, encode_json(\%stat_prcstime);
     printf $fh qq#  "time_of_day": %s,\n#, encode_json(\%stat_timeofday);
     printf $fh qq#  "data_source": %s,\n#, encode_json(\%stat_source);
     printf $fh qq#  "http_method": %s,\n#, encode_json(\%stat_httpmethod);
@@ -448,21 +449,21 @@ if (!defined($output_json) or defined($output_text)) {
     }
     print $fh "Top Request Count:\n";
     print_histogram($fh, \%stat_top_count, 71, 20);
-    print $fh "Top Process Time:\n";
-    print_histogram_time($fh, \%stat_top_time, 68, 20);
     print $fh "Top Download Size:\n";
     print_histogram_kb($fh, \%stat_top_download, 68, 20);
+    print $fh "Top Backend Time:\n";
+    print_histogram_time($fh, \%stat_top_time, 68, 20);
     print $fh "Errors:\n";
     print_histogram($fh, \%stat_errortype, 71);
     print $fh "Hostnames:\n";
     print_histogram($fh, \%stat_host, 35);
-    print $fh "Top Hostname Process Times:\n";
-    print_histogram_time($fh, \%stat_host_time, 35, 20);
     print $fh "Top Hostname Download Sizes:\n";
     print_histogram_kb($fh, \%stat_host_download, 35, 20);
+    print $fh "Top Hostname Backend Time:\n";
+    print_histogram_time($fh, \%stat_host_time, 35, 20);
     print $fh "Countries:\n";
     print_histogram($fh, \%stat_country, 35);
-    print $fh "Processing Times:\n";
+    print $fh "Backend Time Distribution:\n";
     foreach my $key (sort keys %stat_prcstime) {
         printf $fh "  %5.1f%% within: %8s seconds\n", $key * 100.0, $stat_prcstime{$key};
     }
@@ -483,7 +484,7 @@ if (!defined($output_json) or defined($output_text)) {
     print_histogram($fh, \%stat_useragent);
     printf $fh "Total:\n";
     printf $fh "  %7d requests\n", $total;
-    printf $fh "  %11s process time\n", format_secs($totaltime);
     printf $fh "  %10s downloaded data\n", format_kb($totalkb);
+    printf $fh "  %11s backend time\n", format_secs($totaltime);
     close($fh);
 }
