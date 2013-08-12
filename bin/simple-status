@@ -84,33 +84,28 @@ storagestatus() {
     done
 }
 
-# Function for printing all child PIDs
-proctree() {
+# Function for printing a group of related PIDs
+procids() {
     PID=$1
     printf "$PID "
     for CHILD in `ps --ppid $PID -o pid --no-headers` ; do
-        proctree $CHILD
+        procids $CHILD
     done
 }
 
 # Function for printing process status
 procstatus() {
-    TOTAL_PIDS=`proctree $1`
+    TMPFILE=/tmp/simple-status.vars
+    ps --format "pid,rss,comm" --no-headers `procids $1` > $TMPFILE
+    exec < $TMPFILE
     TOTAL_RSS=0
     TOTAL_SWAP=0
-    for ID in $TOTAL_PIDS ; do
-        PROCFILE=/proc/$ID/status
-        if [ -e $PROCFILE ] ; then
-            TMPFILE=/tmp/simple-status.vars
-            sed -e 's/^\(\w*\):\s*\(\S*\).*/\1="\2"/g;t;d' $PROCFILE > $TMPFILE
-            . $TMPFILE
-            rm -f $TMPFILE
-            RSS=${VmRSS:-0}
-            SWAP=${VmSwap:-0}
-            TOTAL_RSS=$((TOTAL_RSS + RSS))
-            TOTAL_SWAP=$((TOTAL_SWAP + SWAP))
-        fi
+    while read ID RSS CMD ; do
+        SWAP=`grep VmSwap /proc/$ID/status | tr -cd '[:digit:]'` || true
+        TOTAL_RSS=$((TOTAL_RSS + RSS))
+        TOTAL_SWAP=$((TOTAL_SWAP + SWAP))
     done
+    rm -f $TMPFILE
     PID=$1
     RSS=`echo $TOTAL_RSS | awk '{OFMT="%.1f" ; print $1 / 1024}'`
     SWAP=`echo $TOTAL_SWAP | awk '{OFMT="%.0f" ; print $1 / 1024}'`
