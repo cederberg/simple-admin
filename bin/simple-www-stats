@@ -201,12 +201,17 @@ sub normalize_stat_values {
     my $hour = $$ref_data{'DATETIME'};
     $hour =~ s/^.*?\d{4}:(\d{2}):.*/$1/;
     $$ref_data{'HOUR'} = $hour;
-    $$ref_data{'COUNTRY'} = '<No IP adress>';
+    $$ref_data{'COUNTRY'} = '<Unknown>';
     if ($$ref_data{'IP'} =~ /^[\d\.]+$/) {
         my ($ipcode, $ipcountry) = $geo->LookUp($$ref_data{'IP'});
+        if ($ipcountry =~ /Reserved/) {
+            $ipcountry = '<Unknown>';
+        } elsif ($ipcountry =~ /Taiwan/) {
+            $ipcountry = 'Taiwan';
+        }
         $$ref_data{'COUNTRY'} = $ipcountry || $ipcode;
     } elsif ($$ref_data{'IP'} ne '') {
-        $$ref_data{'COUNTRY'} = '<Unsupported IPv6>';
+        $$ref_data{'COUNTRY'} = '<Unknown (IPv6)>';
     }
     $$ref_data{'SOURCE'} = 'File';
     if ($$ref_data{'BACKEND'} ne '-') {
