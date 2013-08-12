@@ -129,24 +129,21 @@ my $total = 0;
 my $totaltime = 0.0;
 my $totalkb = 1;
 my @conf_errors = ();
-my %hist_timeofday = ();
-my %hist_prcstime = ();
-my %stat_top_count = ();
-my %stat_top_time = ();
-my %stat_top_download = ();
-my %stat_source = ();
-my %stat_filetype = ();
+my %stat_httpcode = ();
+my %stat_httpversion = ();
+my %stat_httpmethod = ();
 my %stat_host = ();
-my %stat_host_time = ();
-my %stat_host_download = ();
 my %stat_country = ();
 my %stat_timeofday = ();
-my %stat_prcstime = ();
-my %stat_httpmethod = ();
-my %stat_httpversion = ();
-my %stat_httpcode = ();
+my %stat_timeofday_raw = ();
 my %stat_useragent = ();
+my %stat_file = ();
+my %stat_filetype = ();
+my %stat_source = ();
+my %stat_redirect = ();
 my %stat_errortype = ();
+my %hist_prcstime_raw = ();
+my %hist_prcstime = ();
 my $parser = Parser->new;
 my $geo = Geo::IPfree->new;
 $geo->Faster;
@@ -255,6 +252,20 @@ sub normalize_error_msg {
     return "$respcode $host$url";
 }
 
+# Processes stat counters for a key
+sub process_counter {
+    my ($ref, $key, $kbytes, $time) = @_;
+    if (!defined($$ref{$key})) {
+        $$ref{$key} = ();
+        $$ref{$key}{'requests'} = 0;
+        $$ref{$key}{'kbytes'} = 0;
+        $$ref{$key}{'time'} = 0.0;
+    }
+    $$ref{$key}{'requests'}++;
+    $$ref{$key}{'kbytes'} += $kbytes;
+    $$ref{$key}{'time'} += $time;
+}
+
 # Processes an HTTP log file line
 sub process_line {
     my ($line) = @_;
@@ -262,28 +273,28 @@ sub process_line {
     normalize_browser_platform(\%data);
     normalize_stat_values(\%data);
     my $respcode = $data{'CODE'};
+    my $kbytes = $data{'KBYTES'};
+    my $time = $data{'BACKENDTIME'};
     $total++;
-    $totalkb += $data{'KBYTES'};
-    $totaltime += $data{'BACKENDTIME'};
-    $hist_timeofday{''.(int($data{'HOUR'}) / 3)}++;
-    $hist_prcstime{$data{'BACKENDTIME'}}++;
-    $stat_source{$data{'SOURCE'}}++;
-    $stat_country{$data{'COUNTRY'}}++;
-    $stat_host{$data{'HOSTNAME'}}++;
-    $stat_httpcode{"HTTP $respcode"}++;
-    $stat_httpmethod{$data{'METHOD'}}++;
-    $stat_httpversion{$data{'HTTP'} || '<blank>'}++;
-    $stat_useragent{$data{'BROWSER'}}++;
-    $stat_filetype{$data{'FILECATEGORY'}}++;
-    if ($respcode =~ /^[23]0[0-9]$/) {
-        my $hostfile = $data{'HOST'}.$data{'FILE'};
-        $stat_top_count{$hostfile}++;
-        $stat_top_time{$hostfile} += $data{'BACKENDTIME'};
-        $stat_top_download{$hostfile} += $data{'KBYTES'};
-        $stat_host_time{$data{'HOSTNAME'}} += $data{'BACKENDTIME'};
-        $stat_host_download{$data{'HOSTNAME'}} += $data{'KBYTES'};
+    $totalkb += $kbytes;
+    $totaltime += $time;
+    process_counter(\%stat_timeofday_raw, ''.(int($data{'HOUR'}) / 3), $kbytes, $time);
+    process_counter(\%hist_prcstime_raw, $data{'BACKENDTIME'}, $kbytes, $time);
+    process_counter(\%stat_httpcode, "HTTP $respcode", $kbytes, $time);
+    process_counter(\%stat_httpversion, $data{'HTTP'} || '<blank>', $kbytes, $time);
+    process_counter(\%stat_httpmethod, $data{'METHOD'}, $kbytes, $time);
+    process_counter(\%stat_country, $data{'COUNTRY'}, $kbytes, $time);
+    process_counter(\%stat_host, $data{'HOSTNAME'}, $kbytes, $time);
+    process_counter(\%stat_filetype, $data{'FILECATEGORY'}, $kbytes, $time);
+    process_counter(\%stat_source, $data{'SOURCE'}, $kbytes, $time);
+    process_counter(\%stat_useragent, $data{'BROWSER'}, $kbytes, $time);
+    if ($respcode =~ /^20[0-9]$/ || $respcode eq '304') {
+        process_counter(\%stat_file, $data{'HOST'}.$data{'FILE'}, $kbytes, $time);
+    } elsif ($respcode =~ /^30[0-9]$/) {
+        process_counter(\%stat_redirect, $data{'HOST'}.$data{'FILE'}, $kbytes, $time);
     } else {
-        $stat_errortype{normalize_error_msg($respcode, $data{'HOST'}, $data{'PATH'})}++;
+        my $key = normalize_error_msg($respcode, $data{'HOST'}, $data{'PATH'});
+        process_counter(\%stat_errortype, $key, $kbytes, $time);
     }
 }
 
@@ -363,43 +374,26 @@ sub format_secs {
 
 # Print a formatted histogram
 sub print_histogram {
-    my ($handle, $hashref, $width, $max) = @_;
-    my @sorted = reverse sort {$$hashref{$a} <=> $$hashref{$b}} keys %$hashref;
-    my $fmt = sprintf("  %%-%ds %s\n", $width || 15, "%7d (%4.1f%%) requests");
+    my ($handle, $hashref, $width, $max, $sortby) = @_;
+    $sortby = $sortby || 'requests';
+    my @sorted;
+    if ($sortby eq 'key') {
+        @sorted = sort keys %$hashref;
+    } else {
+        @sorted = reverse sort {$$hashref{$a}{$sortby} <=> $$hashref{$b}{$sortby}} keys %$hashref;
+    }
+    my $fmt = "%7d (%4.1f%%) reqs %12s (%4.1f%%) %12s (%4.1f%%)";
+    $fmt = sprintf("  %%-%ds %s\n", $width || 30, $fmt);
     if (defined($max) and @sorted > $max) {
         $#sorted = $max - 1;
     }
     foreach my $key (@sorted) {
-        my $count = $$hashref{$key};
-        printf $handle $fmt, $key.':', $count, percent($count, $total);
-    }
-}
-
-# Print a formatted time histogram
-sub print_histogram_time {
-    my ($handle, $hashref, $width, $max) = @_;
-    my @sorted = reverse sort {$$hashref{$a} <=> $$hashref{$b}} keys %$hashref;
-    my $fmt = sprintf("  %%-%ds %s\n", $width || 15, "%10s (%4.1f%%)");
-    if (defined($max) and @sorted > $max) {
-        $#sorted = $max - 1;
-    }
-    foreach my $key (@sorted) {
-        my $count = $$hashref{$key};
-        printf $handle $fmt, $key.':', format_secs($count), percent($count, $totaltime);
-    }
-}
-
-# Print a formatted data size histogram
-sub print_histogram_kb {
-    my ($handle, $hashref, $width, $max) = @_;
-    my @sorted = reverse sort {$$hashref{$a} <=> $$hashref{$b}} keys %$hashref;
-    my $fmt = sprintf("  %%-%ds %s\n", $width || 15, "%10s (%4.1f%%)");
-    if (defined($max) and @sorted > $max) {
-        $#sorted = $max - 1;
-    }
-    foreach my $key (@sorted) {
-        my $count = $$hashref{$key};
-        printf $handle $fmt, $key.':', format_kb($count), percent($count, $totalkb);
+        my $count = $$hashref{$key}{'requests'};
+        my $kbytes = $$hashref{$key}{'kbytes'};
+        my $time = $$hashref{$key}{'time'};
+        printf $handle $fmt, $key.':', $count, percent($count, $total),
+               format_kb($kbytes), percent($kbytes, $totalkb),
+               format_secs($time), percent($time, $totaltime);
     }
 }
 
@@ -432,20 +426,19 @@ if (!@filenames) {
 }
 
 # Format time-of-day keys
-foreach my $key (sort keys %hist_timeofday) {
-    my $count = $hist_timeofday{$key};
+foreach my $key (sort keys %stat_timeofday_raw) {
     my $timekey = sprintf("%02d:00-%02d:59", int($key) * 3, int($key) * 3 + 2);
-    $stat_timeofday{$timekey} = $count;
+    $stat_timeofday{$timekey} = $stat_timeofday_raw{$key};
 }
 
 # Calculate processing time thresholds
 my @limits = (0.500, 0.750, 0.900, 0.950, 0.975, 0.990, 0.995, 0.998, 0.999, 1.0);
 my $nextlimit = shift(@limits);
 my $count = 0;
-foreach my $time (sort {$a <=> $b} keys %hist_prcstime) {
-    $count += $hist_prcstime{$time};
+foreach my $time (sort {$a <=> $b} keys %hist_prcstime_raw) {
+    $count += $hist_prcstime_raw{$time}{'requests'};
     if ($count / $total >= $nextlimit) {
-        $stat_prcstime{$nextlimit} = $time;
+        $hist_prcstime{$nextlimit} = $time;
         $nextlimit = shift(@limits);
     }
 }
@@ -457,17 +450,19 @@ if (defined($output_json)) {
     printf $fh "\{\n";
     my %json_total = ( 'count' => $total, 'kb' => $totalkb, 'size' => format_kb($totalkb));
     printf $fh qq#  "total": %s,\n#, encode_json(\%json_total);
-    printf $fh qq#  "error_type": %s,\n#, encode_json(\%stat_errortype);
+    printf $fh qq#  "http_code": %s,\n#, encode_json(\%stat_httpcode);
+    printf $fh qq#  "http_version": %s,\n#, encode_json(\%stat_httpversion);
+    printf $fh qq#  "http_method": %s,\n#, encode_json(\%stat_httpmethod);
     printf $fh qq#  "hostname": %s,\n#, encode_json(\%stat_host);
     printf $fh qq#  "country": %s,\n#, encode_json(\%stat_country);
-    printf $fh qq#  "backend_time": %s,\n#, encode_json(\%stat_prcstime);
-    printf $fh qq#  "time_of_day": %s,\n#, encode_json(\%stat_timeofday);
-    printf $fh qq#  "data_source": %s,\n#, encode_json(\%stat_source);
-    printf $fh qq#  "file_types": %s,\n#, encode_json(\%stat_filetype);
-    printf $fh qq#  "http_method": %s,\n#, encode_json(\%stat_httpmethod);
-    printf $fh qq#  "http_version": %s,\n#, encode_json(\%stat_httpversion);
-    printf $fh qq#  "http_code": %s,\n#, encode_json(\%stat_httpcode);
     printf $fh qq#  "user_agent": %s,\n#, encode_json(\%stat_useragent);
+    printf $fh qq#  "file_type": %s,\n#, encode_json(\%stat_filetype);
+    printf $fh qq#  "file_source": %s,\n#, encode_json(\%stat_source);
+    printf $fh qq#  "time_of_day": %s,\n#, encode_json(\%stat_timeofday);
+    printf $fh qq#  "process_time": %s,\n#, encode_json(\%hist_prcstime);
+    #printf $fh qq#  "file": %s,\n#, encode_json(\%stat_file);
+    printf $fh qq#  "redirect": %s,\n#, encode_json(\%stat_redirect);
+    printf $fh qq#  "error_type": %s,\n#, encode_json(\%stat_errortype);
     printf $fh "\}\n";
     close($fh);
 }
@@ -478,31 +473,18 @@ if (!defined($output_json) or defined($output_text)) {
     } else {
         $fh = *STDOUT;
     }
-    print $fh "Top Request Count:\n";
-    print_histogram($fh, \%stat_top_count, 71, 20);
-    print $fh "Top Download Size:\n";
-    print_histogram_kb($fh, \%stat_top_download, 68, 20);
-    print $fh "Top Backend Time:\n";
-    print_histogram_time($fh, \%stat_top_time, 68, 20);
+    print $fh "Top Requests:\n";
+    print_histogram($fh, \%stat_file, 80, 20);
+    print $fh "Top Downloads:\n";
+    print_histogram($fh, \%stat_file, 80, 20, 'kbytes');
+    print $fh "Top Processing Time:\n";
+    print_histogram($fh, \%stat_file, 80, 20, 'time');
+    print $fh "Top Redirects:\n";
+    print_histogram($fh, \%stat_redirect, 80, 20);
     print $fh "Errors:\n";
-    print_histogram($fh, \%stat_errortype, 71);
+    print_histogram($fh, \%stat_errortype, 80);
     print $fh "Hostnames:\n";
-    print_histogram($fh, \%stat_host, 35);
-    print $fh "Top Hostname Download Sizes:\n";
-    print_histogram_kb($fh, \%stat_host_download, 35, 20);
-    print $fh "Top Hostname Backend Time:\n";
-    print_histogram_time($fh, \%stat_host_time, 35, 20);
-    print $fh "Countries:\n";
-    print_histogram($fh, \%stat_country, 35);
-    print $fh "Backend Time Distribution:\n";
-    foreach my $key (sort keys %stat_prcstime) {
-        printf $fh "  %5.1f%% within: %8s seconds\n", $key * 100.0, $stat_prcstime{$key};
-    }
-    print $fh "Time of Day Distribution:\n";
-    foreach my $key (sort keys %stat_timeofday) {
-        my $count = $stat_timeofday{$key};
-        printf $fh "  %-15s %7d (%4.1f%%) requests\n", $key.':', $count, $count * 100.0 / $total;
-    }
+    print_histogram($fh, \%stat_host);
     print $fh "Data Sources:\n";
     print_histogram($fh, \%stat_source);
     print $fh "File Types:\n";
@@ -513,8 +495,16 @@ if (!defined($output_json) or defined($output_text)) {
     print_histogram($fh, \%stat_httpversion);
     print $fh "Response Codes:\n";
     print_histogram($fh, \%stat_httpcode);
+    print $fh "Countries:\n";
+    print_histogram($fh, \%stat_country);
     print $fh "User Agents:\n";
     print_histogram($fh, \%stat_useragent);
+    print $fh "Time of Day Distribution:\n";
+    print_histogram($fh, \%stat_timeofday, 30, 8, 'key');
+    print $fh "Backend Time Distribution:\n";
+    foreach my $key (sort keys %hist_prcstime) {
+        printf $fh "  %5.1f%% within: %8s seconds\n", $key * 100.0, $hist_prcstime{$key};
+    }
     printf $fh "Total:\n";
     printf $fh "  %7d requests\n", $total;
     printf $fh "  %10s downloaded data\n", format_kb($totalkb);
