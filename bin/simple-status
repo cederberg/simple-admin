@@ -48,14 +48,14 @@ fail() {
 cpustatus() {
     CPU_COUNT=`grep --count processor /proc/cpuinfo`
     LOAD_AVG=`cat /proc/loadavg | awk '{print $1, $2, $3}'`
-    FMT="loadavg:    %s, %s, %s       -- %s processors\n"
+    FMT="loadavg:   %s, %s, %s       -- %s processors\n"
     printf "$FMT" $LOAD_AVG $CPU_COUNT
 }
 
 # Function for printing memory status
 memstatus() {
     TMPFILE=/tmp/simple-status.vars
-    sed -e 's/:\s*/=/' -e 's/ kB//' -e 's/[^A-Za-z0-9=]//g' /proc/meminfo > $TMPFILE
+    sed -e 's/^\(\w*\):\s*\(\S*\).*/\1="\2"/g;t;d' /proc/meminfo > $TMPFILE
     . $TMPFILE
     rm $TMPFILE
     FREE=`echo ${MemFree:-0} | awk '{print int($1 / 1024 + 0.5)}'`
@@ -66,7 +66,7 @@ memstatus() {
     TOTAL=`echo ${MemTotal:-0} | awk '{print int($1 / 1024 + 0.5)}'`
     INFO=`printf "%s MB (%s%%) free" $FREE $FREE_PERCENT`
     DETAILS=`printf "%s rss, %s cache, %s swap, %s total (MB)" $RSS $CACHE $SWAP $TOTAL`
-    printf "memory:     %-22s -- %s\n" "$INFO" "$DETAILS"
+    printf "memory:    %-22s -- %s\n" "$INFO" "$DETAILS"
 }
 
 # Function for printing storage status
@@ -79,19 +79,15 @@ storagestatus() {
         INFO=`printf "%s GB (%s%%) free" $FREE $FREE_PERCENT`
         DETAILS=`printf "%s GB used, %s GB total on %s" $USED $TOTAL $DEVICE`
         if [ $TOTALK -ge 1048576 ] ; then
-            printf "storage:    %-22s -- %s\n" "$INFO" "$DETAILS"
+            printf "storage:   %-22s -- %s\n" "$INFO" "$DETAILS"
         fi
     done
 }
 
-# Function for printing a process tree with RSS and swap memory (in kb)
+# Function for printing all child PIDs
 proctree() {
     PID=$1
-    TMPFILE=/tmp/simple-status.vars
-    sed -e 's/:\s*/=/' -e 's/ kB//' -e 's/[^A-Za-z0-9=]//g' /proc/$PID/status > $TMPFILE
-    . $TMPFILE
-    rm $TMPFILE
-    echo "$PID ${VmRSS:-0} ${VmSwap:-0}"
+    printf "$PID "
     for CHILD in `ps --ppid $PID -o pid --no-headers` ; do
         proctree $CHILD
     done
@@ -99,20 +95,26 @@ proctree() {
 
 # Function for printing process status
 procstatus() {
-    PID=$1
-    proctree $1 > /tmp/simple-status.total 2> /dev/null
-    exec < /tmp/simple-status.total
+    TOTAL_PIDS=`proctree $1`
     TOTAL_RSS=0
     TOTAL_SWAP=0
-    while read CHILD RSS SWAP ; do
-        TOTAL_RSS=`echo $TOTAL_RSS ${RSS:-0} | awk '{print $1 + $2}'`
-        TOTAL_SWAP=`echo $TOTAL_SWAP ${SWAP:-0} | awk '{print $1 + $2}'`
+    for ID in $TOTAL_PIDS ; do
+        PROCFILE=/proc/$ID/status
+        if [ -e $PROCFILE ] ; then
+            TMPFILE=/tmp/simple-status.vars
+            sed -e 's/^\(\w*\):\s*\(\S*\).*/\1="\2"/g;t;d' $PROCFILE > $TMPFILE
+            . $TMPFILE
+            rm -f $TMPFILE
+            RSS=${VmRSS:-0}
+            SWAP=${VmSwap:-0}
+            TOTAL_RSS=$((TOTAL_RSS + RSS))
+            TOTAL_SWAP=$((TOTAL_SWAP + SWAP))
+        fi
     done
-    rm /tmp/simple-status.total
     PID=$1
     RSS=`echo $TOTAL_RSS | awk '{OFMT="%.1f" ; print $1 / 1024}'`
     SWAP=`echo $TOTAL_SWAP | awk '{OFMT="%.0f" ; print $1 / 1024}'`
-    printf "pid: %5s,  rss: %5s MB,  swap: %3s MB" $PID $RSS $SWAP
+    printf "pid: %5s,  rss: %6s MB,  swap: %3s MB" $PID $RSS $SWAP
 }
 
 # Function for printing service status
