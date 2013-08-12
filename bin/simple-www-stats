@@ -136,7 +136,8 @@ my %stat_host = ();
 my %stat_country = ();
 my %stat_timeofday = ();
 my %stat_timeofday_raw = ();
-my %stat_useragent = ();
+my %stat_browser = ();
+my %stat_platform = ();
 my %stat_file = ();
 my %stat_filetype = ();
 my %stat_source = ();
@@ -177,17 +178,17 @@ sub normalize_browser_platform {
         $$ref_data{'BROWSER'} = 'Other';
     }
     if ($agent =~ /Android/i) {
-        $$ref_data{'OS'} = 'Android';
+        $$ref_data{'PLATFORM'} = 'Android';
     } elsif ($agent =~ /iPhone|iPod|iPad|iOS/i) {
-        $$ref_data{'OS'} = 'iOS';
+        $$ref_data{'PLATFORM'} = 'iOS';
     } elsif ($agent =~ /Mac/i) {
-        $$ref_data{'OS'} = 'Mac';
+        $$ref_data{'PLATFORM'} = 'Mac';
     } elsif ($agent =~ /Linux/i) {
-        $$ref_data{'OS'} = 'Linux';
+        $$ref_data{'PLATFORM'} = 'Linux';
     } elsif ($agent =~ /Win/i) {
-        $$ref_data{'OS'} = 'Windows';
+        $$ref_data{'PLATFORM'} = 'Windows';
     } else {
-        $$ref_data{'OS'} = 'Other';
+        $$ref_data{'PLATFORM'} = 'Other';
     }
 }
 
@@ -287,7 +288,8 @@ sub process_line {
     process_counter(\%stat_host, $data{'HOSTNAME'}, $kbytes, $time);
     process_counter(\%stat_filetype, $data{'FILECATEGORY'}, $kbytes, $time);
     process_counter(\%stat_source, $data{'SOURCE'}, $kbytes, $time);
-    process_counter(\%stat_useragent, $data{'BROWSER'}, $kbytes, $time);
+    process_counter(\%stat_browser, $data{'BROWSER'}, $kbytes, $time);
+    process_counter(\%stat_platform, $data{'PLATFORM'}, $kbytes, $time);
     if ($respcode =~ /^20[0-9]$/ || $respcode eq '304') {
         process_counter(\%stat_file, $data{'HOST'}.$data{'FILE'}, $kbytes, $time);
     } elsif ($respcode =~ /^30[0-9]$/) {
@@ -455,7 +457,8 @@ if (defined($output_json)) {
     printf $fh qq#  "http_method": %s,\n#, encode_json(\%stat_httpmethod);
     printf $fh qq#  "hostname": %s,\n#, encode_json(\%stat_host);
     printf $fh qq#  "country": %s,\n#, encode_json(\%stat_country);
-    printf $fh qq#  "user_agent": %s,\n#, encode_json(\%stat_useragent);
+    printf $fh qq#  "browser": %s,\n#, encode_json(\%stat_browser);
+    printf $fh qq#  "platform": %s,\n#, encode_json(\%stat_platform);
     printf $fh qq#  "file_type": %s,\n#, encode_json(\%stat_filetype);
     printf $fh qq#  "file_source": %s,\n#, encode_json(\%stat_source);
     printf $fh qq#  "time_of_day": %s,\n#, encode_json(\%stat_timeofday);
@@ -497,8 +500,10 @@ if (!defined($output_json) or defined($output_text)) {
     print_histogram($fh, \%stat_httpcode);
     print $fh "Countries:\n";
     print_histogram($fh, \%stat_country);
-    print $fh "User Agents:\n";
-    print_histogram($fh, \%stat_useragent);
+    print $fh "Browsers:\n";
+    print_histogram($fh, \%stat_browser);
+    print $fh "Platforms:\n";
+    print_histogram($fh, \%stat_platform);
     print $fh "Time of Day Distribution:\n";
     print_histogram($fh, \%stat_timeofday, 30, 8, 'key');
     print $fh "Backend Time Distribution:\n";
