@@ -24,14 +24,14 @@ $Text::Glob::strict_wildcard_slash = undef;
     sub Reset {
         my ($self) = @_;
         undef $self->{REQUEST};
-        undef $self->{TIME};
+        undef $self->{DATETIME};
         undef $self->{IP};
         undef $self->{HOST};
         undef $self->{CODE};
         undef $self->{BYTES};
         undef $self->{REFERRER};
         undef $self->{AGENT};
-        undef $self->{DELAY};
+        undef $self->{TOTALTIME};
         undef $self->{CACHE};
         undef $self->{BACKEND};
     }
@@ -42,8 +42,8 @@ $Text::Glob::strict_wildcard_slash = undef;
             my $part = $parts[$i];
             if (!defined($self->{REQUEST}) and $part =~ /^[A-Z]{3,10} \/.* HTTP\/1.[01]/) {
                 $self->{REQUEST} = $i;
-            } elsif (!defined($self->{TIME}) and $part =~ /^[0-3]?\d\/\w\w\w\/20\d\d:[0-2]\d:[0-5]\d:[0-5]\d /) {
-                $self->{TIME} = $i;
+            } elsif (!defined($self->{DATETIME}) and $part =~ /^[0-3]?\d\/\w\w\w\/20\d\d:[0-2]\d:[0-5]\d:[0-5]\d /) {
+                $self->{DATETIME} = $i;
             } elsif (!defined($self->{IP}) and $part =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/) {
                 $self->{IP} = $i;
             } elsif (!defined($self->{HOST}) and $part =~ /^([a-z0-9_-]+\.){2,}[a-z]{2,6}$/) {
@@ -56,8 +56,8 @@ $Text::Glob::strict_wildcard_slash = undef;
                 $self->{REFERRER} = $i;
             } elsif (!defined($self->{AGENT}) and $part =~ /Mozilla|bot|crawler|spider/i) {
                 $self->{AGENT} = $i;
-            } elsif (!defined($self->{DELAY}) and $part =~ /^t(ime)?:/) {
-                $self->{DELAY} = $i;
+            } elsif (!defined($self->{TOTALTIME}) and $part =~ /^t(ime)?:/) {
+                $self->{TOTALTIME} = $i;
             } elsif (!defined($self->{CACHE}) and $part =~ /^c(ache)?:/) {
                 $self->{CACHE} = $i;
             } elsif (!defined($self->{BACKEND}) and $part =~ /^(b|backend|u|upstream):/) {
@@ -88,36 +88,38 @@ $Text::Glob::strict_wildcard_slash = undef;
         if ($file =~ m/\.([a-z0-9]+)$/i) {
             $filetype = lc($1);
         }
-        my $time = defined($self->{TIME}) ? $parts[$self->{TIME}] : "";
+        my $datetime = defined($self->{DATETIME}) ? $parts[$self->{DATETIME}] : "";
         my $ip = defined($self->{IP}) ? $parts[$self->{IP}] : "";
         $ip =~ s/^(0:0:0:0:0|:)(:FFFF:|:0:|:)((\d{1,3}\.){3}\d{1,3})$/$3/i;
         my $host = defined($self->{HOST}) ? $parts[$self->{HOST}] : "";
         my $code = defined($self->{CODE}) ? $parts[$self->{CODE}] : "";
-        my $bytes = defined($self->{BYTES}) ? $parts[$self->{BYTES}] : "";
+        my $bytes = defined($self->{BYTES}) ? int($parts[$self->{BYTES}]) : 0;
         my $referrer = defined($self->{REFERRER}) ? $parts[$self->{REFERRER}] : "-";
         my $agent = defined($self->{AGENT}) ? $parts[$self->{AGENT}] : "-";
-        my $delay = defined($self->{DELAY}) ? $parts[$self->{DELAY}] : "0";
-        $delay =~ s/^t(ime)?://;
+        my $totaltime = defined($self->{TOTALTIME}) ? $parts[$self->{TOTALTIME}] : "0";
+        $totaltime =~ s/^t(ime)?://;
         my $cache = defined($self->{CACHE}) ? $parts[$self->{CACHE}] : "-";
         $cache =~ s/^c(ache)?://;
         my $backend = defined($self->{BACKEND}) ? $parts[$self->{BACKEND}] : "-";
         $backend =~ s/^(b|backend|u|upstream)://;
         return (
+            HTTP => $version,
             METHOD => $method,
+            DATETIME => $datetime,
+            IP => $ip,
+            CODE => $code,
+            BYTES => $bytes,
+            KBYTES => 1 + ($bytes >> 10),
+            HOST => $host,
             PATH => $path,
             FILE => $file,
             FILETYPE => $filetype,
-            HTTP => $version,
-            DATETIME => $time,
-            IP => $ip,
-            HOST => $host,
-            CODE => $code,
-            BYTES => $bytes,
             REFERRER => $referrer,
             AGENT => $agent,
-            DELAY => $delay,
+            TOTALTIME => $totaltime,
             CACHE => $cache,
-            BACKEND => $backend
+            BACKEND => $backend,
+            BACKENDTIME => ($backend ne '-') ? 0.0 + $backend : 0.0
         );
     }
 }
@@ -127,8 +129,8 @@ my $total = 0;
 my $totaltime = 0.0;
 my $totalkb = 1;
 my @conf_errors = ();
-my %timeofday = ();
-my %prcstime = ();
+my %hist_timeofday = ();
+my %hist_prcstime = ();
 my %stat_top_count = ();
 my %stat_top_time = ();
 my %stat_top_download = ();
@@ -149,6 +151,176 @@ my $parser = Parser->new;
 my $geo = Geo::IPfree->new;
 $geo->Faster;
 $geo->{cache} = 1;
+
+# Normalize HTTP browser & platform OS
+sub normalize_browser_platform {
+    my ($ref_data) = @_;
+    my $agent = $$ref_data{'AGENT'};
+    if ($agent =~ m#(Chrome|Firefox|MSIE|Opera)[/ ](\d+)#i) {
+        $$ref_data{'BROWSER'} = $1;
+        $$ref_data{'BROWSER_VERSION'} = $2;
+    } elsif ($agent =~ /(Safari)/i or $agent =~ /(WebKit)/i) {
+        $$ref_data{'BROWSER'} = $1;
+        if ($agent =~ m#Version/(\d+)#i) {
+            $$ref_data{'BROWSER_VERSION'} = $1;
+        }
+    } elsif ($agent =~ /Trident/i) {
+        $$ref_data{'BROWSER'} = 'MSIE';
+        if ($agent =~ m/rv:(\d+)/i) {
+            $$ref_data{'BROWSER_VERSION'} = $1;
+        }
+    } elsif ($agent =~ /Bing|Facebook|Google|NING|Pinterest|Yahoo/i or
+             $agent =~ /curl|Java|PubSub|Reeder|wget/i or
+             $agent =~ /bot|crawler|fetch|proxy|search|spider|swarm/i or
+             $agent =~ /archive|check|link|monitor|policy|subscribe|valid/i or
+             $agent =~ /^Mozilla\/4\.0 \(compatible;\)$/ or
+             $agent =~ /^-?$/) {
+        $$ref_data{'BROWSER'} = 'Bot-like';
+    } else {
+        $$ref_data{'BROWSER'} = 'Other';
+    }
+    if ($agent =~ /Android/i) {
+        $$ref_data{'OS'} = 'Android';
+    } elsif ($agent =~ /iPhone|iPod|iPad|iOS/i) {
+        $$ref_data{'OS'} = 'iOS';
+    } elsif ($agent =~ /Mac/i) {
+        $$ref_data{'OS'} = 'Mac';
+    } elsif ($agent =~ /Linux/i) {
+        $$ref_data{'OS'} = 'Linux';
+    } elsif ($agent =~ /Win/i) {
+        $$ref_data{'OS'} = 'Windows';
+    } else {
+        $$ref_data{'OS'} = 'Other';
+    }
+}
+
+# Normalize stat counter values
+sub normalize_stat_values {
+    my ($ref_data) = @_;
+    $$ref_data{'HOSTNAME'} = $$ref_data{'HOST'} || '<blank>';
+    my $hour = $$ref_data{'DATETIME'};
+    $hour =~ s/^.*?\d{4}:(\d{2}):.*/$1/;
+    $$ref_data{'HOUR'} = $hour;
+    $$ref_data{'COUNTRY'} = '<No IP adress>';
+    if ($$ref_data{'IP'} =~ /^[\d\.]+$/) {
+        my ($ipcode, $ipcountry) = $geo->LookUp($$ref_data{'IP'});
+        $$ref_data{'COUNTRY'} = $ipcountry || $ipcode;
+    } elsif ($$ref_data{'IP'} ne '') {
+        $$ref_data{'COUNTRY'} = '<Unsupported IPv6>';
+    }
+    $$ref_data{'SOURCE'} = 'File';
+    if ($$ref_data{'BACKEND'} ne '-') {
+        $$ref_data{'SOURCE'} = 'Backend';
+    } elsif ($$ref_data{'CACHE'} ne '-') {
+        $$ref_data{'SOURCE'} = 'Cache';
+    }
+    $$ref_data{'FILECATEGORY'} = 'Markup';
+    if ($$ref_data{'FILETYPE'} =~ /^(gif|ico|jpe?g|png)$/) {
+        $$ref_data{'FILECATEGORY'} = 'Images';
+    } elsif ($$ref_data{'FILETYPE'} =~ /^(css|less|sass)$/) {
+        $$ref_data{'FILECATEGORY'} = 'Styles';
+    } elsif ($$ref_data{'FILETYPE'} =~ /^(js|coffee|dart)$/) {
+        $$ref_data{'FILECATEGORY'} = 'Scripts';
+    } elsif ($$ref_data{'FILETYPE'} =~ /^(rss|xml|json)$/) {
+        $$ref_data{'FILECATEGORY'} = 'Data';
+    }
+}
+
+# Normalize error message
+sub normalize_error_msg {
+    my ($respcode, $host, $url) = @_;
+    if ($respcode eq '400') {
+        return "$respcode bad request syntax";
+    } elsif ($respcode eq '403' or $respcode eq '405') {
+        return "$respcode bot probe (WebDAV)";
+    } elsif ($respcode eq '408') {
+        return "$respcode timeout waiting for request";
+    } elsif ($respcode eq '499') {
+        return "$respcode client closed connection";
+    } elsif ($host eq '') {
+        return "$respcode <blank host>";
+    }
+    for (my $i = 0; $i < $#conf_errors; $i++) {
+        my $re = $conf_errors[$i][0];
+        my $msg = $conf_errors[$i][1];
+        if ($url =~ /$re/i) {
+            return "$respcode $msg";
+        }
+    }
+    return "$respcode $host$url";
+}
+
+# Processes an HTTP log file line
+sub process_line {
+    my ($line) = @_;
+    my %data = $parser->Parse($line);
+    normalize_browser_platform(\%data);
+    normalize_stat_values(\%data);
+    my $respcode = $data{'CODE'};
+    $total++;
+    $totalkb += $data{'KBYTES'};
+    $totaltime += $data{'BACKENDTIME'};
+    $hist_timeofday{''.(int($data{'HOUR'}) / 3)}++;
+    $hist_prcstime{$data{'BACKENDTIME'}}++;
+    $stat_source{$data{'SOURCE'}}++;
+    $stat_country{$data{'COUNTRY'}}++;
+    $stat_host{$data{'HOSTNAME'}}++;
+    $stat_httpcode{"HTTP $respcode"}++;
+    $stat_httpmethod{$data{'METHOD'}}++;
+    $stat_httpversion{$data{'HTTP'} || '<blank>'}++;
+    $stat_useragent{$data{'BROWSER'}}++;
+    $stat_filetype{$data{'FILECATEGORY'}}++;
+    if ($respcode =~ /^[23]0[0-9]$/) {
+        my $hostfile = $data{'HOST'}.$data{'FILE'};
+        $stat_top_count{$hostfile}++;
+        $stat_top_time{$hostfile} += $data{'BACKENDTIME'};
+        $stat_top_download{$hostfile} += $data{'KBYTES'};
+        $stat_host_time{$data{'HOSTNAME'}} += $data{'BACKENDTIME'};
+        $stat_host_download{$data{'HOSTNAME'}} += $data{'KBYTES'};
+    } else {
+        $stat_errortype{normalize_error_msg($respcode, $data{'HOST'}, $data{'PATH'})}++;
+    }
+}
+
+# Processes an HTTP log file
+sub process_file {
+    my ($filename) = @_;
+    if ($filename ne "-" and !(-f $filename and -r $filename)) {
+        die "ERROR: cannot read file: $filename";
+    }
+    my $fh;
+    if ($filename =~ /\.bz2$/) {
+        open($fh, "-|", "bzcat $filename") or die $!;
+    } elsif ($filename =~ /\.gz$/) {
+        open($fh, "-|", "zcat $filename") or die $!;
+    } elsif ($filename =~ /\.lzma$/) {
+        open($fh, "-|", "lzcat $filename") or die $!;
+    } elsif ($filename =~ /\.xz$/) {
+        open($fh, "-|", "xzcat $filename") or die $!;
+    } else {
+        open($fh, "<$filename") or die $!;
+    }
+    $parser->Reset();
+    while (<$fh>) {
+        process_line($_);
+    }
+    close($fh);
+}
+
+# Processes the config file
+sub process_config {
+    my ($filename) = @_;
+    my $fh;
+    open($fh, "<$filename") or die $!;
+    while (<$fh>) {
+        s/^\s*(.*?)\s*$/$1/;
+        my ($glob, $msg) = split(/\s+/, $_, 2);
+        my $re = Text::Glob::glob_to_regex($glob);
+        my @arr = ($re, $msg);
+        push(@conf_errors, \@arr);
+    }
+    close($fh);
+}
 
 # Percent calculation (safe from div-by-zero)
 sub percent {
@@ -226,174 +398,6 @@ sub print_histogram_kb {
     }
 }
 
-# Normalize HTTP browser & platform OS
-sub normalize_browser_platform {
-    my ($ref_data) = @_;
-    my $agent = $$ref_data{'AGENT'};
-    if ($agent =~ m#(Chrome|Firefox|MSIE|Opera)[/ ](\d+)#i) {
-        $$ref_data{'BROWSER'} = $1;
-        $$ref_data{'BROWSER_VERSION'} = $2;
-    } elsif ($agent =~ /(Safari)/i or $agent =~ /(WebKit)/i) {
-        $$ref_data{'BROWSER'} = $1;
-        if ($agent =~ m#Version/(\d+)#i) {
-            $$ref_data{'BROWSER_VERSION'} = $1;
-        }
-    } elsif ($agent =~ /Trident/i) {
-        $$ref_data{'BROWSER'} = 'MSIE';
-        if ($agent =~ m/rv:(\d+)/i) {
-            $$ref_data{'BROWSER_VERSION'} = $1;
-        }
-    } elsif ($agent =~ /Bing|Facebook|Google|NING|Pinterest|Yahoo/i or
-             $agent =~ /curl|Java|PubSub|Reeder|wget/i or
-             $agent =~ /bot|crawler|fetch|proxy|search|spider|swarm/i or
-             $agent =~ /archive|check|link|monitor|policy|subscribe|valid/i or
-             $agent =~ /^Mozilla\/4\.0 \(compatible;\)$/ or
-             $agent =~ /^-?$/) {
-        $$ref_data{'BROWSER'} = 'Bot-like';
-    } else {
-        $$ref_data{'BROWSER'} = 'Other';
-    }
-    if ($agent =~ /Android/i) {
-        $$ref_data{'OS'} = 'Android';
-    } elsif ($agent =~ /iPhone|iPod|iPad|iOS/i) {
-        $$ref_data{'OS'} = 'iOS';
-    } elsif ($agent =~ /Mac/i) {
-        $$ref_data{'OS'} = 'Mac';
-    } elsif ($agent =~ /Linux/i) {
-        $$ref_data{'OS'} = 'Linux';
-    } elsif ($agent =~ /Win/i) {
-        $$ref_data{'OS'} = 'Windows';
-    } else {
-        $$ref_data{'OS'} = 'Other';
-    }
-}
-
-# Normalize error message
-sub normalize_error_msg {
-    my ($respcode, $host, $url) = @_;
-    if ($respcode eq '400') {
-        return 'bad request syntax';
-    } elsif ($respcode eq '403' or $respcode eq '405') {
-        return 'bot probe (WebDAV)';
-    } elsif ($respcode eq '408') {
-        return 'timeout waiting for request';
-    } elsif ($respcode eq '499') {
-        return 'client closed connection';
-    } elsif ($host eq '<blank>') {
-        return '<blank host>';
-    }
-    for (my $i = 0; $i < $#conf_errors; $i++) {
-        my $re = $conf_errors[$i][0];
-        my $msg = $conf_errors[$i][1];
-        if ($url =~ /$re/i) {
-            return $msg;
-        }
-    }
-    return $host.$url;
-}
-
-# Processes an HTTP log file line
-sub process_line {
-    my ($line) = @_;
-    $total++;
-    my %data = $parser->Parse($line);
-    normalize_browser_platform(\%data);
-    my $hour = $data{'DATETIME'};
-    $hour =~ s/^.*?\d{4}:(\d{2}):.*/$1/;
-    $timeofday{''.(int($hour) / 3)}++;
-    my $host = $data{'HOST'} || '<blank>';
-    $stat_host{$host}++;
-    my $ip = $data{'IP'};
-    if ($ip =~ /^[\d\.]+$/) {
-        my ($ipcode, $ipcountry) = $geo->LookUp($ip);
-        $stat_country{$ipcountry || $ipcode}++;
-    } elsif ($ip ne '') {
-        $stat_country{'<Unsupported IPv6>'}++;
-    } else {
-        $stat_country{'<No IP adress>'}++;
-    }
-    my $respcode = $data{'CODE'};
-    $stat_httpcode{"HTTP $respcode"}++;
-    my $bytes = int($data{'BYTES'});
-    $totalkb += 1 + ($bytes >> 10);
-    my $backendtime = 0.0;
-    if ($data{'BACKEND'} eq '-' and $data{'CACHE'} eq '-') {
-        $stat_source{'File'}++;
-    } elsif ($data{'BACKEND'} ne '-') {
-        $stat_source{'Backend'}++;
-        $backendtime = 0.0 + $data{'BACKEND'};
-    } else {
-        $stat_source{'Cache'}++;
-    }
-    $totaltime += $backendtime;
-    $prcstime{$backendtime}++;
-    $stat_httpmethod{$data{'METHOD'}}++;
-    $stat_httpversion{$data{'HTTP'} || '<blank>'}++;
-    $stat_useragent{$data{'BROWSER'}}++;
-    if ($data{'FILETYPE'} =~ /^(gif|ico|jpe?g|png)$/) {
-        $stat_filetype{'Images'}++;
-    } elsif ($data{'FILETYPE'} =~ /^(css|less|sass)$/) {
-        $stat_filetype{'Styles'}++;
-    } elsif ($data{'FILETYPE'} =~ /^(js|coffee|dart)$/) {
-        $stat_filetype{'Scripts'}++;
-    } elsif ($data{'FILETYPE'} =~ /^(rss|xml|json)$/) {
-        $stat_filetype{'Data'}++;
-    } else {
-        $stat_filetype{'Markup'}++;
-    }
-    my $referer = $data{'REFERRER'};
-    my $url = $data{'PATH'};
-    if ($respcode =~ /^[23]0[0-9]$/) {
-        $stat_top_count{$host.$url}++;
-        $stat_top_time{$host.$url} += $backendtime;
-        $stat_top_download{$host.$url} += ($bytes >> 10) + 1;
-        $stat_host_time{$host} += $backendtime;
-        $stat_host_download{$host} += ($bytes >> 10) + 1;
-    } else {
-        $stat_errortype{"$respcode ".normalize_error_msg($respcode, $host, $url)}++;
-    }
-}
-
-# Processes an HTTP log file
-sub process_file {
-    my ($filename) = @_;
-    if ($filename ne "-" and !(-f $filename and -r $filename)) {
-        die "ERROR: cannot read file: $filename";
-    }
-    my $fh;
-    if ($filename =~ /\.bz2$/) {
-        open($fh, "-|", "bzcat $filename") or die $!;
-    } elsif ($filename =~ /\.gz$/) {
-        open($fh, "-|", "zcat $filename") or die $!;
-    } elsif ($filename =~ /\.lzma$/) {
-        open($fh, "-|", "lzcat $filename") or die $!;
-    } elsif ($filename =~ /\.xz$/) {
-        open($fh, "-|", "xzcat $filename") or die $!;
-    } else {
-        open($fh, "<$filename") or die $!;
-    }
-    $parser->Reset();
-    while (<$fh>) {
-        process_line($_);
-    }
-    close($fh);
-}
-
-# Processes the config file
-sub process_config {
-    my ($filename) = @_;
-    my $fh;
-    open($fh, "<$filename") or die $!;
-    while (<$fh>) {
-        s/^\s*(.*?)\s*$/$1/;
-        my ($glob, $msg) = split(/\s+/, $_, 2);
-        my $re = Text::Glob::glob_to_regex($glob);
-        my @arr = ($re, $msg);
-        push(@conf_errors, \@arr);
-    }
-    close($fh);
-}
-
 # Read config file
 my $config_file = "/etc/simple-www-stats.conf";
 if (-f $config_file) {
@@ -423,8 +427,8 @@ if (!@filenames) {
 }
 
 # Format time-of-day keys
-foreach my $key (sort keys %timeofday) {
-    my $count = $timeofday{$key};
+foreach my $key (sort keys %hist_timeofday) {
+    my $count = $hist_timeofday{$key};
     my $timekey = sprintf("%02d:00-%02d:59", int($key) * 3, int($key) * 3 + 2);
     $stat_timeofday{$timekey} = $count;
 }
@@ -433,8 +437,8 @@ foreach my $key (sort keys %timeofday) {
 my @limits = (0.500, 0.750, 0.900, 0.950, 0.975, 0.990, 0.995, 0.998, 0.999, 1.0);
 my $nextlimit = shift(@limits);
 my $count = 0;
-foreach my $time (sort {$a <=> $b} keys %prcstime) {
-    $count += $prcstime{$time};
+foreach my $time (sort {$a <=> $b} keys %hist_prcstime) {
+    $count += $hist_prcstime{$time};
     if ($count / $total >= $nextlimit) {
         $stat_prcstime{$nextlimit} = $time;
         $nextlimit = shift(@limits);
