@@ -144,14 +144,11 @@ servicestatus() {
         fi
     fi
     if [ $STATUS -eq 0 ] ; then
-        STATUSCOLOR=""
-        STATUSNAME="OK"
+        FMT="$COLOR_OK[OK]$COLOR_OFF %-28s -- %s\n"
     else
-        STATUSCOLOR="$COLOR_ERR"
-        STATUSNAME="ERROR"
+        FMT="$COLOR_ERR[ERROR] %-25s -- %s$COLOR_OFF\n"
     fi
-    FMT="${STATUSCOLOR}* %-9s %-22s${COLOR_OFF} -- %s\n"
-    printf "$FMT" "$NAME:" $STATUSNAME "$DETAILS"
+    printf "$FMT" "$NAME" "$DETAILS"
     return $STATUS
 }
 
