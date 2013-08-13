@@ -48,7 +48,7 @@
 <h3>Usage:</h3>
 
 <blockquote>
-<code>simple-status [-s]</code>
+<code>simple-status [-s] [-m]</code>
 </blockquote>
 
 <table>
@@ -60,6 +60,10 @@
 <td>-s</td>
 <td>Prints a short summary without listing process status.</td>
 </tr>
+<tr>
+<td>-m</td>
+<td>Prints a medium length report, not listing unconfigured processes.</td>
+</tr>
 </table>
 
 <p>Prints a summary of the most important machine and process metrics.
@@ -69,8 +73,8 @@ example output:</p>
 <pre><code>loadavg:    0.00, 0.01, 0.05       -- 4 processors
 memory:     298 MB (60.1%) free    -- 108 rss, 90 cache, 9 swap, 496 total (MB)
 storage:    16.3 GB (69.4%) free   -- 7.2 GB used, 23.6 GB total on /dev/xvda
-* cron:     OK                     -- pid:  2223,  rss:   0.8 MB,  swap:   0 MB
-* ntp:      OK                     -- pid:  2659,  rss:   1.8 MB,  swap:   0 MB</code></pre>
+[OK] cron                          -- pid:  2223,  rss:   0.8 MB,  swap:   0 MB
+[OK] ntp                           -- pid:  2659,  rss:   1.8 MB,  swap:   0 MB</code></pre>
 
 <p>Information is read from the <code>/proc</code> filesystem or via the
 <code>ps</code> utility.</p>
@@ -82,9 +86,9 @@ with one line per process. Comment or blank lines are ignored. Each line
 contains the process or service name, pid file and optional command-line
 match:</p>
 
-<pre><code>cron    /var/run/crond.pid
-sshd    /var/run/sshd.pid
-local   -       local-command</code></pre>
+<pre><code>cron            /var/run/crond.pid
+sshd            /var/run/sshd.pid
+local           -               local-command-match</code></pre>
 
 <p>If <code>-</code> is specified as the pid file, the process lookup is made
 by name (optionally using the command-line match). Process lookup is also made
