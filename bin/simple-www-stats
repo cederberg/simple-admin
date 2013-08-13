@@ -36,31 +36,90 @@ $Text::Glob::strict_wildcard_slash = undef;
         undef $self->{BACKEND};
     }
 
+    sub _ResetValue {
+        my ($self, $value) = @_;
+        if (($self->{REQUEST} // '') eq $value) {
+            undef $self->{REQUEST};
+        }
+        if (($self->{DATETIME} // '') eq $value) {
+            undef $self->{DATETIME};
+        }
+        if (($self->{IP} // '') eq $value) {
+            undef $self->{IP};
+        }
+        if (($self->{HOST} // '') eq $value) {
+            undef $self->{HOST};
+        }
+        if (($self->{CODE} // '') eq $value) {
+            undef $self->{CODE};
+        }
+        if (($self->{BYTES} // '') eq $value) {
+            undef $self->{BYTES};
+        }
+        if (($self->{REFERRER} // '') eq $value) {
+            undef $self->{REFERRER};
+        }
+        if (($self->{AGENT} // '') eq $value) {
+            undef $self->{AGENT};
+        }
+        if (($self->{TOTALTIME} // '') eq $value) {
+            undef $self->{TOTALTIME};
+        }
+        if (($self->{CACHE} // '') eq $value) {
+            undef $self->{CACHE};
+        }
+        if (($self->{BACKEND} // '') eq $value) {
+            undef $self->{BACKEND};
+        }
+    }
+
+    sub IsInitialized {
+        my ($self) = @_;
+        return defined($self->{REQUEST}) &&
+               defined($self->{DATETIME}) &&
+               defined($self->{HOST}) &&
+               defined($self->{CODE}) &&
+               defined($self->{BYTES}) &&
+               defined($self->{REFERRER}) &&
+               defined($self->{AGENT});
+    }
+
     sub _Init {
         my ($self, @parts) = @_;
         for my $i (0 .. $#parts) {
             my $part = $parts[$i];
             if (!defined($self->{REQUEST}) and $part =~ /^[A-Z]{3,10} \/.* HTTP\/1.[01]/) {
+                $self->_ResetValue($i);
                 $self->{REQUEST} = $i;
             } elsif (!defined($self->{DATETIME}) and $part =~ /^[0-3]?\d\/\w\w\w\/20\d\d:[0-2]\d:[0-5]\d:[0-5]\d /) {
+                $self->_ResetValue($i);
                 $self->{DATETIME} = $i;
+            } elsif (!defined($self->{AGENT}) and $part =~ /Mozilla\/\d/i) {
+                $self->_ResetValue($i);
+                $self->{AGENT} = $i;
             } elsif (!defined($self->{IP}) and $part =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/) {
+                $self->_ResetValue($i);
                 $self->{IP} = $i;
             } elsif (!defined($self->{HOST}) and $part =~ /^([a-z0-9_-]+\.){2,}[a-z]{2,6}$/) {
+                $self->_ResetValue($i);
                 $self->{HOST} = $i;
             } elsif (!defined($self->{CODE}) and $part =~ /^[1-5]\d\d$/) {
+                $self->_ResetValue($i);
                 $self->{CODE} = $i;
             } elsif (!defined($self->{BYTES}) and $part =~ /^\d+$/) {
+                $self->_ResetValue($i);
                 $self->{BYTES} = $i;
             } elsif (!defined($self->{REFERRER}) and $part =~ /^https?:/) {
+                $self->_ResetValue($i);
                 $self->{REFERRER} = $i;
-            } elsif (!defined($self->{AGENT}) and $part =~ /Mozilla|bot|crawler|spider/i) {
-                $self->{AGENT} = $i;
             } elsif (!defined($self->{TOTALTIME}) and $part =~ /^t(ime)?:/) {
+                $self->_ResetValue($i);
                 $self->{TOTALTIME} = $i;
             } elsif (!defined($self->{CACHE}) and $part =~ /^c(ache)?:/) {
+                $self->_ResetValue($i);
                 $self->{CACHE} = $i;
             } elsif (!defined($self->{BACKEND}) and $part =~ /^(b|backend|u|upstream):/) {
+                $self->_ResetValue($i);
                 $self->{BACKEND} = $i;
             }
         }
@@ -73,7 +132,7 @@ $Text::Glob::strict_wildcard_slash = undef;
             s/^"(.*)"$/$1/;
             s/^\[(.*)\]$/$1/;
         }
-        if (!defined($self->{REQUEST}) || !defined($self->{HOST}) || !defined($self->{REFERRER})) {
+        if (!$self->IsInitialized()) {
             $self->_Init(@parts);
         }
         my $request = defined($self->{REQUEST}) ? $parts[$self->{REQUEST}] : "";
