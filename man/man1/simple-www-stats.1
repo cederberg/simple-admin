@@ -39,8 +39,19 @@ Write text output to the specified \fIfile\fR.
 .sp
 .SH "CONFIGURATION"
 .sp
-In addition to the standard HTTP log fields, a number of additional parameters
-are recognized. Here is a recommended Nginx format:
+The \fB/etc/simple-www-stats.conf\fR file contains mappings from error URLs
+to readable messages. Each line contains a URL glob (supporting \fB?\fR and
+\fB*\fR chars) and a message to use:
+
+.nf
+    /robots.txt                     missing /robots.txt
+    /favicon.ico                    missing /favicon.ico
+    */cgi*                          bot probe (cgi-bin)
+    */phpMyAdmin*                   bot probe (phpMyAdmin)
+.fi
+
+All standard HTTP log file formats are automatically recognized, but a number
+of additional fields are also supported. Here is a recommended Nginx format:
 
 .nf
     log_format custom '$remote_addr - $remote_user [$time_local] "$request" '
@@ -56,6 +67,13 @@ line per entry):
     66.249.73.70 - - [07/Dec/2012:00:05:17 +0000] "GET / HTTP/1.1" 200 3391
     "-" "Mozilla/5.0 ..." www.site.com cache:MISS time:0.451 backend:0.008
 .fi
+.sp
+.SH "FILES"
+.sp
+.B /etc/simple-www-stats.conf
+.RS 4
+Error message configuration file with one line per URL to match.
+.RE
 .sp
 .SH "SEE ALSO"
 .sp
