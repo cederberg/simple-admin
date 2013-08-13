@@ -184,6 +184,7 @@ $Text::Glob::strict_wildcard_slash = undef;
 }
 
 # Global variables
+my @lines_skipped = ();
 my $total = 0;
 my $totaltime = 0.0;
 my $totalkb = 1;
@@ -330,6 +331,10 @@ sub process_counter {
 sub process_line {
     my ($line) = @_;
     my %data = $parser->Parse($line);
+    if (!$parser->IsInitialized()) {
+        push(@lines_skipped, $line);
+        return;
+    }
     normalize_browser_platform(\%data);
     normalize_stat_values(\%data);
     my $respcode = $data{'CODE'};
@@ -378,8 +383,14 @@ sub process_file {
         open($fh, "<$filename") or die $!;
     }
     $parser->Reset();
+    @lines_skipped = ();
     while (<$fh>) {
         process_line($_);
+    }
+    if ($parser->IsInitialized()) {
+        foreach (@lines_skipped) {
+            process_line($_);
+        }
     }
     close($fh);
 }
