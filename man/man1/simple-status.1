@@ -22,8 +22,8 @@ are checked for existence only, not probed in any other way. An example output:
     loadavg:    0.00, 0.01, 0.05       -- 4 processors
     memory:     298 MB (60.1%) free    -- 108 rss, 90 cache, 9 swap, 496 total (MB)
     storage:    16.3 GB (69.4%) free   -- 7.2 GB used, 23.6 GB total on /dev/xvda
-    * cron:     OK                     -- pid:  2223,  rss:   0.8 MB,  swap:   0 MB
-    * ntp:      OK                     -- pid:  2659,  rss:   1.8 MB,  swap:   0 MB
+    [OK] cron                          -- pid:  2223,  rss:   0.8 MB,  swap:   0 MB
+    [OK] ntp                           -- pid:  2659,  rss:   1.8 MB,  swap:   0 MB
 .fi
 .sp
 Information is read from the \fB/proc\fR filesystem or via the \fBps\fR
@@ -47,9 +47,9 @@ line per process. Comment or blank lines are ignored. Each line contains the
 process or service name, pid file and optional command-line match:
 .sp
 .nf
-    cron    /var/run/crond.pid
-    sshd    /var/run/sshd.pid
-    local   -       local-command
+    cron            /var/run/crond.pid
+    sshd            /var/run/sshd.pid
+    local           -               local-command-match
 .fi
 .sp
 If \fB-\fR is specified as the pid file, the process lookup is made by name
