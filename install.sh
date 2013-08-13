@@ -75,7 +75,7 @@ fi
 
 # Install required packages
 echo -n "Checking dependencies... "
-DEPS="aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl libtext-glob-perl"
+DEPS="aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl"
 if apt-get --simulate install $DEPS | tail -n1 | grep '0 upgraded, 0 newly installed' > /dev/null ; then
     echo "installed"
 else

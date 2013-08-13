@@ -5,9 +5,6 @@ use warnings;
 use File::Basename;
 use Geo::IPfree;
 use JSON::XS;
-use Text::Glob;
-$Text::Glob::strict_leading_dot = undef;
-$Text::Glob::strict_wildcard_slash = undef;
 
 # HTTP request log parser
 {
@@ -403,8 +400,22 @@ sub process_config {
     while (<$fh>) {
         s/^\s*(.*?)\s*$/$1/;
         my ($glob, $msg) = split(/\s+/, $_, 2);
-        my $re = Text::Glob::glob_to_regex($glob);
-        my @arr = ($re, $msg);
+        my $re = $glob;
+        $re =~ s/\\/\\\\/g;
+        $re =~ s/\./\\./g;
+        $re =~ s/\+/\\+/g;
+        $re =~ s/\|/\\|/g;
+        $re =~ s/\^/\\^/g;
+        $re =~ s/\$/\\\$/g;
+        $re =~ s/\(/\\(/g;
+        $re =~ s/\)/\\)/g;
+        $re =~ s/\[/\\[/g;
+        $re =~ s/\]/\\]/g;
+        $re =~ s/\{/\\{/g;
+        $re =~ s/\}/\\}/g;
+        $re =~ s/\*/.*/g;
+        $re =~ s/\?/./g;
+        my @arr = ("^$re\$", $msg);
         push(@conf_errors, \@arr);
     }
     close($fh);
