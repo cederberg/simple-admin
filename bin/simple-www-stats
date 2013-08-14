@@ -183,8 +183,9 @@ use JSON::XS;
 # Global variables
 my @lines_skipped = ();
 my $total = 0;
-my $totaltime = 0.0;
 my $totalkb = 1;
+my $totaltime = 0.0;
+my $totalerrors = 0;
 my @conf_errors = ();
 my %stat_httpcode = ();
 my %stat_httpversion = ();
@@ -310,16 +311,18 @@ sub normalize_error_msg {
 
 # Processes stat counters for a key
 sub process_counter {
-    my ($ref, $key, $kbytes, $time) = @_;
+    my ($ref, $key, $kbytes, $time, $iserror) = @_;
     if (!defined($$ref{$key})) {
         $$ref{$key} = ();
         $$ref{$key}{'count'} = 0;
         $$ref{$key}{'kbytes'} = 0;
         $$ref{$key}{'secs'} = 0.0;
+        $$ref{$key}{'errors'} = 0;
     }
     $$ref{$key}{'count'}++;
     $$ref{$key}{'kbytes'} += $kbytes;
     $$ref{$key}{'secs'} += $time;
+    $$ref{$key}{'errors'} += $iserror ? 1 : 0;
 }
 
 # Processes an HTTP log file line
@@ -335,27 +338,29 @@ sub process_line {
     my $respcode = $data{'CODE'};
     my $kbytes = $data{'KBYTES'};
     my $time = $data{'BACKENDTIME'};
+    my $iserror = !($respcode =~ /^[23]0[0-9]$/);
     $total++;
     $totalkb += $kbytes;
     $totaltime += $time;
-    process_counter(\%stat_timeofday_raw, ''.(int($data{'HOUR'}) / 3), $kbytes, $time);
-    process_counter(\%hist_prcstime_raw, $data{'BACKENDTIME'}, $kbytes, $time);
-    process_counter(\%stat_httpcode, "HTTP $respcode", $kbytes, $time);
-    process_counter(\%stat_httpversion, $data{'HTTP'} || '<blank>', $kbytes, $time);
-    process_counter(\%stat_httpmethod, $data{'METHOD'}, $kbytes, $time);
-    process_counter(\%stat_country, $data{'COUNTRY'}, $kbytes, $time);
-    process_counter(\%stat_host, $data{'HOSTNAME'}, $kbytes, $time);
-    process_counter(\%stat_filetype, $data{'FILECATEGORY'}, $kbytes, $time);
-    process_counter(\%stat_source, $data{'SOURCE'}, $kbytes, $time);
-    process_counter(\%stat_browser, $data{'BROWSER'}, $kbytes, $time);
-    process_counter(\%stat_platform, $data{'PLATFORM'}, $kbytes, $time);
+    $totalerrors += $iserror ? 1 : 0;
+    process_counter(\%stat_timeofday_raw, ''.(int($data{'HOUR'}) / 3), $kbytes, $time, $iserror);
+    process_counter(\%hist_prcstime_raw, $data{'BACKENDTIME'}, $kbytes, $time, $iserror);
+    process_counter(\%stat_httpcode, "HTTP $respcode", $kbytes, $time, $iserror);
+    process_counter(\%stat_httpversion, $data{'HTTP'} || '<blank>', $kbytes, $time, $iserror);
+    process_counter(\%stat_httpmethod, $data{'METHOD'}, $kbytes, $time, $iserror);
+    process_counter(\%stat_country, $data{'COUNTRY'}, $kbytes, $time, $iserror);
+    process_counter(\%stat_host, $data{'HOSTNAME'}, $kbytes, $time, $iserror);
+    process_counter(\%stat_filetype, $data{'FILECATEGORY'}, $kbytes, $time, $iserror);
+    process_counter(\%stat_source, $data{'SOURCE'}, $kbytes, $time, $iserror);
+    process_counter(\%stat_browser, $data{'BROWSER'}, $kbytes, $time, $iserror);
+    process_counter(\%stat_platform, $data{'PLATFORM'}, $kbytes, $time, $iserror);
     if ($respcode =~ /^20[0-9]$/ || $respcode eq '304') {
-        process_counter(\%stat_file, $data{'HOST'}.$data{'FILE'}, $kbytes, $time);
+        process_counter(\%stat_file, $data{'HOST'}.$data{'FILE'}, $kbytes, $time, $iserror);
     } elsif ($respcode =~ /^30[0-9]$/) {
-        process_counter(\%stat_redirect, $data{'HOST'}.$data{'FILE'}, $kbytes, $time);
+        process_counter(\%stat_redirect, $data{'HOST'}.$data{'FILE'}, $kbytes, $time, $iserror);
     } else {
         my $key = normalize_error_msg($respcode, $data{'HOST'}, $data{'PATH'});
-        process_counter(\%stat_errortype, $key, $kbytes, $time);
+        process_counter(\%stat_errortype, $key, $kbytes, $time, $iserror);
     }
 }
 
@@ -487,13 +492,14 @@ sub sorted_table {
 sub print_histogram {
     my ($handle, $hashref, $width, $max, $sortby) = @_;
     my @sorted = sorted_keys($hashref, $max, $sortby);
-    my $fmt = "%7d (%4.1f%%) reqs %12s (%4.1f%%) %12s (%4.1f%%)";
+    my $fmt = "%7d reqs (%4.1f%%) %7d errors %12s (%4.1f%%) %12s (%4.1f%%)";
     $fmt = sprintf("  %%-%ds %s\n", $width || 30, $fmt);
     foreach my $key (@sorted) {
         my $count = $$hashref{$key}{'count'};
         my $kbytes = $$hashref{$key}{'kbytes'};
         my $time = $$hashref{$key}{'secs'};
-        printf $handle $fmt, $key.':', $count, percent($count, $total),
+        my $errors = $$hashref{$key}{'errors'};
+        printf $handle $fmt, $key.':', $count, percent($count, $total), $errors,
                format_kb($kbytes), percent($kbytes, $totalkb),
                format_secs($time), percent($time, $totaltime);
     }
@@ -550,7 +556,7 @@ if (defined($output_json)) {
     my $fh;
     open($fh, '>'.$output_json) or die "ERROR: Couldn't write to ".$output_json;
     printf $fh "\{\n";
-    my %json_total = ('count' => $total,
+    my %json_total = ('count' => $total, 'errors' => $totalerrors,
                       'kbytes' => $totalkb, 'size' => format_kb($totalkb),
                       'secs' => $totaltime, 'time' => format_secs($totaltime));
     printf $fh qq#  "total": %s,\n#, encode_json(\%json_total);
@@ -620,6 +626,7 @@ if (!defined($output_json) or defined($output_text)) {
     }
     printf $fh "Total:\n";
     printf $fh "  %7d requests\n", $total;
+    printf $fh "  %7d errors\n", $totalerrors;
     printf $fh "  %10s downloaded data\n", format_kb($totalkb);
     printf $fh "  %11s backend time\n", format_secs($totaltime);
     close($fh);
