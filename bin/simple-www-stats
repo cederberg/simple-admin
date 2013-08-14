@@ -313,13 +313,13 @@ sub process_counter {
     my ($ref, $key, $kbytes, $time) = @_;
     if (!defined($$ref{$key})) {
         $$ref{$key} = ();
-        $$ref{$key}{'requests'} = 0;
+        $$ref{$key}{'count'} = 0;
         $$ref{$key}{'kbytes'} = 0;
-        $$ref{$key}{'time'} = 0.0;
+        $$ref{$key}{'secs'} = 0.0;
     }
-    $$ref{$key}{'requests'}++;
+    $$ref{$key}{'count'}++;
     $$ref{$key}{'kbytes'} += $kbytes;
-    $$ref{$key}{'time'} += $time;
+    $$ref{$key}{'secs'} += $time;
 }
 
 # Processes an HTTP log file line
@@ -456,25 +456,43 @@ sub format_secs {
     }
 }
 
-# Print a formatted histogram
-sub print_histogram {
-    my ($handle, $hashref, $width, $max, $sortby) = @_;
-    $sortby = $sortby || 'requests';
+# Sorts keys from a referenced associative list
+sub sorted_keys {
+    my ($hashref, $max, $sortby) = @_;
+    $sortby = $sortby || 'count';
     my @sorted;
     if ($sortby eq 'key') {
         @sorted = sort keys %$hashref;
     } else {
         @sorted = reverse sort {$$hashref{$a}{$sortby} <=> $$hashref{$b}{$sortby}} keys %$hashref;
     }
-    my $fmt = "%7d (%4.1f%%) reqs %12s (%4.1f%%) %12s (%4.1f%%)";
-    $fmt = sprintf("  %%-%ds %s\n", $width || 30, $fmt);
     if (defined($max) and @sorted > $max) {
         $#sorted = $max - 1;
     }
+    return @sorted;
+}
+
+# Copies, sorts and optionally truncates a referenced associative list
+sub sorted_table {
+    my ($hashref, $max, $sortby) = @_;
+    my @sorted = sorted_keys($hashref, $max, $sortby);
+    my %res = ();
     foreach my $key (@sorted) {
-        my $count = $$hashref{$key}{'requests'};
+        $res{$key} = $$hashref{$key};
+    }
+    return %res;
+}
+
+# Print a formatted histogram
+sub print_histogram {
+    my ($handle, $hashref, $width, $max, $sortby) = @_;
+    my @sorted = sorted_keys($hashref, $max, $sortby);
+    my $fmt = "%7d (%4.1f%%) reqs %12s (%4.1f%%) %12s (%4.1f%%)";
+    $fmt = sprintf("  %%-%ds %s\n", $width || 30, $fmt);
+    foreach my $key (@sorted) {
+        my $count = $$hashref{$key}{'count'};
         my $kbytes = $$hashref{$key}{'kbytes'};
-        my $time = $$hashref{$key}{'time'};
+        my $time = $$hashref{$key}{'secs'};
         printf $handle $fmt, $key.':', $count, percent($count, $total),
                format_kb($kbytes), percent($kbytes, $totalkb),
                format_secs($time), percent($time, $totaltime);
@@ -520,7 +538,7 @@ my @limits = (0.500, 0.750, 0.900, 0.950, 0.975, 0.990, 0.995, 0.998, 0.999, 1.0
 my $nextlimit = shift(@limits);
 my $count = 0;
 foreach my $time (sort {$a <=> $b} keys %hist_prcstime_raw) {
-    $count += $hist_prcstime_raw{$time}{'requests'};
+    $count += $hist_prcstime_raw{$time}{'count'};
     if ($count / $total >= $nextlimit) {
         $hist_prcstime{$nextlimit} = $time;
         $nextlimit = shift(@limits);
@@ -532,12 +550,14 @@ if (defined($output_json)) {
     my $fh;
     open($fh, '>'.$output_json) or die "ERROR: Couldn't write to ".$output_json;
     printf $fh "\{\n";
-    my %json_total = ( 'count' => $total, 'kb' => $totalkb, 'size' => format_kb($totalkb));
+    my %json_total = ('count' => $total,
+                      'kbytes' => $totalkb, 'size' => format_kb($totalkb),
+                      'secs' => $totaltime, 'time' => format_secs($totaltime));
     printf $fh qq#  "total": %s,\n#, encode_json(\%json_total);
-    printf $fh qq#  "http_code": %s,\n#, encode_json(\%stat_httpcode);
     printf $fh qq#  "http_version": %s,\n#, encode_json(\%stat_httpversion);
     printf $fh qq#  "http_method": %s,\n#, encode_json(\%stat_httpmethod);
-    printf $fh qq#  "hostname": %s,\n#, encode_json(\%stat_host);
+    printf $fh qq#  "http_code": %s,\n#, encode_json(\%stat_httpcode);
+    printf $fh qq#  "host": %s,\n#, encode_json(\%stat_host);
     printf $fh qq#  "country": %s,\n#, encode_json(\%stat_country);
     printf $fh qq#  "browser": %s,\n#, encode_json(\%stat_browser);
     printf $fh qq#  "platform": %s,\n#, encode_json(\%stat_platform);
@@ -545,9 +565,15 @@ if (defined($output_json)) {
     printf $fh qq#  "file_source": %s,\n#, encode_json(\%stat_source);
     printf $fh qq#  "time_of_day": %s,\n#, encode_json(\%stat_timeofday);
     printf $fh qq#  "process_time": %s,\n#, encode_json(\%hist_prcstime);
-    #printf $fh qq#  "file": %s,\n#, encode_json(\%stat_file);
-    printf $fh qq#  "redirect": %s,\n#, encode_json(\%stat_redirect);
-    printf $fh qq#  "error_type": %s,\n#, encode_json(\%stat_errortype);
+    my %data = sorted_table(\%stat_file, 100, 'count');
+    printf $fh qq#  "top_request": %s,\n#, encode_json(\%data);
+    %data = sorted_table(\%stat_file, 100, 'kbytes');
+    printf $fh qq#  "top_download": %s,\n#, encode_json(\%data);
+    %data = sorted_table(\%stat_file, 100, 'secs');
+    printf $fh qq#  "top_process_time": %s,\n#, encode_json(\%data);
+    %data = sorted_table(\%stat_redirect, 100, 'count');
+    printf $fh qq#  "top_redirect": %s,\n#, encode_json(\%data);
+    printf $fh qq#  "error": %s,\n#, encode_json(\%stat_errortype);
     printf $fh "\}\n";
     close($fh);
 }
@@ -563,14 +589,14 @@ if (!defined($output_json) or defined($output_text)) {
     print $fh "Top Downloads:\n";
     print_histogram($fh, \%stat_file, 80, 20, 'kbytes');
     print $fh "Top Processing Time:\n";
-    print_histogram($fh, \%stat_file, 80, 20, 'time');
+    print_histogram($fh, \%stat_file, 80, 20, 'secs');
     print $fh "Top Redirects:\n";
     print_histogram($fh, \%stat_redirect, 80, 20);
     print $fh "Errors:\n";
     print_histogram($fh, \%stat_errortype, 80);
     print $fh "Hostnames:\n";
     print_histogram($fh, \%stat_host);
-    print $fh "Data Sources:\n";
+    print $fh "File Sources:\n";
     print_histogram($fh, \%stat_source);
     print $fh "File Types:\n";
     print_histogram($fh, \%stat_filetype);
