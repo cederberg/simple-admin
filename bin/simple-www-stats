@@ -397,6 +397,9 @@ sub process_config {
     open($fh, "<$filename") or die $!;
     while (<$fh>) {
         s/^\s*(.*?)\s*$/$1/;
+        if (m/^(#.*)?$/) {
+            next;
+        }
         my ($glob, $msg) = split(/\s+/, $_, 2);
         my $re = $glob;
         $re =~ s/\\/\\\\/g;
