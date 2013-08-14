@@ -579,7 +579,7 @@ if (defined($output_json)) {
     printf $fh qq#  "top_process_time": %s,\n#, encode_json(\%data);
     %data = sorted_table(\%stat_redirect, 100, 'count');
     printf $fh qq#  "top_redirect": %s,\n#, encode_json(\%data);
-    printf $fh qq#  "error": %s,\n#, encode_json(\%stat_errortype);
+    printf $fh qq#  "error": %s\n#, encode_json(\%stat_errortype);
     printf $fh "\}\n";
     close($fh);
 }
