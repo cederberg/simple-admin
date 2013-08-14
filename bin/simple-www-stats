@@ -132,7 +132,7 @@ use JSON::XS;
         if (!$self->IsInitialized()) {
             $self->_Init(@parts);
         }
-        my $request = defined($self->{REQUEST}) ? $parts[$self->{REQUEST}] : "";
+        my $request = defined($self->{REQUEST}) ? $parts[$self->{REQUEST}] // "" : "";
         my ($method, $path, $version) = ($request =~ /^(\S+) (.*?) (HTTP\/.*)/);
         if (!defined($method)) {
             $method = '<Invalid>';
@@ -144,19 +144,19 @@ use JSON::XS;
         if ($file =~ m/\.([a-z0-9]+)$/i) {
             $filetype = lc($1);
         }
-        my $datetime = defined($self->{DATETIME}) ? $parts[$self->{DATETIME}] : "";
-        my $ip = defined($self->{IP}) ? $parts[$self->{IP}] : "";
+        my $datetime = defined($self->{DATETIME}) ? $parts[$self->{DATETIME}] // "" : "";
+        my $ip = defined($self->{IP}) ? $parts[$self->{IP}] // "" : "";
         $ip =~ s/^(0:0:0:0:0|:)(:FFFF:|:0:|:)((\d{1,3}\.){3}\d{1,3})$/$3/i;
-        my $host = defined($self->{HOST}) ? $parts[$self->{HOST}] : "";
-        my $code = defined($self->{CODE}) ? $parts[$self->{CODE}] : "";
-        my $bytes = defined($self->{BYTES}) ? int($parts[$self->{BYTES}]) : 0;
-        my $referrer = defined($self->{REFERRER}) ? $parts[$self->{REFERRER}] : "-";
-        my $agent = defined($self->{AGENT}) ? $parts[$self->{AGENT}] : "-";
-        my $totaltime = defined($self->{TOTALTIME}) ? $parts[$self->{TOTALTIME}] : "0";
+        my $host = defined($self->{HOST}) ? $parts[$self->{HOST}] // "" : "";
+        my $code = defined($self->{CODE}) ? $parts[$self->{CODE}] // "" : "";
+        my $bytes = defined($self->{BYTES}) ? int($parts[$self->{BYTES}]) // 0 : 0;
+        my $referrer = defined($self->{REFERRER}) ? $parts[$self->{REFERRER}] // "-" : "-";
+        my $agent = defined($self->{AGENT}) ? $parts[$self->{AGENT}] // "-" : "-";
+        my $totaltime = defined($self->{TOTALTIME}) ? $parts[$self->{TOTALTIME}] // "0" : "0";
         $totaltime =~ s/^t(ime)?://;
-        my $cache = defined($self->{CACHE}) ? $parts[$self->{CACHE}] : "-";
+        my $cache = defined($self->{CACHE}) ? $parts[$self->{CACHE}] // "-" : "-";
         $cache =~ s/^c(ache)?://;
-        my $backend = defined($self->{BACKEND}) ? $parts[$self->{BACKEND}] : "-";
+        my $backend = defined($self->{BACKEND}) ? $parts[$self->{BACKEND}] // "-" : "-";
         $backend =~ s/^(b|backend|u|upstream)://;
         return (
             HTTP => $version,
