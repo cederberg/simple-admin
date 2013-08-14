@@ -121,9 +121,9 @@ servicepid() {
     MATCH=${3:-${NAME}}
     if [ -r "$PIDFILE" ] && ps -p `cat $PIDFILE` > /dev/null 2>&1 ; then
         cat $PIDFILE | awk '{print $1}'
-    elif PID=`ps --ppid 1 -o pid,comm | grep " $MATCH" | awk '{print $1}'` ; then
+    elif PID=`ps --ppid 1 -o pid,comm | grep " $MATCH" | head -n 1 | awk '{print $1}'` ; then
         echo -n $PID
-    elif PID=`ps --ppid 1 -o pid,args | grep "$MATCH" | awk '{print $1}'` ; then
+    elif PID=`ps --ppid 1 -o pid,args | grep "$MATCH" | head -n 1 | awk '{print $1}'` ; then
         echo -n $PID
     fi 
 }
@@ -141,10 +141,10 @@ servicestatus() {
         DETAILS=`procdetails $PID`
     elif [ ! -r "$PIDFILE" ] ; then
         STATUS=2
-        DETAILS="no PID file $PIDFILE, process exists"
+        DETAILS="no PID file $PIDFILE, pid $PID found"
     elif [ $PID != "`cat $PIDFILE | awk '{print $1}'`" ] ; then
         STATUS=3
-        DETAILS="invalid PID file $PIDFILE, process exists"
+        DETAILS="invalid PID file $PIDFILE, pid $PID found"
     else
         STATUS=0
         DETAILS=`procdetails $PID`
