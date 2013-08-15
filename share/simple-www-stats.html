@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Chivo:900">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.2/css/smoothness/jquery-ui-1.10.2.custom.min.css">
+
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.0/css/font-awesome-ie7.min.css">
+    <![endif]-->
+    <title>Simple-Admin Web Statistics Viewer</title>
+    <style type="text/css">
+
+/* Default styles */
+body {
+    margin: 0;
+    padding: 10px 20px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 13px;
+}
+textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: 100%;
+}
+select optgroup {
+    font-family: inherit;
+    font-size: inherit;
+    font-style: inherit;
+}
+
+/* Header styles */
+header h1 {
+    margin: 0;
+    padding: 0 0 5px 0;
+    font-family: 'Chivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 900;
+    letter-spacing: -1px;
+    font-size: 3.0em;
+    color: #303030;
+    line-height: 1.2;
+}
+header h1 span {
+    color: #888;
+}
+
+/* Loading styles */
+#loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    -webkit-transition: opacity 0.7s ease;
+    transition: opacity 0.7s ease;
+}
+#loading div {
+    margin-top: 20%;
+    text-align: center;
+    font-size: 40px;
+    color: white;
+    text-shadow: 0 0 10px rgba(255,255,255,0.7);
+    letter-spacing: 5px;
+}
+#loading i {
+    display: inline-block;
+    font-size: 500px;
+    -webkit-animation: spin 10s linear 0s infinite;
+    animation: spin 10s linear infinite;
+}
+
+/* Selector styles */
+#selector {
+    position: absolute;
+    top: 30px;
+    right: 20px;
+}
+#selector select {
+    min-width: 20em;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+#selector select * {
+    font-weight: normal;
+}
+#selector optgroup:before {
+    padding-left: 6px;
+    color: #888;
+}
+#selector optgroup {
+    margin-bottom: 6px;
+    border-bottom: 1px solid #EEEEEE;
+    padding-bottom: 6px;
+}
+#datepicker {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    z-index: 10;
+    -webkit-transition: opacity 0.5s ease;
+    transition: opacity 0.5s ease;
+}
+
+/* Summary styles */
+#summary {
+    margin: 5px 0 15px;
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: #FFFFF8;
+    box-shadow: 0 1px 3px #886 inset;
+    font-size: 1.2em;
+}
+#summary span {
+    padding-left: 6px;
+}
+
+/* Tooltip styles */
+#tooltip {
+    position: absolute;
+    z-index: 10;
+    padding: 6px;
+    border: 1px solid #888;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    -webkit-transition: opacity 0.5s ease, top 0.05s ease, left 0.05s ease;
+    transition: opacity 0.5s ease, top 0.05s ease, left 0.05s ease;
+}
+
+/* Chart Selector styles */
+.chart-selector {
+    height: 410px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 8px;
+    padding: 0 0px;
+    white-space: nowrap;
+    background: #FFFFF8;
+    box-shadow: 0 1px 3px #886 inset;
+}
+.chart-selector .box {
+    position: relative;
+    display: inline-block;
+    width: 350px;
+    height: 350px;
+    overflow: hidden;
+    margin: 20px 20px 20px 0;
+    border-radius: 6px;
+    padding: 5px;
+    vertical-align: top;
+    background: white;
+    box-shadow: 0 0 3px #886;
+}
+.chart-selector .box h2 {
+    margin: 3px 10px;
+}
+.chart-selector .box .barchart,
+.chart-selector .box .piechart {
+    height: 310px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Chart Selector styles */
+.sortorder {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #EEEEEE;
+    font-size: 0.9em;
+}
+.sortorder span {
+    color: #CCCCCC;
+    cursor: pointer;
+}
+.sortorder span.selected {
+    color: #666666;
+}
+
+/* Bar Chart styles */
+.barchart {
+    margin: 6px 0;
+}
+.barchart .row {
+    margin: 0 10px;
+}
+.barchart .label {
+    float: left;
+    color: #666;
+}
+.barchart .value {
+    float: right;
+}
+.barchart .bar {
+    width: 100%;
+    clear: both;
+    height: 6px;
+    margin: 0 0 6px 0;
+    border-radius: 3px;
+    background: -moz-linear-gradient(left, #222, #ccc);
+    background: -ms-linear-gradient(left, #222, #ccc);
+    background: -webkit-linear-gradient(left, #222, #ccc);
+    background: linear-gradient(left, #222, #ccc);
+}
+.barchart.blue .bar {
+    background: -moz-linear-gradient(left, #2a4269, #38588e, #476fb2, #698bc3, #8da7d2, #b2c3e0);
+    background: -ms-linear-gradient(left, #2a4269, #38588e, #476fb2, #698bc3, #8da7d2, #b2c3e0);
+    background: -webkit-linear-gradient(left, #2a4269, #38588e, #476fb2, #698bc3, #8da7d2, #b2c3e0);
+    background: linear-gradient(left, #2a4269, #38588e, #476fb2, #698bc3, #8da7d2, #b2c3e0);
+}
+.barchart.red .bar {
+    background: -moz-linear-gradient(left, #6b1918, #942222, #be2c2b, #d54847, #df7170, #e89a9a);
+    background: -ms-linear-gradient(left, #6b1918, #942222, #be2c2b, #d54847, #df7170, #e89a9a);
+    background: -webkit-linear-gradient(left, #6b1918, #942222, #be2c2b, #d54847, #df7170, #e89a9a);
+    background: linear-gradient(left, #6b1918, #942222, #be2c2b, #d54847, #df7170, #e89a9a);
+}
+.barchart.green .bar {
+    background: -moz-linear-gradient(left, #4a661b, #688f25, #85b730, #9ed04a, #b4da73, #cae59b);
+    background: -ms-linear-gradient(left, #4a661b, #688f25, #85b730, #9ed04a, #b4da73, #cae59b);
+    background: -webkit-linear-gradient(left, #4a661b, #688f25, #85b730, #9ed04a, #b4da73, #cae59b);
+    background: linear-gradient(left, #4a661b, #688f25, #85b730, #9ed04a, #b4da73, #cae59b);
+}
+.barchart.cyan .bar {
+    background: -moz-linear-gradient(left, #165b6f, #1e7e9a, #26a1c5, #43b8db, #6ec9e3, #99d9eb);
+    background: -ms-linear-gradient(left, #165b6f, #1e7e9a, #26a1c5, #43b8db, #6ec9e3, #99d9eb);
+    background: -webkit-linear-gradient(left, #165b6f, #1e7e9a, #26a1c5, #43b8db, #6ec9e3, #99d9eb);
+    background: linear-gradient(left, #165b6f, #1e7e9a, #26a1c5, #43b8db, #6ec9e3, #99d9eb);
+}
+.barchart.purple .bar {
+    background: -moz-linear-gradient(left, #3f2954, #593977, #734a99, #8d63b3, #a685c4, #bfa7d5);
+    background: -ms-linear-gradient(left, #3f2954, #593977, #734a99, #8d63b3, #a685c4, #bfa7d5);
+    background: -webkit-linear-gradient(left, #3f2954, #593977, #734a99, #8d63b3, #a685c4, #bfa7d5);
+    background: linear-gradient(left, #3f2954, #593977, #734a99, #8d63b3, #a685c4, #bfa7d5);
+}
+.barchart.orange .bar {
+    background: -moz-linear-gradient(left, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+    background: -ms-linear-gradient(left, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+    background: -webkit-linear-gradient(left, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+    background: linear-gradient(left, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+}
+
+/* Generic styles */
+.compact th,
+.compact td {
+    padding: 0 3px 0 0;
+}
+.align-right {
+    text-align: right;
+}
+
+.hidden {
+    display: none;
+}
+.animation .hiding,
+.animation .showing {
+    opacity: 0;
+}
+.no-animation .hiding {
+    display: none;
+}
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Simple-Admin <span>Web Statistics Viewer</span></h1>
+    </header>
+
+    <div id="loading">
+      <div>
+        <i class="icon-spinner"></i><br>
+        <span>Loading Data...</span>
+      </div>
+    </div>
+
+    <div id="selector">
+      <select name="date">
+        <optgroup label="Preset Dates">
+          <option value="-1" selected>Yesterday</option>
+          <option value="-2">Day Before Yesterday</option>
+          <option value="-8">Last Week</option>
+          <option value="-31">Last Month</option>
+        </optgroup>
+        <option value="...">Select Another Date...</option>
+      </select>
+    </div>
+    <div id="datepicker" class="hidden hiding"></div>
+
+    <div id="summary">
+      <b>Total <span data-field="date" style="padding: 0;"></span>:</b>
+      <span data-field="count" data-format="number"></span> requests,
+      <span data-field="errors" data-format="number"></span> errors,
+      <span data-field="kbytes" data-format="kbytes"></span> downloads,
+      <span data-field="secs" data-format="secs"></span> processing time
+    </div>
+
+    <div id="tooltip" class="hidden hiding">
+      <b><span data-field="name">Test</span>:</b>
+      <table class="compact">
+        <tbody>
+          <tr>
+            <td class="align-right"><span data-field="count" data-format="number"></span></td>
+            <td>requests</td>
+            <td>(<span data-field="count_ratio" data-format="percent"></span>)</td>
+          </tr>
+          <tr>
+            <td class="align-right"><span data-field="errors" data-format="number"></span></td>
+            <td>errors</td>
+            <td>(<span data-field="errors_ratio" data-format="percent"></span>)</td>
+          </tr>
+          <tr>
+            <td class="align-right"><span data-field="kbytes" data-format="kbytes/value"></span></td>
+            <td><span data-field="kbytes" data-format="kbytes/unit"></span></td>
+            <td>(<span data-field="kbytes_ratio" data-format="percent"></span>)</td>
+          </tr>
+          <tr>
+            <td class="align-right"><span data-field="secs" data-format="secs/value"></span></td>
+            <td><span data-field="secs" data-format="secs/unit"></span></td>
+            <td>(<span data-field="secs_ratio" data-format="percent"></span>)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-selector">
+      <div class="box" style="margin-left: 20px;">
+        <h2>Host Names</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="host" class="barchart purple"></div>
+      </div>
+      <div class="box">
+        <h2>File Types</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="file_type" class="piechart cyan"></div>
+      </div>
+      <div class="box">
+        <h2>File Sources</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="file_source" class="barchart green"></div>
+      </div>
+      <div class="box">
+        <h2>Countries</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="countries" class="piechart orange"></div>
+      </div>
+      <div class="box">
+        <h2>Time of Day</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="name/count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="name/kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="name/secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="time_of_day" class="barchart red"></div>
+      </div>
+      <div class="box">
+        <h2>Platforms</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="platforms" class="piechart blue"></div>
+      </div>
+      <div class="box">
+        <h2>Browsers</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="browsers" class="piechart purple"></div>
+      </div>
+      <div class="box">
+        <h2>HTTP Versions</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="http_version" class="barchart cyan"></div>
+      </div>
+      <div class="box">
+        <h2>HTTP Methods</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="http_method" class="barchart green"></div>
+      </div>
+      <div class="box">
+        <h2>Response Codes</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="http_code" class="barchart orange"></div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highcharts/3.0.2/highcharts.js"></script>
+    <script type="text/javascript">
+
+var BLUE = ['#2a4269', '#38588e', '#476fb2', '#698bc3', '#8da7d2', '#b2c3e0'];
+var RED = ['#6b1918', '#942222', '#be2c2b', '#d54847', '#df7170', '#e89a9a'];
+var GREEN = ['#4a661b', '#688f25', '#85b730', '#9ed04a', '#b4da73', '#cae59b'];
+var CYAN = ['#165b6f', '#1e7e9a', '#26a1c5', '#43b8db', '#6ec9e3', '#99d9eb'];
+var PURPLE = ['#3f2954', '#593977', '#734a99', '#8d63b3', '#a685c4', '#bfa7d5'];
+var ORANGE = ['#9a5202', '#cc6c03', '#cc6c03', '#fc9f39', '#fdb86b', '#fdd09e'];
+
+// Format a date
+function formatDate(date) {
+    var year = "" + date.getFullYear();
+    var month = ("0" + (date.getMonth() + 1)).substr(-2);
+    var day = ("0" + date.getDate()).substr(-2);
+    return year + '-' + month + '-' + day;
+}
+
+// Format a numeric value
+function formatNumber(num) {
+    return Highcharts.numberFormat(num, 0);
+}
+
+// Format a numeric percent value
+function formatPercent(num) {
+    return Highcharts.numberFormat(num * 100, 1) + "%";
+}
+
+// Format a number of KB (data size)
+function formatKb(kb) {
+    if (kb < 1024) {
+        return Highcharts.numberFormat(kb, 0) + " KB";
+    } else if (kb < 1024 * 1024) {
+        return Highcharts.numberFormat(kb / 1024, 2) + " MB";
+    } else {
+        return Highcharts.numberFormat(kb / (1024 * 1024), 2) + " GB";
+    }
+}
+
+// Format a number of seconds (time)
+function formatSecs(secs) {
+    if (secs < 60) {
+        return Highcharts.numberFormat(secs, 1) + " sec";
+    } else if (secs < 3600) {
+        return Highcharts.numberFormat(secs / 60, 1) + " min";
+    } else {
+        return Highcharts.numberFormat(secs / 3600, 1) + " hrs";
+    }
+}
+
+function formatTemplate(tmpl, data) {
+    $(tmpl).find("span[data-field]").each(function () {
+        var elem = $(this);
+        var field = elem.attr("data-field");
+        var fmt = elem.attr("data-format") || "text";
+        var value = data[field];
+        if (fmt == "number") {
+            value = formatNumber(value);
+        } else if (fmt == "percent") {
+            value = formatPercent(value);
+        } else if (fmt == "kbytes") {
+            value = formatKb(value);
+        } else if (fmt == "kbytes/value") {
+            value = formatKb(value).replace(/\s\S*$/, "");
+        } else if (fmt == "kbytes/unit") {
+            value = formatKb(value).replace(/.*\s/, "");
+        } else if (fmt == "secs") {
+            value = formatSecs(value);
+        } else if (fmt == "secs/value") {
+            value = formatSecs(value).replace(/\s\S*$/, "");
+        } else if (fmt == "secs/unit") {
+            value = formatSecs(value).replace(/.*\s/, "");
+        }
+        $(this).text(value || "");
+    });
+}
+
+function dataSeries(data, total, sort) {
+    sort = sort || "-count";
+    var m;
+    var field = sort.replace(/.*\//, "").replace(/^\W+/, "");
+    var sortKey = sort.replace(/^\W+/, "").replace(/\/.*/, "");
+    var sortReverse = sort.charAt(0) == '-';
+    var series = [];
+    for (var k in data) {
+        var v = data[k];
+        if (v && v.count) {
+            v.name = k;
+            v.y = (typeof(v[field]) == "number") ? v[field] : v.count;
+            v.count_ratio = v.count / total.count;
+            v.errors_ratio = v.errors / total.errors;
+            v.kbytes_ratio = v.kbytes / total.kbytes;
+            v.secs_ratio = v.secs / total.secs;
+            if (field == "kbytes") {
+                v.value = formatKb(v.kbytes) + " (" +
+                          formatPercent(v.kbytes_ratio) + ")";
+            } else if (field == "secs") {
+                v.value = formatSecs(v.secs) + " (" +
+                          formatPercent(v.secs_ratio) + ")";
+            } else {
+                v.value = formatNumber(v.count) + " requests (" +
+                          formatPercent(v.count_ratio) + ")";
+            }
+            series.push(v);
+        }
+    }
+    series.sort(function (a, b) {
+        var v1 = a[sortKey];
+        var v2 = b[sortKey];
+        var cmp = (v1 == v2) ? 0 : (v1 < v2) ? -1 : 1;
+        return sortReverse ? -cmp : cmp;
+    });
+    return series;
+}
+
+function barChart(elem, data, total, sort) {
+    var series = dataSeries(data, total, sort);
+    var max = 0;
+    for (var i = 0; i < series.length; i++) {
+        max = Math.max(max, series[i].y);
+    }
+    var rows = [];
+    for (var i = 0; i < series.length; i++) {
+        var p = series[i];
+        var label = $("<span class='label'/>").text(p.name);
+        var value = $("<span class='value'/>").text(p.value);
+        var pct = Math.round(Math.max(5, p.y * 100 / max));
+        var bar = $("<div class='bar'/>").css("width", pct + "%");
+        rows.push($("<div class='row'/>").append(label, value, bar).data(p));
+    }
+    $(elem).empty().append(rows);
+}
+
+function barChartTooltip(evt) {
+    if (evt.type == "mouseleave") {
+        hide("#tooltip");
+    } else {
+        var tooltip = $("#tooltip");
+        var pos = { top: evt.pageY + 20, left: evt.pageX - 20};
+        tooltip.css(pos);
+        var target = $(evt.target);
+        var p = $(target.filter(".row")[0] || target.closest(".row")[0]).data();
+        if (p && tooltip.hasClass("hidden")) {
+            show("#tooltip");
+        }
+        if (p && p !== tooltip.data()) {
+            tooltip.data(p);
+            formatTemplate("#tooltip", p);
+        }
+    }
+}
+
+function pieChart(elem, data, total, sort) {
+    var series = dataSeries(data, total, sort);
+    var elem = $(elem);
+    var color = BLUE;
+    if (elem.hasClass("red")) {
+        color = RED;
+    } else if (elem.hasClass("green")) {
+        color = GREEN;
+    } else if (elem.hasClass("cyan")) {
+        color = CYAN;
+    } else if (elem.hasClass("purple")) {
+        color = PURPLE;
+    } else if (elem.hasClass("orange")) {
+        color = ORANGE;
+    }
+    var opts = {
+        chart: { type: "pie" },
+        title: { text: null },
+        plotOptions: {
+            pie: {
+                colors: color,
+                dataLabels: {
+                    formatter: function () {
+                        if (this.percentage < 2)
+                            return null;
+                        return this.point.name;
+                    }
+                }
+            }
+        },
+        tooltip: {
+            useHTML: true,
+            formatter: function () {
+                formatTemplate("#tooltip", this.point);
+                return $("#tooltip").html();
+            }
+        },
+        series: [{
+            name: 'Requests',
+            data: series
+        }]
+    }
+    $(elem).highcharts(opts);
+}
+
+function sortChart(evt) {
+    var target = $(evt.target);
+    if (!target.is("span")) {
+        target = target.closest("span");
+    }
+    if (!target.is(".selected")) {
+        target.parent().find(".selected").removeClass("selected");
+        target.addClass("selected");
+        renderChart(target.parents(".box").find(".barchart, .piechart"));
+    }
+}
+
+function renderChart(elem, data, total, sort) {
+    elem = $(elem);
+    data = data || elem.data("data");
+    total = total || $("#summary").data("data");
+    sort = sort || elem.parent().find(".sortorder .selected").attr("data-sort");
+    elem.data("data", data);
+    if (elem.hasClass("barchart")) {
+        barChart(elem, data, total, sort);
+    } else if (elem.hasClass("piechart")) {
+        pieChart(elem, data, total, sort);
+    }
+}
+
+function loadData() {
+    var date = $("#selector select").val();
+    if (date == "...") {
+        show("#datepicker");
+        return false;
+    } else {
+        show("#loading");
+        $("#selector select").data("current", date);
+        var file = "logstats." + date.replace(/-/g, "") + ".json";
+        var cb = loadDataCb.bind(this, date);
+        var eb = loadDataFail.bind(this, file);
+        $.getJSON(file).then(cb, eb);
+    }
+}
+
+function loadDataCb(date, res) {
+    hide("#loading");
+    res.total.date = date;
+    $("#summary").data("data", res.total);
+    formatTemplate("#summary", res.total);
+    renderChart("#host", res.host, res.total);
+    renderChart("#file_type", res.file_type, res.total);
+    renderChart("#file_source", res.file_source, res.total);
+    renderChart("#countries", res.country, res.total);
+    renderChart("#platforms", res.platform, res.total);
+    renderChart("#browsers", res.browser, res.total);
+    renderChart("#time_of_day", res.time_of_day, res.total, "name");
+    renderChart("#http_version", res.http_version, res.total);
+    renderChart("#http_method", res.http_method, res.total);
+    renderChart("#http_code", res.http_code, res.total);
+}
+
+function loadDataFail(file, xhr, status, error) {
+    hide("#loading");
+    alert("Couldn't load file " + file + ":\n\n" + (error));
+}
+
+function selectDate(date) {
+    hide("#datepicker");
+    if (!date) {
+        date = $("#selector select").data("current");
+        $("#selector select").val(date);
+    } else {
+        var opt = $("#selector option[value='" + date + "']");
+        if (!opt.length) {
+             var dttm = $.datepicker.parseDate("yy-mm-dd", date);
+             var txt = $.datepicker.formatDate("D, M dd yy (yy-mm-dd)", dttm);
+             opt = $("<option value='" + date + "'/>").text(txt);
+             if ($("#selector optgroup").length < 2) {
+                 var grp = $("<optgroup label='Custom Dates'/>")
+                 $("#selector option:last").before(grp);
+             }
+             $("#selector optgroup:last").append(opt);
+        }
+        $("#selector select").val(date).change();
+    }
+}
+
+function show(elem) {
+    $(elem).addClass("showing");
+    $(elem).removeClass("hidden hiding");
+    setTimeout(function () { $(elem).removeClass("showing"); }, 10);
+}
+
+function hide(elem) {
+    $(elem).addClass("hiding");
+    setTimeout(function () {
+        if ($(elem).hasClass("hiding")) {
+            $(elem).addClass("hidden");
+        }
+    }, 1000);
+}
+
+$(function () {
+    // Init animations
+    var bodyStyles = document.body.style;
+    if ("transition" in bodyStyles || "-webkit-transition" in bodyStyles) {
+        $("body").addClass("animation");
+    } else {
+        $("body").addClass("no-animation");
+    }
+
+    // Init HighCharts
+    Highcharts.setOptions({
+        lang: { thousandsSep: " " }
+    });
+
+    // Init date selector
+    $("#selector").find("option").each(function () {
+        var opt = $(this);
+        var val = opt.attr("value");
+        if (/^[+-]\d+$/.test(val)) {
+            var now = new Date().getTime();
+            var date = formatDate(new Date(now + 24 * 60 * 60 * 1000 * val));
+            opt.attr("value", date);
+            opt.append(" (" + date + ")");
+        }
+    });
+    $("#datepicker").datepicker({ numberOfMonths: 2, showWeek: true,
+                                  maxDate: "-1D", dateFormat: "yy-mm-dd",
+                                  onSelect: selectDate });
+
+    // Init event handlers
+    $("#selector select").on("click", false);
+    $("#selector select").on("change", loadData);
+    $(window).on("click", selectDate.bind(null, null));
+    $("body").on("mouseenter mouseleave mousemove", ".barchart", barChartTooltip);
+    $("body").on("click touchstart", ".sortorder span", sortChart);
+
+    // Load initial data
+    loadData();
+});
+    </script>
+  </body>
+</html>
