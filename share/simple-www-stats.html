@@ -14,7 +14,16 @@
     <style type="text/css">
 
 /* Default styles */
+html {
+    width: 100%;
+    height: 100%;
+}
 body {
+    width: -webkit-calc(100% - 40px);
+    width: calc(100% - 40px);
+    height: -webkit-calc(100% - 20px);
+    height: calc(100% - 20px);
+    overflow: hidden;
     margin: 0;
     padding: 10px 20px;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -110,7 +119,7 @@ header h1 span {
     margin: 5px 0 15px;
     border-radius: 6px;
     padding: 8px 10px;
-    background: #FFFFF8;
+    background: #FFFAF0;
     box-shadow: 0 1px 3px #886 inset;
     font-size: 1.2em;
 }
@@ -121,14 +130,15 @@ header h1 span {
 /* Tooltip styles */
 #tooltip {
     position: absolute;
+    max-width: 400px;
     z-index: 10;
     padding: 6px;
     border: 1px solid #888;
     border-radius: 4px;
     background: rgba(255,255,255,0.9);
     box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    -webkit-transition: opacity 0.5s ease, top 0.05s ease, left 0.05s ease;
-    transition: opacity 0.5s ease, top 0.05s ease, left 0.05s ease;
+    -webkit-transition: opacity 0.7s ease 0.5s, top 0.05s ease, left 0.05s ease;
+    transition: opacity 0.7s ease 0.5s, top 0.05s ease, left 0.05s ease;
 }
 
 /* Chart Selector styles */
@@ -190,6 +200,8 @@ header h1 span {
 }
 .barchart .label {
     float: left;
+    max-width: -webkit-calc(100% - 100px);
+    max-width: calc(100% - 100px);
     color: #666;
 }
 .barchart .value {
@@ -241,6 +253,107 @@ header h1 span {
     background: -ms-linear-gradient(left, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
     background: -webkit-linear-gradient(left, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
     background: linear-gradient(left, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+}
+
+/* Tab Switcher styles */
+.tab-container {
+    width: 100%;
+    height: -webkit-calc(100% - 545px);
+    height: calc(100% - 545px);
+    margin: 20px 0 0 0;
+}
+.tab-label-list {
+    position: relative;
+    margin: 0;
+}
+.tab-label {
+    display: inline-block;
+    margin: 0 2px 0 0;
+    border-width: 1px 1px 0;
+    border-style: solid;
+    border-color: #CCCCCC;
+    border-radius: 6px 6px 0 0;
+    padding: 3px 6px;
+    background: #EEEEEE;
+    background: -moz-linear-gradient(top , #FFFFFF, #DDDDDD);
+    background: -ms-linear-gradient(top , #FFFFFF, #DDDDDD);
+    background: -webkit-linear-gradient(top , #FFFFFF, #DDDDDD);
+    background: linear-gradient(top , #FFFFFF, #DDDDDD);
+    cursor: pointer;
+    font-size: 1.1em;
+    text-shadow: 0 1px 0 #FFFFFF;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.tab-label.active {
+    border-color: #888888;
+    background: #88EEFF;
+    color: #FFFFFF;
+    text-shadow: 0 1px 1px #000000;
+}
+.tab-label.blue.active {
+    border-color: #38588e;
+    background: -moz-linear-gradient(bottom, #38588e, #476fb2, #698bc3, #8da7d2, #b2c3e0);
+    background: -ms-linear-gradient(bottom, #38588e, #476fb2, #698bc3, #8da7d2, #b2c3e0);
+    background: -webkit-linear-gradient(bottom, #38588e, #476fb2, #698bc3, #8da7d2, #b2c3e0);
+    background: linear-gradient(bottom, #38588e, #476fb2, #698bc3, #8da7d2, #b2c3e0);
+}
+.tab-label.red.active {
+    border-color: #942222;
+    background: -moz-linear-gradient(bottom, #942222, #be2c2b, #d54847, #df7170, #e89a9a);
+    background: -ms-linear-gradient(bottom, #942222, #be2c2b, #d54847, #df7170, #e89a9a);
+    background: -webkit-linear-gradient(bottom, #942222, #be2c2b, #d54847, #df7170, #e89a9a);
+    background: linear-gradient(bottom, #942222, #be2c2b, #d54847, #df7170, #e89a9a);
+}
+.tab-label.green.active {
+    border-color: #688f25;
+    background: -moz-linear-gradient(bottom, #688f25, #85b730, #9ed04a, #b4da73, #cae59b);
+    background: -ms-linear-gradient(bottom, #688f25, #85b730, #9ed04a, #b4da73, #cae59b);
+    background: -webkit-linear-gradient(bottom, #688f25, #85b730, #9ed04a, #b4da73, #cae59b);
+    background: linear-gradient(bottom, #688f25, #85b730, #9ed04a, #b4da73, #cae59b);
+}
+.tab-label.cyan.active {
+    border-color: #1e7e9a;
+    background: -moz-linear-gradient(bottom, #1e7e9a, #26a1c5, #43b8db, #6ec9e3, #99d9eb);
+    background: -ms-linear-gradient(bottom, #1e7e9a, #26a1c5, #43b8db, #6ec9e3, #99d9eb);
+    background: -webkit-linear-gradient(bottom, #1e7e9a, #26a1c5, #43b8db, #6ec9e3, #99d9eb);
+    background: linear-gradient(bottom, #1e7e9a, #26a1c5, #43b8db, #6ec9e3, #99d9eb);
+}
+.tab-label.purple.active {
+    border-color: #593977;
+    background: -moz-linear-gradient(bottom, #593977, #734a99, #8d63b3, #a685c4, #bfa7d5);
+    background: -ms-linear-gradient(bottom, #593977, #734a99, #8d63b3, #a685c4, #bfa7d5);
+    background: -webkit-linear-gradient(bottom, #593977, #734a99, #8d63b3, #a685c4, #bfa7d5);
+    background: linear-gradient(bottom, #593977, #734a99, #8d63b3, #a685c4, #bfa7d5);
+}
+.tab-label.orange.active {
+    border-color: #9a5202;
+    background: -moz-linear-gradient(bottom, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+    background: -ms-linear-gradient(bottom, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+    background: -webkit-linear-gradient(bottom, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+    background: linear-gradient(bottom, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
+}
+.tab-content {
+    width: -webkit-calc(100% - 20px);
+    width: calc(100% - 20px);
+    height: -webkit-calc(100% - 55px);
+    height: calc(100% - 55px);
+    margin: 0;
+    border-radius: 0 6px 6px 6px;
+    padding: 15px 10px;
+    box-shadow: 0 1px 3px #886 inset;
+}
+.tab-content .barchart,
+.tab-content .piechart {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0;
 }
 
 /* Generic styles */
@@ -419,6 +532,32 @@ header h1 span {
       </div>
     </div>
 
+    <div class="tab-container">
+      <div class="tab-label-list">
+        <div class="tab-label cyan active" data-ref="top_request"><i class="icon-sort-by-attributes-alt"></i> Top Requests</div>
+        <div class="tab-label purple" data-ref="top_download"><i class="icon-truck"></i> Top Downloads</div>
+        <div class="tab-label orange" data-ref="top_process_time"><i class="icon-time"></i> Top Process Time</div>
+        <div class="tab-label green" data-ref="top_redirect"><i class="icon-retweet"></i> Top Redirects</div>
+        <div class="tab-label red" data-ref="top_error"><i class="icon-bolt"></i> Error Responses</div>
+      </div>
+      <div class="tab-content">
+        <div id="top_request" class="barchart cyan"></div>
+      </div>
+      <div class="tab-content hidden">
+        <div id="top_download" class="barchart purple"></div>
+      </div>
+      <div class="tab-content hidden">
+        <div id="top_process_time" class="barchart orange"></div>
+      </div>
+      <div class="tab-content hidden">
+        <div id="top_redirect" class="barchart green"></div>
+      </div>
+      <div class="tab-content hidden">
+        <div id="top_error" class="barchart red"></div>
+      </div>
+    </div>
+
+
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highcharts/3.0.2/highcharts.js"></script>
@@ -555,20 +694,29 @@ function barChart(elem, data, total, sort) {
 }
 
 function barChartTooltip(evt) {
+    var target = $(evt.target);
+    var isTargetTooltip = target.closest("#tooltip").length > 0;
     if (evt.type == "mouseleave") {
         hide("#tooltip");
     } else {
         var tooltip = $("#tooltip");
-        var pos = { top: evt.pageY + 20, left: evt.pageX - 20};
-        tooltip.css(pos);
-        var target = $(evt.target);
-        var p = $(target.filter(".row")[0] || target.closest(".row")[0]).data();
-        if (p && tooltip.hasClass("hidden")) {
-            show("#tooltip");
-        }
+        var p = target.closest(".row").data();
         if (p && p !== tooltip.data()) {
             tooltip.data(p);
             formatTemplate("#tooltip", p);
+        }
+        var maxWidth = $("body").width();
+        var maxHeight = $("body").height();
+        var width = tooltip.width();
+        var height = tooltip.height();
+        var pos = { left: evt.pageX - 20, top: evt.pageY + 20 };
+        pos.left = Math.max(0, Math.min(maxWidth - width, pos.left));
+        if (pos.top + height >= maxHeight) {
+            pos.top = evt.pageY - height - 30;
+        }
+        tooltip.css(pos);
+        if (p || isTargetTooltip) {
+            show("#tooltip");
         }
     }
 }
@@ -628,6 +776,7 @@ function sortChart(evt) {
         target.addClass("selected");
         renderChart(target.parents(".box").find(".barchart, .piechart"));
     }
+    return false;
 }
 
 function renderChart(elem, data, total, sort) {
@@ -673,6 +822,11 @@ function loadDataCb(date, res) {
     renderChart("#http_version", res.http_version, res.total);
     renderChart("#http_method", res.http_method, res.total);
     renderChart("#http_code", res.http_code, res.total);
+    renderChart("#top_request", res.top_request, res.total, "-count");
+    renderChart("#top_download", res.top_download, res.total, "-kbytes");
+    renderChart("#top_process_time", res.top_process_time, res.total, "-secs");
+    renderChart("#top_redirect", res.top_redirect, res.total, "-count");
+    renderChart("#top_error", res.error, res.total, "-count");
 }
 
 function loadDataFail(file, xhr, status, error) {
@@ -701,10 +855,27 @@ function selectDate(date) {
     }
 }
 
+function selectTab(evt) {
+    var target = $(evt.target);
+    if (!target.is(".tab-label")) {
+        target = target.closest(".tab-label");
+    }
+    if (!target.is(".active")) {
+        target.parent().find(".active").removeClass("active");
+        target.addClass("active");
+        $(".tab-content").addClass("hidden");
+        $("#" + target.attr("data-ref")).closest(".tab-content").removeClass("hidden");
+    }
+    return false;
+}
+
 function show(elem) {
-    $(elem).addClass("showing");
-    $(elem).removeClass("hidden hiding");
-    setTimeout(function () { $(elem).removeClass("showing"); }, 10);
+    elem = $(elem);
+    if (elem.hasClass("hidden") || elem.hasClass("hiding")) {
+        elem.addClass("showing");
+        elem.removeClass("hidden hiding");
+        setTimeout(function () { elem.removeClass("showing"); }, 10);
+    }
 }
 
 function hide(elem) {
@@ -749,8 +920,9 @@ $(function () {
     $("#selector select").on("click", false);
     $("#selector select").on("change", loadData);
     $(window).on("click", selectDate.bind(null, null));
-    $("body").on("mouseenter mouseleave mousemove", ".barchart", barChartTooltip);
+    $("body").on("mouseenter mouseleave mousemove", ".barchart, #tooltip", barChartTooltip);
     $("body").on("click touchstart", ".sortorder span", sortChart);
+    $("body").on("click touchstart", ".tab-label", selectTab);
 
     // Load initial data
     loadData();
