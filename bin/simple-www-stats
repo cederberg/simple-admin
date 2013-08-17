@@ -200,6 +200,9 @@ my %stat_file = ();
 my %stat_filetype = ();
 my %stat_source = ();
 my %stat_redirect = ();
+my %stat_referrer_site = ();
+my %stat_referrer_source = ();
+my %stat_referrer_target = ();
 my %stat_errortype = ();
 my %hist_prcstime_raw = ();
 my %hist_prcstime = ();
@@ -283,6 +286,18 @@ sub normalize_stat_values {
     } elsif ($$ref_data{'FILETYPE'} =~ /^(rss|xml|json)$/) {
         $$ref_data{'FILECATEGORY'} = 'Data';
     }
+    $$ref_data{'REFERRER'} =~ s/\?.*//;
+    my $refhost = $$ref_data{'REFERRER'};
+    $refhost =~ s#.*//##;
+    $refhost =~ s#[/:].*##;
+    if (length($refhost) > 3 and $refhost ne $$ref_data{'HOST'}) {
+        $$ref_data{'REFERRER_HOST'} = $refhost;
+        $$ref_data{'REFERRER_TARGET'} = $$ref_data{'HOST'}.$$ref_data{'FILE'};
+    } else {
+        $$ref_data{'REFERRER'} = '-';
+        $$ref_data{'REFERRER_HOST'} = '-';
+        $$ref_data{'REFERRER_TARGET'} = '-';
+    }
 }
 
 # Normalize error message
@@ -361,6 +376,11 @@ sub process_line {
     } else {
         my $key = normalize_error_msg($respcode, $data{'HOST'}, $data{'PATH'});
         process_counter(\%stat_errortype, $key, $kbytes, $time, $iserror);
+    }
+    if ($data{'REFERRER'} ne '-' and !$iserror) {
+        process_counter(\%stat_referrer_site, $data{'REFERRER_HOST'}, $kbytes, $time, $iserror);
+        process_counter(\%stat_referrer_source, $data{'REFERRER'}, $kbytes, $time, $iserror);
+        process_counter(\%stat_referrer_target, $data{'REFERRER_TARGET'}, $kbytes, $time, $iserror);
     }
 }
 
@@ -579,6 +599,12 @@ if (defined($output_json)) {
     printf $fh qq#  "top_process_time": %s,\n#, encode_json(\%data);
     %data = sorted_table(\%stat_redirect, 100, 'count');
     printf $fh qq#  "top_redirect": %s,\n#, encode_json(\%data);
+    %data = sorted_table(\%stat_referrer_site, 100, 'count');
+    printf $fh qq#  "top_referral_site": %s,\n#, encode_json(\%data);
+    %data = sorted_table(\%stat_referrer_source, 100, 'count');
+    printf $fh qq#  "top_referral_source": %s,\n#, encode_json(\%data);
+    %data = sorted_table(\%stat_referrer_target, 100, 'count');
+    printf $fh qq#  "top_referral_target": %s,\n#, encode_json(\%data);
     printf $fh qq#  "error": %s\n#, encode_json(\%stat_errortype);
     printf $fh "\}\n";
     close($fh);
@@ -598,6 +624,12 @@ if (!defined($output_json) or defined($output_text)) {
     print_histogram($fh, \%stat_file, 80, 20, 'secs');
     print $fh "Top Redirects:\n";
     print_histogram($fh, \%stat_redirect, 80, 20);
+    print $fh "Top Referral Sites:\n";
+    print_histogram($fh, \%stat_referrer_site, 80, 20);
+    print $fh "Top Referral Sources:\n";
+    print_histogram($fh, \%stat_referrer_source, 80, 20);
+    print $fh "Top Referral Targets:\n";
+    print_histogram($fh, \%stat_referrer_target, 80, 20);
     print $fh "Errors:\n";
     print_histogram($fh, \%stat_errortype, 80);
     print $fh "Hostnames:\n";
@@ -612,8 +644,8 @@ if (!defined($output_json) or defined($output_text)) {
     print_histogram($fh, \%stat_httpversion);
     print $fh "Response Codes:\n";
     print_histogram($fh, \%stat_httpcode);
-    print $fh "Countries:\n";
-    print_histogram($fh, \%stat_country);
+    print $fh "Top Countries:\n";
+    print_histogram($fh, \%stat_country, 30, 20);
     print $fh "Browsers:\n";
     print_histogram($fh, \%stat_browser);
     print $fh "Platforms:\n";
