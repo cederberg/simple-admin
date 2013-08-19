@@ -5,6 +5,7 @@ use warnings;
 use File::Basename;
 use Geo::IPfree;
 use JSON::XS;
+use Math::Round;
 
 # HTTP request log parser
 {
@@ -352,13 +353,11 @@ sub process_counter {
         $$ref{$key}{'count'} = 0;
         $$ref{$key}{'kbytes'} = 0;
         $$ref{$key}{'secs'} = 0.0;
-        $$ref{$key}{'sqrsecs'} = 0.0;
         $$ref{$key}{'errors'} = 0;
     }
     $$ref{$key}{'count'}++;
     $$ref{$key}{'kbytes'} += $kbytes;
     $$ref{$key}{'secs'} += $time;
-    $$ref{$key}{'sqrsecs'} += $time * $time;
     $$ref{$key}{'errors'} += $iserror ? 1 : 0;
 }
 
@@ -470,6 +469,18 @@ sub process_config {
     close($fh);
 }
 
+# Postprocess all stat counters
+sub postprocess_stats {
+    my ($hashref) = @_;
+    my @keys = keys %$hashref;
+    foreach my $key (@keys) {
+        my $count = $$hashref{$key}{'count'};
+        my $secs = $$hashref{$key}{'secs'};
+        $$hashref{$key}{'secs'} = nearest(0.001, $secs);
+        $$hashref{$key}{'avgsecs'} = nearest(0.001, $secs / $count);
+    }
+}
+
 # Percent calculation (safe from div-by-zero)
 sub percent {
     my ($value, $total) = @_;
@@ -576,6 +587,26 @@ if (!@filenames) {
     die "ERROR: no access log file specified";
 }
 
+# Round numbers and average response times
+postprocess_stats(\%stat_httpversion);
+postprocess_stats(\%stat_httpcode);
+postprocess_stats(\%stat_httpversion);
+postprocess_stats(\%stat_httpmethod);
+postprocess_stats(\%stat_host);
+postprocess_stats(\%stat_country);
+postprocess_stats(\%stat_timeofday_raw);
+postprocess_stats(\%stat_browser);
+postprocess_stats(\%stat_platform);
+postprocess_stats(\%stat_file);
+postprocess_stats(\%stat_filetype);
+postprocess_stats(\%stat_source);
+postprocess_stats(\%stat_redirect);
+postprocess_stats(\%stat_referrer_site);
+postprocess_stats(\%stat_referrer_source);
+postprocess_stats(\%stat_referrer_target);
+postprocess_stats(\%stat_errortype);
+postprocess_stats(\%stat_prcstime);
+
 # Format time-of-day keys
 foreach my $key (sort keys %stat_timeofday_raw) {
     my $timekey = sprintf("%02d:00-%02d:59", int($key) * 3, int($key) * 3 + 2);
@@ -596,7 +627,8 @@ if (defined($output_json)) {
     printf $fh "\{\n";
     my %json_total = ('count' => $total, 'errors' => $totalerrors,
                       'kbytes' => $totalkb, 'size' => format_kb($totalkb),
-                      'secs' => $totaltime, 'time' => format_secs($totaltime));
+                      'secs' => nearest(0.001, $totaltime), 'time' => format_secs($totaltime),
+                      'avgsecs' => nearest(0.001, $totaltime / $total));
     printf $fh qq#  "total": %s,\n#, encode_json(\%json_total);
     printf $fh qq#  "http_version": %s,\n#, encode_json(\%stat_httpversion);
     printf $fh qq#  "http_method": %s,\n#, encode_json(\%stat_httpmethod);
@@ -613,7 +645,7 @@ if (defined($output_json)) {
     printf $fh qq#  "top_request": %s,\n#, encode_json(\%data);
     %data = sorted_table(\%stat_file, 100, 'kbytes');
     printf $fh qq#  "top_download": %s,\n#, encode_json(\%data);
-    %data = sorted_table(\%stat_file, 100, 'sqrsecs');
+    %data = sorted_table(\%stat_file, 100, 'avgsecs');
     printf $fh qq#  "top_process_time": %s,\n#, encode_json(\%data);
     %data = sorted_table(\%stat_redirect, 100, 'count');
     printf $fh qq#  "top_redirect": %s,\n#, encode_json(\%data);
@@ -639,7 +671,7 @@ if (!defined($output_json) or defined($output_text)) {
     print $fh "Top Downloads:\n";
     print_histogram($fh, \%stat_file, 80, 20, 'kbytes');
     print $fh "Top Backend Time:\n";
-    print_histogram($fh, \%stat_file, 80, 20, 'sqrsecs');
+    print_histogram($fh, \%stat_file, 80, 20, 'avgsecs');
     print $fh "Top Redirects:\n";
     print_histogram($fh, \%stat_redirect, 80, 20);
     print $fh "Top Referral Sites:\n";
