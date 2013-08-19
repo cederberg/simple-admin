@@ -204,8 +204,8 @@ my %stat_referrer_site = ();
 my %stat_referrer_source = ();
 my %stat_referrer_target = ();
 my %stat_errortype = ();
-my %hist_prcstime_raw = ();
-my %hist_prcstime = ();
+my %stat_prcstime = ();
+my $stat_prcstime_max = 0.0;
 my $parser = Parser->new;
 my $geo = Geo::IPfree->new;
 $geo->Faster;
@@ -324,6 +324,26 @@ sub normalize_error_msg {
     return "$respcode $host$url";
 }
 
+# Returns the process time hash key
+sub process_time_key {
+    my ($time) = @_;
+    if ($time <= 0.0) {
+        return '0.0 secs';
+    } elsif ($time <= 0.5) {
+        return '0.5 secs';
+    } elsif ($time <= 1.0) {
+        return '1.0 secs';
+    } elsif ($time <= 2.0) {
+        return '2.0 secs';
+    } elsif ($time <= 5.0) {
+        return '5.0 secs';
+    } elsif ($time <= 10.0) {
+        return '10.0 secs';
+    } else {
+        return '*';
+    }
+}
+
 # Processes stat counters for a key
 sub process_counter {
     my ($ref, $key, $kbytes, $time, $iserror) = @_;
@@ -332,11 +352,13 @@ sub process_counter {
         $$ref{$key}{'count'} = 0;
         $$ref{$key}{'kbytes'} = 0;
         $$ref{$key}{'secs'} = 0.0;
+        $$ref{$key}{'sqrsecs'} = 0.0;
         $$ref{$key}{'errors'} = 0;
     }
     $$ref{$key}{'count'}++;
     $$ref{$key}{'kbytes'} += $kbytes;
     $$ref{$key}{'secs'} += $time;
+    $$ref{$key}{'sqrsecs'} += $time * $time;
     $$ref{$key}{'errors'} += $iserror ? 1 : 0;
 }
 
@@ -359,7 +381,8 @@ sub process_line {
     $totaltime += $time;
     $totalerrors += $iserror ? 1 : 0;
     process_counter(\%stat_timeofday_raw, ''.(int($data{'HOUR'}) / 3), $kbytes, $time, $iserror);
-    process_counter(\%hist_prcstime_raw, $data{'BACKENDTIME'}, $kbytes, $time, $iserror);
+    process_counter(\%stat_prcstime, process_time_key($time), $kbytes, $time, $iserror);
+    $stat_prcstime_max = ($stat_prcstime_max >= $time) ? $stat_prcstime_max : $time;
     process_counter(\%stat_httpcode, "HTTP $respcode", $kbytes, $time, $iserror);
     process_counter(\%stat_httpversion, $data{'HTTP'} || '<blank>', $kbytes, $time, $iserror);
     process_counter(\%stat_httpmethod, $data{'METHOD'}, $kbytes, $time, $iserror);
@@ -559,16 +582,11 @@ foreach my $key (sort keys %stat_timeofday_raw) {
     $stat_timeofday{$timekey} = $stat_timeofday_raw{$key};
 }
 
-# Calculate processing time thresholds
-my @limits = (0.500, 0.750, 0.900, 0.950, 0.975, 0.990, 0.995, 0.998, 0.999, 1.0);
-my $nextlimit = shift(@limits);
-my $count = 0;
-foreach my $time (sort {$a <=> $b} keys %hist_prcstime_raw) {
-    $count += $hist_prcstime_raw{$time}{'count'};
-    if ($count / $total >= $nextlimit) {
-        $hist_prcstime{$nextlimit} = $time;
-        $nextlimit = shift(@limits);
-    }
+# Update max processing time key
+if (defined($stat_prcstime{'*'})) {
+    my $key = sprintf("%.1f secs", $stat_prcstime_max);
+    $stat_prcstime{$key} = $stat_prcstime{'*'};
+    delete $stat_prcstime{'*'};
 }
 
 # Print output
@@ -590,12 +608,12 @@ if (defined($output_json)) {
     printf $fh qq#  "file_type": %s,\n#, encode_json(\%stat_filetype);
     printf $fh qq#  "file_source": %s,\n#, encode_json(\%stat_source);
     printf $fh qq#  "time_of_day": %s,\n#, encode_json(\%stat_timeofday);
-    printf $fh qq#  "process_time": %s,\n#, encode_json(\%hist_prcstime);
+    printf $fh qq#  "process_time": %s,\n#, encode_json(\%stat_prcstime);
     my %data = sorted_table(\%stat_file, 100, 'count');
     printf $fh qq#  "top_request": %s,\n#, encode_json(\%data);
     %data = sorted_table(\%stat_file, 100, 'kbytes');
     printf $fh qq#  "top_download": %s,\n#, encode_json(\%data);
-    %data = sorted_table(\%stat_file, 100, 'secs');
+    %data = sorted_table(\%stat_file, 100, 'sqrsecs');
     printf $fh qq#  "top_process_time": %s,\n#, encode_json(\%data);
     %data = sorted_table(\%stat_redirect, 100, 'count');
     printf $fh qq#  "top_redirect": %s,\n#, encode_json(\%data);
@@ -620,8 +638,8 @@ if (!defined($output_json) or defined($output_text)) {
     print_histogram($fh, \%stat_file, 80, 20);
     print $fh "Top Downloads:\n";
     print_histogram($fh, \%stat_file, 80, 20, 'kbytes');
-    print $fh "Top Processing Time:\n";
-    print_histogram($fh, \%stat_file, 80, 20, 'secs');
+    print $fh "Top Backend Time:\n";
+    print_histogram($fh, \%stat_file, 80, 20, 'sqrsecs');
     print $fh "Top Redirects:\n";
     print_histogram($fh, \%stat_redirect, 80, 20);
     print $fh "Top Referral Sites:\n";
@@ -651,11 +669,9 @@ if (!defined($output_json) or defined($output_text)) {
     print $fh "Platforms:\n";
     print_histogram($fh, \%stat_platform);
     print $fh "Time of Day Distribution:\n";
-    print_histogram($fh, \%stat_timeofday, 30, 8, 'key');
+    print_histogram($fh, \%stat_timeofday, 30, 10, 'key');
     print $fh "Backend Time Distribution:\n";
-    foreach my $key (sort keys %hist_prcstime) {
-        printf $fh "  %5.1f%% within: %8s seconds\n", $key * 100.0, $hist_prcstime{$key};
-    }
+    print_histogram($fh, \%stat_prcstime);
     printf $fh "Total:\n";
     printf $fh "  %7d requests\n", $total;
     printf $fh "  %7d errors\n", $totalerrors;
