@@ -153,11 +153,11 @@ use JSON::XS;
         my $referrer = defined($self->{REFERRER}) ? $parts[$self->{REFERRER}] // "-" : "-";
         my $agent = defined($self->{AGENT}) ? $parts[$self->{AGENT}] // "-" : "-";
         my $totaltime = defined($self->{TOTALTIME}) ? $parts[$self->{TOTALTIME}] // "0" : "0";
-        $totaltime =~ s/^t(ime)?://;
+        $totaltime =~ s/[^0-9.-]//g;
         my $cache = defined($self->{CACHE}) ? $parts[$self->{CACHE}] // "-" : "-";
         $cache =~ s/^c(ache)?://;
         my $backend = defined($self->{BACKEND}) ? $parts[$self->{BACKEND}] // "-" : "-";
-        $backend =~ s/^(b|backend|u|upstream)://;
+        $backend =~ s/[^0-9.-]//g;
         return (
             HTTP => $version,
             METHOD => $method,
