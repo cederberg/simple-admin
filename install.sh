@@ -110,6 +110,11 @@ mkdir -p /usr/local/share/man/man1
 cp man/man1/* /usr/local/share/man/man1/
 gzip -f /usr/local/share/man/man1/simple-*.1
 
+# Install man pages
+echo "Installing shared files to /usr/local/share/simple-admin/..."
+mkdir -p /usr/local/share/simple-admin
+cp share/* /usr/local/share/simple-admin/
+
 # Check for missing config files
 CONFIG_MISSING=""
 for FILE in etc/*.conf ; do
