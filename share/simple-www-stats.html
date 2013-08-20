@@ -653,7 +653,7 @@ function formatPercent(num) {
 
 // Format a number of KB (data size)
 function formatKb(kb) {
-    if (kb < 1024) {
+    if (isNaN(kb) || kb < 1024) {
         return Highcharts.numberFormat(kb, 0) + " KB";
     } else if (kb < 1024 * 1024) {
         return Highcharts.numberFormat(kb / 1024, 2) + " MB";
@@ -664,7 +664,7 @@ function formatKb(kb) {
 
 // Format a number of seconds (time)
 function formatSecs(secs) {
-    if (secs < 60) {
+    if (isNaN(secs) || secs < 60) {
         return Highcharts.numberFormat(secs, 1) + " secs";
     } else if (secs < 3600) {
         return Highcharts.numberFormat(secs / 60, 1) + " mins";
