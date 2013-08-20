@@ -10,7 +10,7 @@
     <!--[if IE 7]>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.0/css/font-awesome-ie7.min.css">
     <![endif]-->
-    <title>Simple-Admin Web Statistics Viewer</title>
+    <title>Simple-Admin Web Stats Viewer</title>
     <style type="text/css">
 
 /* Default styles */
@@ -85,7 +85,7 @@ header h1 span {
 /* Selector styles */
 #selector {
     position: absolute;
-    top: 30px;
+    top: 22px;
     right: 20px;
 }
 #selector select {
@@ -380,7 +380,7 @@ header h1 span {
 
   <body>
     <header>
-      <h1>Simple-Admin <span>Web Statistics Viewer</span></h1>
+      <h1>Simple-Admin <span>Web Stats Viewer</span></h1>
     </header>
 
     <div id="loading">
@@ -468,13 +468,22 @@ header h1 span {
         <div id="file_source" class="barchart green"></div>
       </div>
       <div class="box">
+        <h2>Referral Sites</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="top_referral_site" class="barchart orange"></div>
+      </div>
+      <div class="box">
         <h2>Countries</h2>
         <div class="sortorder">
           <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
           <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
           <span data-sort="-secs"><i class="icon-time"></i> Time</span>
         </div>
-        <div id="countries" class="piechart orange"></div>
+        <div id="countries" class="piechart red"></div>
       </div>
       <div class="box">
         <h2>Time of Day</h2>
@@ -483,7 +492,7 @@ header h1 span {
           <span data-sort="name/kbytes"><i class="icon-truck"></i> Size</span> |
           <span data-sort="name/secs"><i class="icon-time"></i> Time</span>
         </div>
-        <div id="time_of_day" class="barchart red"></div>
+        <div id="time_of_day" class="barchart blue"></div>
       </div>
       <div class="box">
         <h2>Platforms</h2>
@@ -492,7 +501,7 @@ header h1 span {
           <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
           <span data-sort="-secs"><i class="icon-time"></i> Time</span>
         </div>
-        <div id="platforms" class="piechart blue"></div>
+        <div id="platforms" class="piechart purple"></div>
       </div>
       <div class="box">
         <h2>Browsers</h2>
@@ -501,25 +510,7 @@ header h1 span {
           <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
           <span data-sort="-secs"><i class="icon-time"></i> Time</span>
         </div>
-        <div id="browsers" class="piechart purple"></div>
-      </div>
-      <div class="box">
-        <h2>HTTP Versions</h2>
-        <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
-        </div>
-        <div id="http_version" class="barchart cyan"></div>
-      </div>
-      <div class="box">
-        <h2>HTTP Methods</h2>
-        <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
-        </div>
-        <div id="http_method" class="barchart green"></div>
+        <div id="browsers" class="piechart orange"></div>
       </div>
       <div class="box">
         <h2>Response Codes</h2>
@@ -528,7 +519,29 @@ header h1 span {
           <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
           <span data-sort="-secs"><i class="icon-time"></i> Time</span>
         </div>
-        <div id="http_code" class="barchart orange"></div>
+        <div id="http_code" class="barchart cyan"></div>
+      </div>
+      <div class="box">
+        <h2>HTTP Versions</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="http_version" class="barchart green"></div>
+      </div>
+      <div class="box">
+        <h2>HTTP Methods</h2>
+        <div class="sortorder">
+          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
+          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
+          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+        </div>
+        <div id="http_method" class="barchart orange"></div>
+      </div>
+      <div class="box">
+        <h2>Max Response Time</h2>
+        <div id="process_time" class="barchart red"></div>
       </div>
     </div>
 
@@ -538,7 +551,9 @@ header h1 span {
         <div class="tab-label purple" data-ref="top_download"><i class="icon-truck"></i> Top Downloads</div>
         <div class="tab-label orange" data-ref="top_process_time"><i class="icon-time"></i> Top Process Time</div>
         <div class="tab-label green" data-ref="top_redirect"><i class="icon-retweet"></i> Top Redirects</div>
-        <div class="tab-label red" data-ref="top_error"><i class="icon-bolt"></i> Error Responses</div>
+        <div class="tab-label blue" data-ref="top_referral_source"><i class="icon-signout"></i> Referral Sources</div>
+        <div class="tab-label cyan" data-ref="top_referral_target"><i class="icon-signin"></i> Referral Targets</div>
+        <div class="tab-label red" data-ref="top_error"><i class="icon-bolt"></i> Errors</div>
       </div>
       <div class="tab-content">
         <div id="top_request" class="barchart cyan"></div>
@@ -551,6 +566,12 @@ header h1 span {
       </div>
       <div class="tab-content hidden">
         <div id="top_redirect" class="barchart green"></div>
+      </div>
+      <div class="tab-content hidden">
+        <div id="top_referral_source" class="barchart blue"></div>
+      </div>
+      <div class="tab-content hidden">
+        <div id="top_referral_target" class="barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
         <div id="top_error" class="barchart red"></div>
@@ -602,9 +623,9 @@ function formatKb(kb) {
 // Format a number of seconds (time)
 function formatSecs(secs) {
     if (secs < 60) {
-        return Highcharts.numberFormat(secs, 1) + " sec";
+        return Highcharts.numberFormat(secs, 1) + " secs";
     } else if (secs < 3600) {
-        return Highcharts.numberFormat(secs / 60, 1) + " min";
+        return Highcharts.numberFormat(secs / 60, 1) + " mins";
     } else {
         return Highcharts.numberFormat(secs / 3600, 1) + " hrs";
     }
@@ -647,8 +668,9 @@ function dataSeries(data, total, sort) {
     for (var k in data) {
         var v = data[k];
         if (v && v.count) {
-            v.name = k;
+            v.x = parseFloat(k);
             v.y = (typeof(v[field]) == "number") ? v[field] : v.count;
+            v.name = k;
             v.count_ratio = v.count / total.count;
             v.errors_ratio = v.errors / total.errors;
             v.kbytes_ratio = v.kbytes / total.kbytes;
@@ -659,6 +681,9 @@ function dataSeries(data, total, sort) {
             } else if (field == "secs") {
                 v.value = formatSecs(v.secs) + " (" +
                           formatPercent(v.secs_ratio) + ")";
+            } else if (field == "avgsecs") {
+                v.value = formatSecs(v.avgsecs) + " (" +
+                          formatNumber(v.count) + " requests)";
             } else {
                 v.value = formatNumber(v.count) + " requests (" +
                           formatPercent(v.count_ratio) + ")";
@@ -808,25 +833,29 @@ function loadData() {
 }
 
 function loadDataCb(date, res) {
-    hide("#loading");
     res.total.date = date;
     $("#summary").data("data", res.total);
     formatTemplate("#summary", res.total);
-    renderChart("#host", res.host, res.total);
-    renderChart("#file_type", res.file_type, res.total);
-    renderChart("#file_source", res.file_source, res.total);
-    renderChart("#countries", res.country, res.total);
-    renderChart("#platforms", res.platform, res.total);
-    renderChart("#browsers", res.browser, res.total);
-    renderChart("#time_of_day", res.time_of_day, res.total, "name");
-    renderChart("#http_version", res.http_version, res.total);
-    renderChart("#http_method", res.http_method, res.total);
-    renderChart("#http_code", res.http_code, res.total);
-    renderChart("#top_request", res.top_request, res.total, "-count");
-    renderChart("#top_download", res.top_download, res.total, "-kbytes");
-    renderChart("#top_process_time", res.top_process_time, res.total, "-secs");
-    renderChart("#top_redirect", res.top_redirect, res.total, "-count");
-    renderChart("#top_error", res.error, res.total, "-count");
+    renderChart("#host", res.host || [], res.total);
+    renderChart("#file_type", res.file_type || [], res.total);
+    renderChart("#file_source", res.file_source || [], res.total);
+    renderChart("#top_referral_site", res.top_referral_site || [], res.total);
+    renderChart("#countries", res.country || [], res.total);
+    renderChart("#platforms", res.platform || [], res.total);
+    renderChart("#browsers", res.browser || [], res.total);
+    renderChart("#time_of_day", res.time_of_day || [], res.total, "name");
+    renderChart("#http_version", res.http_version || [], res.total);
+    renderChart("#http_method", res.http_method || [], res.total);
+    renderChart("#http_code", res.http_code || [], res.total);
+    renderChart("#process_time", res.process_time || [], res.total, "-x");
+    renderChart("#top_request", res.top_request || [], res.total, "-count");
+    renderChart("#top_download", res.top_download || [], res.total, "-kbytes");
+    renderChart("#top_process_time", res.top_process_time || [], res.total, "-avgsecs");
+    renderChart("#top_redirect", res.top_redirect || [], res.total, "-count");
+    renderChart("#top_referral_source", res.top_referral_source || [], res.total, "-count");
+    renderChart("#top_referral_target", res.top_referral_target || [], res.total, "-count");
+    renderChart("#top_error", res.error || [], res.total, "-count");
+    hide("#loading");
 }
 
 function loadDataFail(file, xhr, status, error) {
