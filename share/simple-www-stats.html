@@ -119,8 +119,13 @@ header h1 span {
     margin: 5px 0 15px;
     border-radius: 6px;
     padding: 8px 10px;
-    background: #FFFAF0;
-    box-shadow: 0 1px 3px #886 inset;
+    background: #666666;
+    background: -moz-linear-gradient(top, #666666, #000000);
+    background: -ms-linear-gradient(top, #666666, #000000);
+    background: -webkit-linear-gradient(top, #666666, #000000);
+    background: linear-gradient(top, #666666, #000000);
+    color: white;
+    box-shadow: 0 2px 4px #888;
     font-size: 1.2em;
 }
 #summary span {
@@ -137,8 +142,8 @@ header h1 span {
     border-radius: 4px;
     background: rgba(255,255,255,0.9);
     box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    -webkit-transition: opacity 0.7s ease 0.5s, top 0.05s ease, left 0.05s ease;
-    transition: opacity 0.7s ease 0.5s, top 0.05s ease, left 0.05s ease;
+    -webkit-transition: opacity 0.7s ease;
+    transition: opacity 0.7s ease;
 }
 
 /* Chart Selector styles */
@@ -149,8 +154,8 @@ header h1 span {
     border-radius: 8px;
     padding: 0 0px;
     white-space: nowrap;
-    background: #FFFFF8;
-    box-shadow: 0 1px 3px #886 inset;
+    background: #F8F8F8;
+    box-shadow: 0 1px 3px #888 inset;
 }
 .chart-selector .box {
     position: relative;
@@ -196,7 +201,41 @@ header h1 span {
     margin: 6px 0;
 }
 .barchart .row {
-    margin: 0 10px;
+    margin: 0 0 5px 0;
+    padding: 0 10px 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    -webkit-transition: background 0.3s ease;
+    transition: background 0.3s ease;
+}
+.barchart .row:hover {
+    background: #F8F8F8;
+}
+.barchart .row.active {
+    background: #F0F0F0;
+}
+.barchart .row.active,
+.barchart .row.active .label {
+    color: #000;
+    text-shadow: 0.6px 0 0 #000;
+}
+.barchart.blue .row.active {
+    background: #F0F8FF;
+}
+.barchart.red .row.active {
+    background: #FFF0F0;
+}
+.barchart.green .row.active {
+    background: #E8FFE8;
+}
+.barchart.cyan .row.active {
+    background: #E8FCFF;
+}
+.barchart.purple .row.active {
+    background: #F8F0FF;
+}
+.barchart.orange .row.active {
+    background: #FFF4E0;
 }
 .barchart .label {
     float: left;
@@ -211,7 +250,7 @@ header h1 span {
     width: 100%;
     clear: both;
     height: 6px;
-    margin: 0 0 6px 0;
+    margin: 0;
     border-radius: 3px;
     background: -moz-linear-gradient(left, #222, #ccc);
     background: -ms-linear-gradient(left, #222, #ccc);
@@ -432,8 +471,11 @@ header h1 span {
           </tr>
           <tr>
             <td class="align-right"><span data-field="secs" data-format="secs/value"></span></td>
-            <td><span data-field="secs" data-format="secs/unit"></span></td>
+            <td><span data-field="secs" data-format="secs/unit"></span> total</td>
             <td>(<span data-field="secs_ratio" data-format="percent"></span>)</td>
+          <tr>
+            <td class="align-right"><span data-field="avgsecs" data-format="secs/value"></span></td>
+            <td colspan="3"><span data-field="avgsecs" data-format="secs/unit"></span> / request</td>
           </tr>
         </tbody>
       </table>
@@ -658,6 +700,36 @@ function formatTemplate(tmpl, data) {
     });
 }
 
+function tooltipFormat(evt, data) {
+    var tooltip = $("#tooltip");
+    if (data && data !== tooltip.data("data")) {
+        tooltip.data("data", data);
+        formatTemplate("#tooltip", data);
+    }
+    if (evt && evt.pageX && evt.pageY) {
+        var maxWidth = $("body").width();
+        var maxHeight = $("body").height();
+        var width = tooltip.width();
+        var height = tooltip.height();
+        var pos = { left: evt.pageX - 20, top: evt.pageY + 20 };
+        pos.left = Math.max(0, Math.min(maxWidth - width, pos.left));
+        if (pos.top + height >= maxHeight) {
+            pos.top = evt.pageY - height - 30;
+        }
+        tooltip.css(pos);
+    }
+}
+
+function tooltipShow() {
+    clearTimeout($("#tooltip").data("timer"));
+    $("#tooltip").data("timer", setTimeout(tooltipHide, 5000));
+    show("#tooltip");
+}
+
+function tooltipHide() {
+    hide("#tooltip");
+}
+
 function dataSeries(data, total, sort) {
     sort = sort || "-count";
     var m;
@@ -718,32 +790,12 @@ function barChart(elem, data, total, sort) {
     $(elem).empty().append(rows);
 }
 
-function barChartTooltip(evt) {
-    var target = $(evt.target);
-    var isTargetTooltip = target.closest("#tooltip").length > 0;
-    if (evt.type == "mouseleave") {
-        hide("#tooltip");
-    } else {
-        var tooltip = $("#tooltip");
-        var p = target.closest(".row").data();
-        if (p && p !== tooltip.data()) {
-            tooltip.data(p);
-            formatTemplate("#tooltip", p);
-        }
-        var maxWidth = $("body").width();
-        var maxHeight = $("body").height();
-        var width = tooltip.width();
-        var height = tooltip.height();
-        var pos = { left: evt.pageX - 20, top: evt.pageY + 20 };
-        pos.left = Math.max(0, Math.min(maxWidth - width, pos.left));
-        if (pos.top + height >= maxHeight) {
-            pos.top = evt.pageY - height - 30;
-        }
-        tooltip.css(pos);
-        if (p || isTargetTooltip) {
-            show("#tooltip");
-        }
-    }
+function barChartSelect(evt) {
+    var target = $(evt.target).closest(".row");
+    target.parent().find(".active").removeClass("active");
+    target.addClass("active");
+    tooltipFormat(evt, target.data());
+    tooltipShow();
 }
 
 function pieChart(elem, data, total, sort) {
@@ -773,15 +825,14 @@ function pieChart(elem, data, total, sort) {
                             return null;
                         return this.point.name;
                     }
+                },
+                events: {
+                    click: pieChartSelect
                 }
             }
         },
         tooltip: {
-            useHTML: true,
-            formatter: function () {
-                formatTemplate("#tooltip", this.point);
-                return $("#tooltip").html();
-            }
+            enabled: false
         },
         series: [{
             name: 'Requests',
@@ -789,6 +840,11 @@ function pieChart(elem, data, total, sort) {
         }]
     }
     $(elem).highcharts(opts);
+}
+
+function pieChartSelect(evt) {
+    tooltipFormat(evt, evt.point);
+    tooltipShow();
 }
 
 function sortChart(evt) {
@@ -949,9 +1005,10 @@ $(function () {
     $("#selector select").on("click", false);
     $("#selector select").on("change", loadData);
     $(window).on("click", selectDate.bind(null, null));
-    $("body").on("mouseenter mouseleave mousemove", ".barchart, #tooltip", barChartTooltip);
     $("body").on("click touchstart", ".sortorder span", sortChart);
     $("body").on("click touchstart", ".tab-label", selectTab);
+    $("body").on("click touchstart", ".barchart .row", barChartSelect);
+    $("body").on("click touchstart mousemove", "#tooltip", tooltipShow);
 
     // Load initial data
     loadData();
