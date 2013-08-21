@@ -264,7 +264,7 @@ sub normalize_stat_values {
     $$ref_data{'COUNTRY'} = '<Unknown>';
     if ($$ref_data{'IP'} =~ /^[\d\.]+$/) {
         my ($ipcode, $ipcountry) = $geo->LookUp($$ref_data{'IP'});
-        if ($ipcountry =~ /Reserved/) {
+        if (!defined($ipcountry) or $ipcountry =~ /Reserved/) {
             $ipcountry = '<Unknown>';
         }
         $$ref_data{'COUNTRY'} = $ipcountry || $ipcode;
