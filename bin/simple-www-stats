@@ -78,7 +78,6 @@ use Math::Round;
                defined($self->{HOST}) &&
                defined($self->{CODE}) &&
                defined($self->{BYTES}) &&
-               defined($self->{REFERRER}) &&
                defined($self->{AGENT});
     }
 
@@ -107,7 +106,7 @@ use Math::Round;
             } elsif (!defined($self->{BYTES}) and $part =~ /^\d+$/) {
                 $self->_ResetValue($i);
                 $self->{BYTES} = $i;
-            } elsif (!defined($self->{REFERRER}) and $part =~ /^(-$|https?:)/) {
+            } elsif (!defined($self->{REFERRER}) and $part =~ /^https?:/) {
                 $self->_ResetValue($i);
                 $self->{REFERRER} = $i;
             } elsif (!defined($self->{TOTALTIME}) and $part =~ /^t(ime)?:/) {
@@ -130,7 +129,7 @@ use Math::Round;
             s/^"(.*)"$/$1/;
             s/^\[(.*)\]$/$1/;
         }
-        if (!$self->IsInitialized()) {
+        if (!$self->IsInitialized() or !defined($self->{REFERRER})) {
             $self->_Init(@parts);
         }
         my $request = defined($self->{REQUEST}) ? $parts[$self->{REQUEST}] // "" : "";
