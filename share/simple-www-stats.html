@@ -55,33 +55,6 @@ header h1 span {
     color: #888;
 }
 
-/* Loading styles */
-#loading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 100;
-    -webkit-transition: opacity 0.7s ease;
-    transition: opacity 0.7s ease;
-}
-#loading div {
-    margin-top: 20%;
-    text-align: center;
-    font-size: 40px;
-    color: white;
-    text-shadow: 0 0 10px rgba(255,255,255,0.7);
-    letter-spacing: 5px;
-}
-#loading i {
-    display: inline-block;
-    font-size: 500px;
-    -webkit-animation: spin 10s linear 0s infinite;
-    animation: spin 10s linear infinite;
-}
-
 /* Selector styles */
 #selector {
     position: absolute;
@@ -130,21 +103,6 @@ header h1 span {
 }
 #summary span {
     padding-left: 6px;
-}
-
-/* Tooltip styles */
-#tooltip {
-    position: absolute;
-    max-width: 400px;
-    overflow: hidden;
-    z-index: 10;
-    padding: 6px;
-    border: 1px solid #888;
-    border-radius: 4px;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    -webkit-transition: opacity 0.7s ease;
-    transition: opacity 0.7s ease;
 }
 
 /* Chart Selector styles */
@@ -396,6 +354,94 @@ header h1 span {
     margin: 0;
 }
 
+/* Tooltip styles */
+#tooltip {
+    position: absolute;
+    max-width: 400px;
+    overflow: hidden;
+    z-index: 10;
+    padding: 6px;
+    border: 1px solid #888;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    -webkit-transition: opacity 0.7s ease;
+    transition: opacity 0.7s ease;
+}
+#tooltip .timeline {
+    margin-top: 3px;
+    border-top: 1px solid #EEEEEE;
+    padding-top: 3px;
+    color: #003366;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Dialog box styles */
+#dialog {
+    position: absolute;
+    left: 5%;
+    top: 20%;
+    width: 90%;
+    height: 60%;
+    z-index: 100;
+    border-radius: 10px;
+    background: #FFFFFF;
+    box-shadow: 0px 0px 10px #000000;
+}
+#dialog .close {
+    position: absolute;
+    right: 10px;
+    top: 6px;
+    z-index: 10;
+    font-size: 30px;
+    color: #333333;
+    text-shadow: 0 0 2px #333333;
+}
+#dialog .close.icon-remove-sign:before {
+    cursor: pointer;
+}
+#dialog .linechart {
+    width: 90%;
+    height: 80%;
+    margin-top: 10%;
+    margin-left: 4%;
+    overflow: hidden;
+}
+
+/* Loading styles */
+#loading {
+    position: absolute;
+    top: 20%;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    text-align: center;
+    font-size: 40px;
+    color: white;
+    text-shadow: 0 0 10px rgba(255,255,255,0.7);
+    letter-spacing: 5px;
+}
+#loading i {
+    display: inline-block;
+    font-size: 500px;
+    -webkit-animation: spin 10s linear 0s infinite;
+    animation: spin 10s linear infinite;
+}
+
+/* Overlay style */
+#overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    -webkit-transition: opacity 0.7s ease;
+    transition: opacity 0.7s ease;
+}
+
 /* Generic styles */
 .compact th,
 .compact td {
@@ -423,13 +469,6 @@ header h1 span {
       <h1>Simple-Admin <span>Web Stats Viewer</span></h1>
     </header>
 
-    <div id="loading">
-      <div>
-        <i class="icon-spinner"></i><br>
-        <span>Loading Data...</span>
-      </div>
-    </div>
-
     <div id="selector">
       <select name="date">
         <optgroup label="Preset Dates">
@@ -449,37 +488,6 @@ header h1 span {
       <span data-field="errors" data-format="number"></span> errors,
       <span data-field="kbytes" data-format="kbytes"></span> downloads,
       <span data-field="secs" data-format="secs"></span> processing time
-    </div>
-
-    <div id="tooltip" class="hidden hiding">
-      <b><span data-field="name">Test</span>:</b>
-      <table class="compact">
-        <tbody>
-          <tr>
-            <td class="align-right"><span data-field="count" data-format="number"></span></td>
-            <td>requests</td>
-            <td>(<span data-field="count_ratio" data-format="percent"></span>)</td>
-          </tr>
-          <tr>
-            <td class="align-right"><span data-field="errors" data-format="number"></span></td>
-            <td>errors</td>
-            <td>(<span data-field="errors_ratio" data-format="percent"></span>)</td>
-          </tr>
-          <tr>
-            <td class="align-right"><span data-field="kbytes" data-format="kbytes/value"></span></td>
-            <td><span data-field="kbytes" data-format="kbytes/unit"></span></td>
-            <td>(<span data-field="kbytes_ratio" data-format="percent"></span>)</td>
-          </tr>
-          <tr>
-            <td class="align-right"><span data-field="secs" data-format="secs/value"></span></td>
-            <td><span data-field="secs" data-format="secs/unit"></span> total</td>
-            <td>(<span data-field="secs_ratio" data-format="percent"></span>)</td>
-          <tr>
-            <td class="align-right"><span data-field="avgsecs" data-format="secs/value"></span></td>
-            <td colspan="3"><span data-field="avgsecs" data-format="secs/unit"></span> / request</td>
-          </tr>
-        </tbody>
-      </table>
     </div>
 
     <div class="chart-selector">
@@ -526,7 +534,7 @@ header h1 span {
           <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
           <span data-sort="-secs"><i class="icon-time"></i> Time</span>
         </div>
-        <div id="countries" class="piechart red"></div>
+        <div id="country" class="piechart red"></div>
       </div>
       <div class="box">
         <h2>Time of Day</h2>
@@ -544,7 +552,7 @@ header h1 span {
           <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
           <span data-sort="-secs"><i class="icon-time"></i> Time</span>
         </div>
-        <div id="platforms" class="piechart purple"></div>
+        <div id="platform" class="piechart purple"></div>
       </div>
       <div class="box">
         <h2>Browsers</h2>
@@ -553,7 +561,7 @@ header h1 span {
           <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
           <span data-sort="-secs"><i class="icon-time"></i> Time</span>
         </div>
-        <div id="browsers" class="piechart orange"></div>
+        <div id="browser" class="piechart orange"></div>
       </div>
       <div class="box">
         <h2>Response Codes</h2>
@@ -621,18 +629,70 @@ header h1 span {
       </div>
     </div>
 
+    <div id="tooltip" class="hidden hiding">
+      <b><span data-field="name">Test</span>:</b>
+      <table class="compact">
+        <tbody>
+          <tr>
+            <td class="align-right"><span data-field="count" data-format="number"></span></td>
+            <td>requests</td>
+            <td>(<span data-field="count_ratio" data-format="percent"></span>)</td>
+          </tr>
+          <tr>
+            <td class="align-right"><span data-field="errors" data-format="number"></span></td>
+            <td>errors</td>
+            <td>(<span data-field="errors_ratio" data-format="percent"></span>)</td>
+          </tr>
+          <tr>
+            <td class="align-right"><span data-field="kbytes" data-format="kbytes/value"></span></td>
+            <td><span data-field="kbytes" data-format="kbytes/unit"></span></td>
+            <td>(<span data-field="kbytes_ratio" data-format="percent"></span>)</td>
+          </tr>
+          <tr>
+            <td class="align-right"><span data-field="secs" data-format="secs/value"></span></td>
+            <td><span data-field="secs" data-format="secs/unit"></span> total</td>
+            <td>(<span data-field="secs_ratio" data-format="percent"></span>)</td>
+          <tr>
+            <td class="align-right"><span data-field="avgsecs" data-format="secs/value"></span></td>
+            <td colspan="3"><span data-field="avgsecs" data-format="secs/unit"></span> / request</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="timeline">
+        View Timeline  <i class="icon-bar-chart"></i>
+      </div>
+    </div>
+
+    <div id="dialog" class="hidden hiding">
+      <i class="close icon-remove-sign"></i>
+      <div class="linechart purple"></div>
+    </div>
+
+    <div id="loading">
+      <i class="icon-spinner"></i><br>
+      <span>Loading Data...</span>
+    </div>
+
+    <div id="overlay"></div>
 
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highcharts/3.0.2/highcharts.js"></script>
     <script type="text/javascript">
 
+// Color schemes
 var BLUE = ['#2a4269', '#38588e', '#476fb2', '#698bc3', '#8da7d2', '#b2c3e0'];
 var RED = ['#6b1918', '#942222', '#be2c2b', '#d54847', '#df7170', '#e89a9a'];
 var GREEN = ['#4a661b', '#688f25', '#85b730', '#9ed04a', '#b4da73', '#cae59b'];
 var CYAN = ['#165b6f', '#1e7e9a', '#26a1c5', '#43b8db', '#6ec9e3', '#99d9eb'];
 var PURPLE = ['#3f2954', '#593977', '#734a99', '#8d63b3', '#a685c4', '#bfa7d5'];
 var ORANGE = ['#9a5202', '#cc6c03', '#cc6c03', '#fc9f39', '#fdb86b', '#fdd09e'];
+
+// Chart rendering queue (of functions)
+var renderQueue = [];
+
+// Statistics data (by date)
+var stats = {};
 
 // Format a date
 function formatDate(date) {
@@ -727,6 +787,12 @@ function tooltipShow() {
     show("#tooltip");
 }
 
+function tooltipExpand() {
+    dialogShow($("#tooltip").data("data"));
+    tooltipHide();
+    return false;
+}
+
 function tooltipHide() {
     hide("#tooltip");
 }
@@ -793,9 +859,12 @@ function barChart(elem, data, total, sort) {
 
 function barChartSelect(evt) {
     var target = $(evt.target).closest(".row");
-    target.parent().find(".active").removeClass("active");
+    var chart = target.closest(".barchart");
+    var data = target.data();
+    chart.find(".active").removeClass("active");
     target.addClass("active");
-    tooltipFormat(evt, target.data());
+    data.chart = chart.attr("id");
+    tooltipFormat(evt, data);
     tooltipShow();
 }
 
@@ -840,11 +909,14 @@ function pieChart(elem, data, total, sort) {
             data: series
         }]
     }
-    $(elem).highcharts(opts);
+    elem.highcharts(opts);
 }
 
 function pieChartSelect(evt) {
-    tooltipFormat(evt, evt.point);
+    var chart = $(evt.target).closest(".piechart");
+    var data = evt.point;
+    data.chart = chart.attr("id");
+    tooltipFormat(evt, data);
     tooltipShow();
 }
 
@@ -867,57 +939,95 @@ function renderChart(elem, data, total, sort) {
     total = total || $("#summary").data("data");
     sort = sort || elem.parent().find(".sortorder .selected").attr("data-sort");
     elem.data("data", data);
+    elem.empty();
     if (elem.hasClass("barchart")) {
-        barChart(elem, data, total, sort);
+        renderQueue.push(barChart.bind(null, elem, data, total, sort));
     } else if (elem.hasClass("piechart")) {
-        pieChart(elem, data, total, sort);
+        renderQueue.push(pieChart.bind(null, elem, data, total, sort));
+    }
+    renderStart();
+}
+
+function renderStart() {
+    if (!renderQueue.timer && renderQueue.length) {
+        renderQueue.timer = setTimeout(renderQueue.shift(), 10);
+        setTimeout(renderNext, 11);
     }
 }
 
-function loadData() {
-    var date = $("#selector select").val();
-    if (date == "...") {
+function renderNext() {
+    renderQueue.timer = 0;
+    renderStart();
+}
+
+function renderStop() {
+    if (renderQueue.timer) {
+        clearTimeout(renderQueue.timer);
+        renderQueue.timer = 0;
+    }
+    if (renderQueue.length) {
+        renderQueue.splice(0, renderQueue.length);
+    }
+}
+
+function loadData(opts) {
+    opts = opts || {};
+    opts.date = opts.date || $("#selector select").val();
+    if (opts.date === "...") {
         show("#datepicker");
         return false;
+    } else if (stats[opts.date]) {
+        loadDataCb(opts, stats[opts.date]);
     } else {
-        show("#loading");
-        $("#selector select").data("current", date);
-        var file = "logstats." + date.replace(/-/g, "") + ".json";
-        var cb = loadDataCb.bind(this, date);
-        var eb = loadDataFail.bind(this, file);
-        $.getJSON(file).then(cb, eb);
+        if (!opts.norender) {
+            show("#loading, #overlay");
+            renderStop();
+            $("#selector select").data("current", opts.date);
+        }
+        opts.file = "logstats." + opts.date.replace(/-/g, "") + ".json";
+        var cb = loadDataCb.bind(this, opts);
+        var eb = loadDataFail.bind(this, opts);
+        return $.getJSON(opts.file).then(cb, eb);
     }
 }
 
-function loadDataCb(date, res) {
-    res.total.date = date;
-    $("#summary").data("data", res.total);
-    formatTemplate("#summary", res.total);
-    renderChart("#host", res.host || [], res.total);
-    renderChart("#file_type", res.file_type || [], res.total);
-    renderChart("#file_source", res.file_source || [], res.total);
-    renderChart("#top_referral_site", res.top_referral_site || [], res.total);
-    renderChart("#countries", res.country || [], res.total);
-    renderChart("#platforms", res.platform || [], res.total);
-    renderChart("#browsers", res.browser || [], res.total);
-    renderChart("#time_of_day", res.time_of_day || [], res.total, "name");
-    renderChart("#http_version", res.http_version || [], res.total);
-    renderChart("#http_method", res.http_method || [], res.total);
-    renderChart("#http_code", res.http_code || [], res.total);
-    renderChart("#process_time", res.process_time || [], res.total, "-x");
-    renderChart("#top_request", res.top_request || [], res.total, "-count");
-    renderChart("#top_download", res.top_download || [], res.total, "-kbytes");
-    renderChart("#top_process_time", res.top_process_time || [], res.total, "-avgsecs");
-    renderChart("#top_redirect", res.top_redirect || [], res.total, "-count");
-    renderChart("#top_referral_source", res.top_referral_source || [], res.total, "-count");
-    renderChart("#top_referral_target", res.top_referral_target || [], res.total, "-count");
-    renderChart("#top_error", res.error || [], res.total, "-count");
-    hide("#loading");
+function loadDataCb(opts, res) {
+    stats[opts.date] = res;
+    res.total.date = opts.date;
+    res.top_error = res.error;
+    delete res.error;
+    if (!opts.norender) {
+        $("#summary").data("data", res.total);
+        formatTemplate("#summary", res.total);
+        renderChart("#top_request", res.top_request || [], res.total, "-count");
+        renderChart("#host", res.host || [], res.total);
+        renderChart("#file_type", res.file_type || [], res.total);
+        renderChart("#file_source", res.file_source || [], res.total);
+        renderChart("#top_referral_site", res.top_referral_site || [], res.total);
+        renderChart("#country", res.country || [], res.total);
+        renderChart("#platform", res.platform || [], res.total);
+        renderChart("#browser", res.browser || [], res.total);
+        renderChart("#time_of_day", res.time_of_day || [], res.total, "name");
+        renderChart("#http_version", res.http_version || [], res.total);
+        renderChart("#http_method", res.http_method || [], res.total);
+        renderChart("#http_code", res.http_code || [], res.total);
+        renderChart("#process_time", res.process_time || [], res.total, "-x");
+        renderChart("#top_download", res.top_download || [], res.total, "-kbytes");
+        renderChart("#top_process_time", res.top_process_time || [], res.total, "-avgsecs");
+        renderChart("#top_redirect", res.top_redirect || [], res.total, "-count");
+        renderChart("#top_referral_source", res.top_referral_source || [], res.total, "-count");
+        renderChart("#top_referral_target", res.top_referral_target || [], res.total, "-count");
+        renderChart("#top_error", res.top_error || [], res.total, "-count");
+        hide("#loading, #overlay");
+    }
 }
 
-function loadDataFail(file, xhr, status, error) {
-    hide("#loading");
-    alert("Couldn't load file " + file + ":\n\n" + (error));
+function loadDataFail(opts, xhr, status, error) {
+    stats[opts.date] = false;
+    if (!opts.norender) {
+        hide("#loading, #overlay");
+        alert("Couldn't load file " + opts.file + ":\n\n" + (error));
+    }
 }
 
 function selectDate(date) {
@@ -953,6 +1063,64 @@ function selectTab(evt) {
         $("#" + target.attr("data-ref")).closest(".tab-content").removeClass("hidden");
     }
     return false;
+}
+
+function dialogShow(data) {
+    var now = new Date().getTime();
+    var dates = [];
+    var defers = [];
+    $("#dialog").data("category", data.chart);
+    $("#dialog").data("key", data.name);
+    $("#dialog").data("dates", dates);
+    for (var i = 1; i <= 31; i++) {
+        var date = formatDate(new Date(now - 24 * 60 * 60 * 1000 * i));
+        dates.push(date);
+        if (typeof(stats[date]) === "undefined") {
+            defers.push(loadData({ date: date, norender: true }));
+        }
+    }
+    if (defers.length) {
+        show("#loading, #overlay");
+        $.when.apply(null, defers).always(dialogRender);
+    } else {
+        dialogRender(dates);
+    }
+}
+
+function dialogRender() {
+    hide("#loading");
+    show("#dialog, #overlay");
+    var category = $("#dialog").data("category");
+    var key = $("#dialog").data("key");
+    var dates = $("#dialog").data("dates");
+    var series = [];
+    for (var i = 0; i < dates.length; i++) {
+        var date = dates[i];
+        var dataset = stats[date];
+        if (dataset && dataset[category] && dataset[category][key]) {
+            var point = dataset[category][key];
+            series.push([Date.parse(date), point.count]);
+        } else {
+            series.push([Date.parse(date), 0]);
+        }
+    }
+    series.sort(function (a, b) { return a[0] - b[0]; });
+    var opts = {
+        chart: { type: 'line' },
+        title: { text: null },
+        xAxis: { type: 'datetime' },
+        yAxis: { min: 0, title: { text: "Request Count" } },
+        series: [{
+            name: key,
+            data: series
+        }]
+    }
+    $("#dialog .linechart").highcharts(opts);
+}
+
+function dialogHide() {
+    hide("#dialog, #overlay");
+    $("#dialog .linechart").empty();
 }
 
 function show(elem) {
@@ -1004,12 +1172,14 @@ $(function () {
 
     // Init event handlers
     $("#selector select").on("click", false);
-    $("#selector select").on("change", loadData);
+    $("#selector select").on("change", loadData.bind(null, null));
     $(window).on("click", selectDate.bind(null, null));
     $("body").on("click touchstart", ".sortorder span", sortChart);
     $("body").on("click touchstart", ".tab-label", selectTab);
     $("body").on("click touchstart", ".barchart .row", barChartSelect);
     $("body").on("click touchstart mousemove", "#tooltip", tooltipShow);
+    $("body").on("click touchstart", "#tooltip .timeline", tooltipExpand);
+    $("body").on("click touchend", "#dialog .close", dialogHide);
 
     // Load initial data
     loadData();
