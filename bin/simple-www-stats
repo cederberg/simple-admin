@@ -92,7 +92,7 @@ use Math::Round;
             } elsif (!defined($self->{DATETIME}) and $part =~ /^[0-3]?\d\/\w\w\w\/20\d\d:[0-2]\d:[0-5]\d:[0-5]\d /) {
                 $self->_ResetValue($i);
                 $self->{DATETIME} = $i;
-            } elsif (!defined($self->{AGENT}) and $part =~ /Mozilla\/\d/i) {
+            } elsif (!defined($self->{AGENT}) and $part =~ /^[A-Za-z_.]{3,}\/\S+(\s|$)/) {
                 $self->_ResetValue($i);
                 $self->{AGENT} = $i;
             } elsif (!defined($self->{IP}) and $part =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/) {
@@ -107,7 +107,7 @@ use Math::Round;
             } elsif (!defined($self->{BYTES}) and $part =~ /^\d+$/) {
                 $self->_ResetValue($i);
                 $self->{BYTES} = $i;
-            } elsif (!defined($self->{REFERRER}) and $part =~ /^https?:/) {
+            } elsif (!defined($self->{REFERRER}) and $part =~ /^(-$|https?:)/) {
                 $self->_ResetValue($i);
                 $self->{REFERRER} = $i;
             } elsif (!defined($self->{TOTALTIME}) and $part =~ /^t(ime)?:/) {
@@ -433,6 +433,8 @@ sub process_file {
         foreach (@lines_skipped) {
             process_line($_);
         }
+    } else {
+        print STDERR "Warning: Failed to initialize parser for $filename\n"
     }
     close($fh);
 }
