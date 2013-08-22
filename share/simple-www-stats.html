@@ -94,17 +94,17 @@ header h1 span {
     margin: 5px 0 15px;
     border-radius: 6px;
     padding: 8px 10px;
-    background: #666666;
-    background: -moz-linear-gradient(top, #666666, #000000);
-    background: -ms-linear-gradient(top, #666666, #000000);
-    background: -webkit-linear-gradient(top, #666666, #000000);
-    background: linear-gradient(top, #666666, #000000);
+    background: #467;
     color: white;
-    box-shadow: 0 2px 4px #888;
+    box-shadow: 0 2px 3px #000 inset;
     font-size: 1.2em;
 }
 #summary span {
     padding-left: 6px;
+}
+#summary .timeline {
+    float: right;
+    cursor: pointer;
 }
 
 /* Chart Selector styles */
@@ -376,7 +376,6 @@ header h1 span {
 /* Tooltip styles */
 #tooltip {
     position: absolute;
-    max-width: 400px;
     overflow: hidden;
     z-index: 10;
     padding: 6px;
@@ -388,12 +387,28 @@ header h1 span {
     transition: opacity 0.7s ease;
 }
 #tooltip .timeline {
-    margin-top: 3px;
-    border-top: 1px solid #EEEEEE;
-    padding-top: 3px;
+    float: left;
+    margin: 0;
+    border-right: 1px solid #EEEEEE;
+    padding: 10px 20px 20px 20px;
     color: #003366;
-    text-decoration: underline;
+    text-align: center;
     cursor: pointer;
+}
+#tooltip .timeline i {
+    font-size: 5em;
+    color: #5588AA;
+}
+#tooltip .timeline i:before {
+    cursor: pointer;
+}
+#tooltip .timeline label {
+    text-decoration: underline;
+}
+#tooltip .data {
+    float: right;
+    margin: 0 0 0 10px;
+    max-width: 400px;
 }
 
 /* Dialog box styles */
@@ -520,6 +535,10 @@ header h1 span {
     <div id="datepicker" class="hidden hiding"></div>
 
     <div id="summary">
+      <div class="timeline">
+        <i class="icon-signal"></i>
+        Timeline
+      </div>
       <b>Total <span data-field="date" style="padding: 0;"></span>:</b>
       <span data-field="count" data-format="number"></span> requests,
       <span data-field="errors" data-format="number"></span> errors,
@@ -714,36 +733,39 @@ header h1 span {
     </div>
 
     <div id="tooltip" class="hidden hiding">
-      <b><span data-field="name">Test</span>:</b>
-      <table class="compact">
-        <tbody>
-          <tr>
-            <td class="align-right"><span data-field="count" data-format="number"></span></td>
-            <td>requests</td>
-            <td>(<span data-field="count_ratio" data-format="percent"></span>)</td>
-          </tr>
-          <tr>
-            <td class="align-right"><span data-field="errors" data-format="number"></span></td>
-            <td>errors</td>
-            <td>(<span data-field="errors_ratio" data-format="percent"></span>)</td>
-          </tr>
-          <tr>
-            <td class="align-right"><span data-field="kbytes" data-format="kbytes/value"></span></td>
-            <td><span data-field="kbytes" data-format="kbytes/unit"></span></td>
-            <td>(<span data-field="kbytes_ratio" data-format="percent"></span>)</td>
-          </tr>
-          <tr>
-            <td class="align-right"><span data-field="secs" data-format="secs/value"></span></td>
-            <td><span data-field="secs" data-format="secs/unit"></span> total</td>
-            <td>(<span data-field="secs_ratio" data-format="percent"></span>)</td>
-          <tr>
-            <td class="align-right"><span data-field="avgsecs" data-format="secs/value"></span></td>
-            <td colspan="3"><span data-field="avgsecs" data-format="secs/unit"></span> / request</td>
-          </tr>
-        </tbody>
-      </table>
       <div class="timeline">
-        View Timeline  <i class="icon-bar-chart"></i>
+        <i class="icon-signal"></i><br>
+        <label>View Timeline</label>
+      </div>
+      <div class="data">
+        <b><span data-field="name">Test</span>:</b>
+        <table class="compact">
+          <tbody>
+            <tr>
+              <td class="align-right"><span data-field="count" data-format="number"></span></td>
+              <td>requests</td>
+              <td>(<span data-field="count_ratio" data-format="percent"></span>)</td>
+            </tr>
+            <tr>
+              <td class="align-right"><span data-field="errors" data-format="number"></span></td>
+              <td>errors</td>
+              <td>(<span data-field="errors_ratio" data-format="percent"></span>)</td>
+            </tr>
+            <tr>
+              <td class="align-right"><span data-field="kbytes" data-format="kbytes/value"></span></td>
+              <td><span data-field="kbytes" data-format="kbytes/unit"></span></td>
+              <td>(<span data-field="kbytes_ratio" data-format="percent"></span>)</td>
+            </tr>
+            <tr>
+              <td class="align-right"><span data-field="secs" data-format="secs/value"></span></td>
+              <td><span data-field="secs" data-format="secs/unit"></span> total</td>
+              <td>(<span data-field="secs_ratio" data-format="percent"></span>)</td>
+            <tr>
+              <td class="align-right"><span data-field="avgsecs" data-format="secs/value"></span></td>
+              <td colspan="3"><span data-field="avgsecs" data-format="secs/unit"></span> / request</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -862,7 +884,7 @@ function tooltipFormat(evt, data) {
         var maxHeight = $("body").height();
         var width = tooltip.width();
         var height = tooltip.height();
-        var pos = { left: pageX - 20, top: pageY + 20 };
+        var pos = { left: pageX - 120, top: pageY + 20 };
         pos.left = Math.max(0, Math.min(maxWidth - width, pos.left));
         if (pos.top + height >= maxHeight) {
             pos.top = pageY - height - 30;
@@ -875,12 +897,6 @@ function tooltipShow() {
     clearTimeout($("#tooltip").data("timer"));
     $("#tooltip").data("timer", setTimeout(tooltipHide, 5000));
     show("#tooltip");
-}
-
-function tooltipExpand() {
-    dialogShow($("#tooltip").data("data"));
-    tooltipHide();
-    return false;
 }
 
 function tooltipHide() {
@@ -1094,6 +1110,7 @@ function loadData(opts) {
 
 function loadDataCb(opts, res) {
     stats[opts.date] = res;
+    res.total.chart = "total";
     res.total.date = opts.date;
     res.top_error = res.error;
     delete res.error;
@@ -1166,6 +1183,13 @@ function selectTab(evt) {
     return false;
 }
 
+function dialogOpen(evt) {
+    var target = $(evt.target).closest(".timeline");
+    dialogShow(target.parent().data("data"));
+    tooltipHide();
+    return false;
+}
+
 function dialogShow(data) {
     var now = new Date().getTime();
     var dates = [];
@@ -1201,16 +1225,33 @@ function dialogRender() {
         if (dataset && dataset[category] && dataset[category][key]) {
             var point = dataset[category][key];
             series.push([Date.parse(date), point.count]);
+        } else if (dataset && dataset[category] && !key) {
+            var point = dataset[category];
+            series.push([Date.parse(date), point.count]);
         } else {
             series.push([Date.parse(date), 0]);
         }
     }
     series.sort(function (a, b) { return a[0] - b[0]; });
     var opts = {
-        chart: { type: 'line' },
-        title: { text: null },
-        xAxis: { type: 'datetime' },
-        yAxis: { min: 0, title: { text: "Request Count" } },
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: null
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: "Request Count"
+            }
+        },
+        legend: {
+            enabled: !!key
+        },
         series: [{
             name: key,
             data: series
@@ -1288,7 +1329,7 @@ $(function () {
     body.on("click touchstart", ".tab-label", selectTab);
     body.on("click touchstart", ".barchart .row", barChartSelect);
     body.on("click touchstart mousemove", "#tooltip", tooltipShow);
-    body.on("click touchstart", "#tooltip .timeline", tooltipExpand);
+    body.on("click touchstart", ".timeline", dialogOpen);
     body.on("click touchend", "#dialog .close", dialogHide);
 
     // Load initial data
