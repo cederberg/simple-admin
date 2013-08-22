@@ -767,15 +767,24 @@ function tooltipFormat(evt, data) {
         tooltip.data("data", data);
         formatTemplate("#tooltip", data);
     }
-    if (evt && evt.pageX && evt.pageY) {
+    evt = evt || {};
+    // Highcharts sends the chart as target for touch events...
+    var chart = evt.target && evt.target.chart;
+    var offset = (chart && $(chart.container).offset()) || {};
+    // ...but normal jQuery events might have touches array
+    var touch = evt.originalEvent && evt.originalEvent.touches &&
+                evt.originalEvent.touches[0];
+    var pageX = evt.pageX || (evt.chartX + offset.left) || (touch && touch.pageX);
+    var pageY = evt.pageY || (evt.chartY + offset.top) || (touch && touch.pageY);
+    if (pageX && pageY) {
         var maxWidth = $("body").width();
         var maxHeight = $("body").height();
         var width = tooltip.width();
         var height = tooltip.height();
-        var pos = { left: evt.pageX - 20, top: evt.pageY + 20 };
+        var pos = { left: pageX - 20, top: pageY + 20 };
         pos.left = Math.max(0, Math.min(maxWidth - width, pos.left));
         if (pos.top + height >= maxHeight) {
-            pos.top = evt.pageY - height - 30;
+            pos.top = pageY - height - 30;
         }
         tooltip.css(pos);
     }
@@ -839,6 +848,7 @@ function dataSeries(data, total, sort) {
     return series;
 }
 
+// Renders a bar chart
 function barChart(elem, data, total, sort) {
     var series = dataSeries(data, total, sort);
     var max = 0;
@@ -857,6 +867,7 @@ function barChart(elem, data, total, sort) {
     $(elem).empty().append(rows);
 }
 
+// Handles data select events on bar charts
 function barChartSelect(evt) {
     var target = $(evt.target).closest(".row");
     var chart = target.closest(".barchart");
@@ -868,6 +879,7 @@ function barChartSelect(evt) {
     tooltipShow();
 }
 
+// Renders a pie chart
 function pieChart(elem, data, total, sort) {
     var series = dataSeries(data, total, sort);
     var elem = $(elem);
@@ -884,8 +896,12 @@ function pieChart(elem, data, total, sort) {
         color = ORANGE;
     }
     var opts = {
-        chart: { type: "pie" },
-        title: { text: null },
+        chart: {
+            type: "pie"
+        },
+        title: {
+            text: null
+        },
         plotOptions: {
             pie: {
                 colors: color,
@@ -905,17 +921,24 @@ function pieChart(elem, data, total, sort) {
             enabled: false
         },
         series: [{
-            name: 'Requests',
             data: series
         }]
     }
     elem.highcharts(opts);
 }
 
+// Handles data select events on pie charts
 function pieChartSelect(evt) {
-    var chart = $(evt.target).closest(".piechart");
+    var chart = evt && evt.target && evt.target.chart;
+    if (chart) {
+        // Highcharts sends the chart as target for touch events
+        var container = chart && $(chart.container).closest(".piechart");
+    } else {
+        // ...but the actual SVG element for click events
+        var container = $(evt.target).closest(".piechart");
+    }
     var data = evt.point;
-    data.chart = chart.attr("id");
+    data.chart = (container && container.attr("id")) || data.chart;
     tooltipFormat(evt, data);
     tooltipShow();
 }
