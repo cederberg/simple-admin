@@ -3,13 +3,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Chivo:900">
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.2/css/smoothness/jquery-ui-1.10.2.custom.min.css">
-
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Chivo:900">
     <!--[if IE 7]>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.0/css/font-awesome-ie7.min.css">
     <![endif]-->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highcharts/3.0.2/highcharts.js"></script>
     <title>Simple-Admin Web Stats Viewer</title>
     <style type="text/css">
 
@@ -167,7 +169,7 @@ header h1 span {
     -webkit-transition: background 0.3s ease;
     transition: background 0.3s ease;
 }
-.barchart .row:hover {
+.no-touch .barchart .row:hover {
     background: #F8F8F8;
 }
 .barchart .row.active {
@@ -425,8 +427,22 @@ header h1 span {
 #loading i {
     display: inline-block;
     font-size: 500px;
-    -webkit-animation: spin 10s linear 0s infinite;
+    -webkit-animation: spin 10s linear infinite;
     animation: spin 10s linear infinite;
+}
+
+/* Working styles */
+.working {
+    margin-top: 30%;
+    text-align: center;
+    font-size: 1.4em;
+}
+.working i {
+    display: inline-block;
+    margin: 0 3px;
+    vertical-align: 1px;
+    -webkit-animation: spin 5s linear infinite;
+    animation: spin 5s linear infinite;
 }
 
 /* Overlay style */
@@ -675,9 +691,6 @@ header h1 span {
 
     <div id="overlay"></div>
 
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highcharts/3.0.2/highcharts.js"></script>
     <script type="text/javascript">
 
 // Color schemes
@@ -962,7 +975,7 @@ function renderChart(elem, data, total, sort) {
     total = total || $("#summary").data("data");
     sort = sort || elem.parent().find(".sortorder .selected").attr("data-sort");
     elem.data("data", data);
-    elem.empty();
+    elem.empty().append($("<div class='working'><i class='icon-spinner'></i> Working...</div>"));
     if (elem.hasClass("barchart")) {
         renderQueue.push(barChart.bind(null, elem, data, total, sort));
     } else if (elem.hasClass("piechart")) {
@@ -1164,10 +1177,19 @@ function hide(elem) {
     }, 1000);
 }
 
+// Initialize app
 $(function () {
-    // Init animations
-    var bodyStyles = document.body.style;
-    if ("transition" in bodyStyles || "-webkit-transition" in bodyStyles) {
+    var body = $("body");
+
+    // Feature detection
+    try {
+        document.createEvent("TouchEvent");
+        body.addClass("touch");
+    } catch (e) {
+        body.addClass("no-touch");
+    }
+    var styles = body[0].style;
+    if ("transition" in styles || "-webkit-transition" in styles) {
         $("body").addClass("animation");
     } else {
         $("body").addClass("no-animation");
@@ -1197,12 +1219,12 @@ $(function () {
     $("#selector select").on("click", false);
     $("#selector select").on("change", loadData.bind(null, null));
     $(window).on("click", selectDate.bind(null, null));
-    $("body").on("click touchstart", ".sortorder span", sortChart);
-    $("body").on("click touchstart", ".tab-label", selectTab);
-    $("body").on("click touchstart", ".barchart .row", barChartSelect);
-    $("body").on("click touchstart mousemove", "#tooltip", tooltipShow);
-    $("body").on("click touchstart", "#tooltip .timeline", tooltipExpand);
-    $("body").on("click touchend", "#dialog .close", dialogHide);
+    body.on("click touchstart", ".sortorder span", sortChart);
+    body.on("click touchstart", ".tab-label", selectTab);
+    body.on("click touchstart", ".barchart .row", barChartSelect);
+    body.on("click touchstart mousemove", "#tooltip", tooltipShow);
+    body.on("click touchstart", "#tooltip .timeline", tooltipExpand);
+    body.on("click touchend", "#dialog .close", dialogHide);
 
     // Load initial data
     loadData();
