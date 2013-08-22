@@ -89,8 +89,8 @@ header h1 span {
     transition: opacity 0.5s ease;
 }
 
-/* Summary styles */
-#summary {
+/* Total styles */
+#total {
     margin: 5px 0 15px;
     border-radius: 6px;
     padding: 8px 10px;
@@ -99,10 +99,10 @@ header h1 span {
     box-shadow: 0 2px 3px #000 inset;
     font-size: 1.2em;
 }
-#summary span {
+#total span {
     padding-left: 6px;
 }
-#summary .timeline {
+#total .timeline {
     float: right;
     cursor: pointer;
 }
@@ -439,7 +439,20 @@ header h1 span {
 #dialog .close.icon-remove-sign:before {
     cursor: pointer;
 }
-#dialog .linechart {
+#dialog h2 {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 97%;
+    padding-left: 3%;
+    text-align: center;
+}
+#dialog .sortorder {
+    position: absolute;
+    top: 8%;
+    right: 5%;
+}
+#dialog .timechart {
     width: 90%;
     height: 80%;
     margin-top: 10%;
@@ -534,7 +547,7 @@ header h1 span {
     </div>
     <div id="datepicker" class="hidden hiding"></div>
 
-    <div id="summary">
+    <div id="total" data-title="Totals">
       <div class="timeline">
         <i class="icon-signal"></i>
         Timeline
@@ -555,7 +568,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="host" class="chart barchart purple"></div>
+        <div id="host" data-title="Host Names" class="chart barchart purple"></div>
       </div>
       <div class="box">
         <h2>File Types</h2>
@@ -565,7 +578,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="file_type" class="chart piechart cyan"></div>
+        <div id="file_type" data-title="File Types" class="chart piechart cyan"></div>
       </div>
       <div class="box">
         <h2>File Sources</h2>
@@ -575,7 +588,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="file_source" class="chart barchart green"></div>
+        <div id="file_source" data-title="File Sources" class="chart barchart green"></div>
       </div>
       <div class="box">
         <h2>Referral Sites</h2>
@@ -585,7 +598,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_referral_site" class="chart barchart orange"></div>
+        <div id="top_referral_site" data-title="Referral Sites" class="chart barchart orange"></div>
       </div>
       <div class="box">
         <h2>Countries</h2>
@@ -595,7 +608,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="country" class="chart piechart red"></div>
+        <div id="country" data-title="Countries" class="chart piechart red"></div>
       </div>
       <div class="box">
         <h2>Time of Day</h2>
@@ -605,7 +618,7 @@ header h1 span {
           <span data-sort="name/secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="name/avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="time_of_day" class="chart barchart blue"></div>
+        <div id="time_of_day" data-title="Time of Day" class="chart barchart blue"></div>
       </div>
       <div class="box">
         <h2>Platforms</h2>
@@ -615,7 +628,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="platform" class="chart piechart purple"></div>
+        <div id="platform" data-title="Platforms" class="chart piechart purple"></div>
       </div>
       <div class="box">
         <h2>Browsers</h2>
@@ -625,7 +638,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="browser" class="chart piechart orange"></div>
+        <div id="browser" data-title="Browsers" class="chart piechart orange"></div>
       </div>
       <div class="box">
         <h2>Response Codes</h2>
@@ -635,7 +648,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="http_code" class="chart barchart cyan"></div>
+        <div id="http_code" data-title="Response Codes" class="chart barchart cyan"></div>
       </div>
       <div class="box">
         <h2>HTTP Versions</h2>
@@ -645,7 +658,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="http_version" class="chart barchart green"></div>
+        <div id="http_version" data-title="HTTP Versions" class="chart barchart green"></div>
       </div>
       <div class="box">
         <h2>HTTP Methods</h2>
@@ -655,11 +668,11 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="http_method" class="chart barchart orange"></div>
+        <div id="http_method" data-title="HTTP Methods" class="chart barchart orange"></div>
       </div>
       <div class="box">
         <h2>Max Response Time</h2>
-        <div id="process_time" class="chart barchart red"></div>
+        <div id="process_time" data-title="Max Response Time" class="chart barchart red"></div>
       </div>
     </div>
 
@@ -680,7 +693,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_request" class="chart barchart cyan"></div>
+        <div id="top_request" data-title="Top Requests" class="chart barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
@@ -689,7 +702,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_download" class="chart barchart purple"></div>
+        <div id="top_download" data-title="Top Downloads" class="chart barchart purple"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
@@ -698,22 +711,13 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time" class="selected"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_process_time" class="chart barchart orange"></div>
+        <div id="top_process_time" data-title="Top Process Time" class="chart barchart orange"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
           <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
         </div>
-        <div id="top_redirect" class="chart barchart green"></div>
-      </div>
-      <div class="tab-content hidden">
-        <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
-        </div>
-        <div id="top_referral_source" class="chart barchart blue"></div>
+        <div id="top_redirect" data-title="Top Redirects" class="chart barchart green"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
@@ -722,13 +726,22 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_referral_target" class="chart barchart cyan"></div>
+        <div id="top_referral_source" data-title="Referral Sources" class="chart barchart blue"></div>
+      </div>
+      <div class="tab-content hidden">
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+        </div>
+        <div id="top_referral_target" data-title="Referral Targets" class="chart barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
           <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
         </div>
-        <div id="top_error" class="chart barchart red"></div>
+        <div id="top_error" data-title="Errors" class="chart barchart red"></div>
       </div>
     </div>
 
@@ -761,8 +774,8 @@ header h1 span {
               <td><span data-field="secs" data-format="secs/unit"></span> total</td>
               <td>(<span data-field="secs_ratio" data-format="percent"></span>)</td>
             <tr>
-              <td class="align-right"><span data-field="avgsecs" data-format="secs/value"></span></td>
-              <td colspan="3"><span data-field="avgsecs" data-format="secs/unit"></span> / request</td>
+              <td class="align-right"><span data-field="avgsecs" data-format="secs/value" data-precision="2"></span></td>
+              <td colspan="3"><span data-field="avgsecs" data-format="secs/unit" data-precision="2"></span> / request</td>
             </tr>
           </tbody>
         </table>
@@ -771,7 +784,14 @@ header h1 span {
 
     <div id="dialog" class="hidden hiding">
       <i class="close icon-remove-sign"></i>
-      <div class="chart linechart purple"></div>
+      <h2>Title</h2>
+      <div class="sortorder">
+        <span data-sort="count" title="Timeline for request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+        <span data-sort="kbytes" title="Timeline for download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+        <span data-sort="secs" title="Timeline for total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+        <span data-sort="avgsecs" title="Timeline for average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+      </div>
+      <div class="chart timechart purple"></div>
     </div>
 
     <div id="loading">
@@ -827,13 +847,14 @@ function formatKb(kb) {
 }
 
 // Format a number of seconds (time)
-function formatSecs(secs) {
+function formatSecs(secs, decimals) {
+    decimals = isNaN(parseInt(decimals)) ? 0 : parseInt(decimals);
     if (isNaN(secs) || secs < 60) {
-        return Highcharts.numberFormat(secs, 1) + " secs";
+        return Highcharts.numberFormat(secs, decimals) + " secs";
     } else if (secs < 3600) {
-        return Highcharts.numberFormat(secs / 60, 1) + " mins";
+        return Highcharts.numberFormat(secs / 60, decimals) + " mins";
     } else {
-        return Highcharts.numberFormat(secs / 3600, 1) + " hrs";
+        return Highcharts.numberFormat(secs / 3600, decimals) + " hrs";
     }
 }
 
@@ -842,6 +863,7 @@ function formatTemplate(tmpl, data) {
         var elem = $(this);
         var field = elem.attr("data-field");
         var fmt = elem.attr("data-format") || "text";
+        var prcs = elem.attr("data-precision");
         var value = data[field];
         if (fmt == "number") {
             value = formatNumber(value);
@@ -854,11 +876,11 @@ function formatTemplate(tmpl, data) {
         } else if (fmt == "kbytes/unit") {
             value = formatKb(value).replace(/.*\s/, "");
         } else if (fmt == "secs") {
-            value = formatSecs(value);
+            value = formatSecs(value, prcs);
         } else if (fmt == "secs/value") {
-            value = formatSecs(value).replace(/\s\S*$/, "");
+            value = formatSecs(value, prcs).replace(/\s\S*$/, "");
         } else if (fmt == "secs/unit") {
-            value = formatSecs(value).replace(/.*\s/, "");
+            value = formatSecs(value, prcs).replace(/.*\s/, "");
         }
         $(this).text(value || "");
     });
@@ -927,7 +949,7 @@ function dataSeries(data, total, sort) {
                 v.value = formatSecs(v.secs) + " (" +
                           formatPercent(v.secs_ratio) + ")";
             } else if (field == "avgsecs") {
-                v.value = formatSecs(v.avgsecs) + " (" +
+                v.value = formatSecs(v.avgsecs, 2) + " (" +
                           formatNumber(v.count) + " reqs)";
             } else {
                 v.value = formatNumber(v.count) + " requests (" +
@@ -943,6 +965,14 @@ function dataSeries(data, total, sort) {
         return sortReverse ? -cmp : cmp;
     });
     return series;
+}
+
+function timeSeries(data, field) {
+    for (var i = 0; i < data.length; i++) {
+        var point = data[i];
+        point.y = point[field] || 0;
+    }
+    return data;
 }
 
 // Renders a bar chart
@@ -1035,9 +1065,55 @@ function pieChartSelect(evt) {
         var container = $(evt.target).closest(".piechart");
     }
     var data = evt.point;
-    data.chart = (container && container.attr("id")) || data.chart;
+    data.chart = container && container.attr("id");
     tooltipFormat(evt, data);
     tooltipShow();
+}
+
+// Renders a time line chart
+function timeChart(elem, data, total, sort) {
+    var series = timeSeries(data, sort);
+    var opts = {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: null
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: null
+            }
+        },
+        legend: {
+            enabled: !!data.key
+        },
+        tooltip: {
+            formatter: function () {
+                var label = Highcharts.dateFormat("%a, %e %b %Y", this.point.x);
+                var count = formatNumber(this.point.count || 0);
+                var errors = formatNumber(this.point.errors || 0);
+                var size = formatKb(this.point.kbytes || 0);
+                var time = formatSecs(this.point.secs || 0);
+                var avgtime = formatSecs(this.point.avgsecs || 0, 2);
+                return "<b>" + label + "</b><br>" +
+                       count + " requests<br>" +
+                       errors + " errors<br>" +
+                       size + "<br>" +
+                       time + " total<br>" +
+                       avgtime + " / request";
+            }
+        },
+        series: [{
+            name: data.key,
+            data: series
+        }]
+    }
+    $(elem).highcharts(opts);
 }
 
 function sortChart(evt) {
@@ -1053,7 +1129,7 @@ function sortChart(evt) {
 function renderChart(elem, data, total, sort) {
     elem = $(elem);
     data = data || elem.data("data");
-    total = total || $("#summary").data("data");
+    total = total || $("#total").data("data");
     sort = sort || elem.parent().find(".sortorder .selected").attr("data-sort");
     elem.data("data", data);
     elem.empty().append($("<div class='working'><i class='icon-spinner'></i> Working...</div>"));
@@ -1061,6 +1137,8 @@ function renderChart(elem, data, total, sort) {
         renderQueue.push(barChart.bind(null, elem, data, total, sort));
     } else if (elem.hasClass("piechart")) {
         renderQueue.push(pieChart.bind(null, elem, data, total, sort));
+    } else if (elem.hasClass("timechart")) {
+        renderQueue.push(timeChart.bind(null, elem, data, total, sort));
     }
     renderStart();
 }
@@ -1115,8 +1193,8 @@ function loadDataCb(opts, res) {
     res.top_error = res.error;
     delete res.error;
     if (!opts.norender) {
-        $("#summary").data("data", res.total);
-        formatTemplate("#summary", res.total);
+        $("#total").data("data", res.total);
+        formatTemplate("#total", res.total);
         renderChart("#top_request", res.top_request || []);
         renderChart("#host", res.host || []);
         renderChart("#file_type", res.file_type || []);
@@ -1194,8 +1272,8 @@ function dialogShow(data) {
     var now = new Date().getTime();
     var dates = [];
     var defers = [];
-    $("#dialog").data("category", data.chart);
-    $("#dialog").data("key", data.name);
+    $("#dialog").data("chart", data.chart);
+    $("#dialog").data("key", data.name || "");
     $("#dialog").data("dates", dates);
     for (var i = 1; i <= 31; i++) {
         var date = formatDate(new Date(now - 24 * 60 * 60 * 1000 * i));
@@ -1213,56 +1291,40 @@ function dialogShow(data) {
 }
 
 function dialogRender() {
-    hide("#loading");
-    show("#dialog, #overlay");
-    var category = $("#dialog").data("category");
+    var category = $("#dialog").data("chart");
     var key = $("#dialog").data("key");
     var dates = $("#dialog").data("dates");
     var series = [];
+    series.key = key;
     for (var i = 0; i < dates.length; i++) {
         var date = dates[i];
         var dataset = stats[date];
+        var point = { count: 0 };
         if (dataset && dataset[category] && dataset[category][key]) {
-            var point = dataset[category][key];
-            series.push([Date.parse(date), point.count]);
+            point = Object.create(dataset[category][key]);
         } else if (dataset && dataset[category] && !key) {
-            var point = dataset[category];
-            series.push([Date.parse(date), point.count]);
-        } else {
-            series.push([Date.parse(date), 0]);
+            point = Object.create(dataset[category]);
         }
+        point.x = Date.parse(date);
+        point.y = point.count;
+        series.push(point);
     }
-    series.sort(function (a, b) { return a[0] - b[0]; });
-    var opts = {
-        chart: {
-            type: 'line'
-        },
-        title: {
-            text: null
-        },
-        xAxis: {
-            type: 'datetime'
-        },
-        yAxis: {
-            min: 0,
-            title: {
-                text: "Request Count"
-            }
-        },
-        legend: {
-            enabled: !!key
-        },
-        series: [{
-            name: key,
-            data: series
-        }]
-    }
-    $("#dialog .linechart").highcharts(opts);
+    series.sort(function (a, b) { return a.x - b.x; });
+    var chart = $("#" + category);
+    var sort = chart.parent().find(".sortorder .selected").attr("data-sort") || "count";
+    var field = sort.replace(/.*\//, "").replace(/^\W+/, "");
+    hide("#loading");
+    show("#dialog, #overlay");
+    $("#dialog h2").text(chart.attr("data-title"));
+    $("#dialog .sortorder .selected").removeClass("selected");
+    $("#dialog .sortorder [data-sort='" + field + "']").addClass("selected");
+    renderChart("#dialog .timechart", series);
 }
 
 function dialogHide() {
     hide("#dialog, #overlay");
-    $("#dialog .linechart").empty();
+    $("#dialog h2").text("");
+    $("#dialog .timechart").empty();
 }
 
 function show(elem) {
