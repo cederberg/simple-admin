@@ -134,24 +134,36 @@ header h1 span {
 .chart-selector .box h2 {
     margin: 3px 10px;
 }
-.chart-selector .box .barchart,
-.chart-selector .box .piechart {
+.chart-selector .box .chart {
     height: 310px;
     overflow-x: hidden;
     overflow-y: auto;
 }
-
-/* Chart Selector styles */
-.sortorder {
+.chart-selector .sortorder {
     position: absolute;
     top: 10px;
     right: 10px;
+}
+.chart-selector .sortorder label {
+    display: none;
+}
+.chart-selector .sortorder .selected label {
+    display: inline;
+}
+
+
+/* Chart Selector styles */
+.sortorder {
     color: #EEEEEE;
     font-size: 0.9em;
 }
 .sortorder span {
+    padding: 0 2px;
     color: #CCCCCC;
     cursor: pointer;
+}
+.sortorder span label {
+    padding-left: 6px;
 }
 .sortorder span.selected {
     color: #666666;
@@ -338,6 +350,7 @@ header h1 span {
     background: linear-gradient(bottom, #9a5202, #cc6c03, #cc6c03, #fc9f39, #fdb86b, #fdd09e);
 }
 .tab-content {
+    position: relative;
     width: -webkit-calc(100% - 20px);
     width: calc(100% - 20px);
     height: -webkit-calc(100% - 55px);
@@ -347,15 +360,19 @@ header h1 span {
     padding: 15px 10px;
     box-shadow: 0 1px 3px #886 inset;
 }
-.tab-content .barchart,
-.tab-content .piechart {
+.tab-content .sortorder {
+    position: absolute;
+    left: 20px;
+    top: 15px;
+}
+.tab-content .chart {
     width: 100%;
-    height: 100%;
+    height: -webkit-calc(100% - 25px);
+    height: calc(100% - 25px);
     overflow-x: hidden;
     overflow-y: auto;
-    margin: 0;
+    margin: 25px 0 0 0;
 }
-
 /* Tooltip styles */
 #tooltip {
     position: absolute;
@@ -397,8 +414,12 @@ header h1 span {
     top: 6px;
     z-index: 10;
     font-size: 30px;
-    color: #333333;
-    text-shadow: 0 0 2px #333333;
+    color: #CCCCCC;
+    text-shadow: 0 0 1px #CCCCCC;
+}
+.no-touch #dialog .close:hover {
+    color: #AAAAAA;
+    text-shadow: 0 0 1px #AAAAAA;
 }
 #dialog .close.icon-remove-sign:before {
     cursor: pointer;
@@ -510,105 +531,116 @@ header h1 span {
       <div class="box" style="margin-left: 20px;">
         <h2>Host Names</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="host" class="barchart purple"></div>
+        <div id="host" class="chart barchart purple"></div>
       </div>
       <div class="box">
         <h2>File Types</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="file_type" class="piechart cyan"></div>
+        <div id="file_type" class="chart piechart cyan"></div>
       </div>
       <div class="box">
         <h2>File Sources</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="file_source" class="barchart green"></div>
+        <div id="file_source" class="chart barchart green"></div>
       </div>
       <div class="box">
         <h2>Referral Sites</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_referral_site" class="barchart orange"></div>
+        <div id="top_referral_site" class="chart barchart orange"></div>
       </div>
       <div class="box">
         <h2>Countries</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="country" class="piechart red"></div>
+        <div id="country" class="chart piechart red"></div>
       </div>
       <div class="box">
         <h2>Time of Day</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="name/count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="name/kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="name/secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="name/count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="name/kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="name/secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="name/avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="time_of_day" class="barchart blue"></div>
+        <div id="time_of_day" class="chart barchart blue"></div>
       </div>
       <div class="box">
         <h2>Platforms</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="platform" class="piechart purple"></div>
+        <div id="platform" class="chart piechart purple"></div>
       </div>
       <div class="box">
         <h2>Browsers</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="browser" class="piechart orange"></div>
+        <div id="browser" class="chart piechart orange"></div>
       </div>
       <div class="box">
         <h2>Response Codes</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="http_code" class="barchart cyan"></div>
+        <div id="http_code" class="chart barchart cyan"></div>
       </div>
       <div class="box">
         <h2>HTTP Versions</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="http_version" class="barchart green"></div>
+        <div id="http_version" class="chart barchart green"></div>
       </div>
       <div class="box">
         <h2>HTTP Methods</h2>
         <div class="sortorder">
-          <span class="selected" data-sort="-count"><i class="icon-sort-by-attributes-alt"></i> Reqs</span> |
-          <span data-sort="-kbytes"><i class="icon-truck"></i> Size</span> |
-          <span data-sort="-secs"><i class="icon-time"></i> Time</span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="http_method" class="barchart orange"></div>
+        <div id="http_method" class="chart barchart orange"></div>
       </div>
       <div class="box">
         <h2>Max Response Time</h2>
-        <div id="process_time" class="barchart red"></div>
+        <div id="process_time" class="chart barchart red"></div>
       </div>
     </div>
 
@@ -620,28 +652,64 @@ header h1 span {
         <div class="tab-label green" data-ref="top_redirect"><i class="icon-retweet"></i> Top Redirects</div>
         <div class="tab-label blue" data-ref="top_referral_source"><i class="icon-signout"></i> Referral Sources</div>
         <div class="tab-label cyan" data-ref="top_referral_target"><i class="icon-signin"></i> Referral Targets</div>
-        <div class="tab-label red" data-ref="top_error"><i class="icon-bolt"></i> Errors</div>
+        <div class="tab-label red" data-ref="top_error"><i class="icon-ban-circle"></i> Errors</div>
       </div>
       <div class="tab-content">
-        <div id="top_request" class="barchart cyan"></div>
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+        </div>
+        <div id="top_request" class="chart barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
-        <div id="top_download" class="barchart purple"></div>
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size" class="selected"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+        </div>
+        <div id="top_download" class="chart barchart purple"></div>
       </div>
       <div class="tab-content hidden">
-        <div id="top_process_time" class="barchart orange"></div>
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time" class="selected"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+        </div>
+        <div id="top_process_time" class="chart barchart orange"></div>
       </div>
       <div class="tab-content hidden">
-        <div id="top_redirect" class="barchart green"></div>
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+        </div>
+        <div id="top_redirect" class="chart barchart green"></div>
       </div>
       <div class="tab-content hidden">
-        <div id="top_referral_source" class="barchart blue"></div>
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+        </div>
+        <div id="top_referral_source" class="chart barchart blue"></div>
       </div>
       <div class="tab-content hidden">
-        <div id="top_referral_target" class="barchart cyan"></div>
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+        </div>
+        <div id="top_referral_target" class="chart barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
-        <div id="top_error" class="barchart red"></div>
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+        </div>
+        <div id="top_error" class="chart barchart red"></div>
       </div>
     </div>
 
@@ -681,7 +749,7 @@ header h1 span {
 
     <div id="dialog" class="hidden hiding">
       <i class="close icon-remove-sign"></i>
-      <div class="linechart purple"></div>
+      <div class="chart linechart purple"></div>
     </div>
 
     <div id="loading">
@@ -844,7 +912,7 @@ function dataSeries(data, total, sort) {
                           formatPercent(v.secs_ratio) + ")";
             } else if (field == "avgsecs") {
                 v.value = formatSecs(v.avgsecs) + " (" +
-                          formatNumber(v.count) + " requests)";
+                          formatNumber(v.count) + " reqs)";
             } else {
                 v.value = formatNumber(v.count) + " requests (" +
                           formatPercent(v.count_ratio) + ")";
@@ -957,14 +1025,11 @@ function pieChartSelect(evt) {
 }
 
 function sortChart(evt) {
-    var target = $(evt.target);
-    if (!target.is("span")) {
-        target = target.closest("span");
-    }
+    var target = $(evt.target).closest("span");
     if (!target.is(".selected")) {
         target.parent().find(".selected").removeClass("selected");
         target.addClass("selected");
-        renderChart(target.parents(".box").find(".barchart, .piechart"));
+        renderChart(target.parent().parent().find(".chart"));
     }
     return false;
 }
@@ -1035,25 +1100,25 @@ function loadDataCb(opts, res) {
     if (!opts.norender) {
         $("#summary").data("data", res.total);
         formatTemplate("#summary", res.total);
-        renderChart("#top_request", res.top_request || [], res.total, "-count");
-        renderChart("#host", res.host || [], res.total);
-        renderChart("#file_type", res.file_type || [], res.total);
-        renderChart("#file_source", res.file_source || [], res.total);
-        renderChart("#top_referral_site", res.top_referral_site || [], res.total);
-        renderChart("#country", res.country || [], res.total);
-        renderChart("#platform", res.platform || [], res.total);
-        renderChart("#browser", res.browser || [], res.total);
-        renderChart("#time_of_day", res.time_of_day || [], res.total, "name");
-        renderChart("#http_version", res.http_version || [], res.total);
-        renderChart("#http_method", res.http_method || [], res.total);
-        renderChart("#http_code", res.http_code || [], res.total);
+        renderChart("#top_request", res.top_request || []);
+        renderChart("#host", res.host || []);
+        renderChart("#file_type", res.file_type || []);
+        renderChart("#file_source", res.file_source || []);
+        renderChart("#top_referral_site", res.top_referral_site || []);
+        renderChart("#country", res.country || []);
+        renderChart("#platform", res.platform || []);
+        renderChart("#browser", res.browser || []);
+        renderChart("#time_of_day", res.time_of_day || []);
+        renderChart("#http_version", res.http_version || []);
+        renderChart("#http_method", res.http_method || []);
+        renderChart("#http_code", res.http_code || []);
         renderChart("#process_time", res.process_time || [], res.total, "-x");
-        renderChart("#top_download", res.top_download || [], res.total, "-kbytes");
-        renderChart("#top_process_time", res.top_process_time || [], res.total, "-avgsecs");
-        renderChart("#top_redirect", res.top_redirect || [], res.total, "-count");
-        renderChart("#top_referral_source", res.top_referral_source || [], res.total, "-count");
-        renderChart("#top_referral_target", res.top_referral_target || [], res.total, "-count");
-        renderChart("#top_error", res.top_error || [], res.total, "-count");
+        renderChart("#top_download", res.top_download || []);
+        renderChart("#top_process_time", res.top_process_time || []);
+        renderChart("#top_redirect", res.top_redirect || []);
+        renderChart("#top_referral_source", res.top_referral_source || []);
+        renderChart("#top_referral_target", res.top_referral_target || []);
+        renderChart("#top_error", res.top_error || []);
         hide("#loading, #overlay");
     }
 }
