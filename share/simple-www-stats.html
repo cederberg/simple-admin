@@ -635,7 +635,7 @@ header h1 span {
           <span data-sort="name/secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="name/avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="time_of_day" data-title="Time of Day" class="chart barchart blue"></div>
+        <div id="time_of_day" data-title="Time of Day" data-compare="10" class="chart barchart blue"></div>
       </div>
       <div class="box">
         <h2>Platforms</h2>
@@ -689,7 +689,7 @@ header h1 span {
       </div>
       <div class="box">
         <h2>Max Response Time</h2>
-        <div id="process_time" data-title="Max Response Time" class="chart barchart red"></div>
+        <div id="process_time" data-title="Max Response Time" data-compare="10" class="chart barchart red"></div>
       </div>
     </div>
 
@@ -710,7 +710,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_request" data-title="Top Requests" class="chart barchart cyan"></div>
+        <div id="top_request" data-title="Top Requests" data-compare="1" class="chart barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
@@ -719,7 +719,7 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_download" data-title="Top Downloads" class="chart barchart purple"></div>
+        <div id="top_download" data-title="Top Downloads" data-compare="1" class="chart barchart purple"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
@@ -728,22 +728,13 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time" class="selected"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_process_time" data-title="Top Process Time" class="chart barchart orange"></div>
+        <div id="top_process_time" data-title="Top Process Time" data-compare="1" class="chart barchart orange"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
           <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
         </div>
-        <div id="top_redirect" data-title="Top Redirects" class="chart barchart green"></div>
-      </div>
-      <div class="tab-content hidden">
-        <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
-        </div>
-        <div id="top_referral_source" data-title="Referral Sources" class="chart barchart blue"></div>
+        <div id="top_redirect" data-title="Top Redirects" data-compare="1" class="chart barchart green"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
@@ -752,13 +743,22 @@ header h1 span {
           <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
           <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
         </div>
-        <div id="top_referral_target" data-title="Referral Targets" class="chart barchart cyan"></div>
+        <div id="top_referral_source" data-title="Referral Sources" data-compare="1" class="chart barchart blue"></div>
+      </div>
+      <div class="tab-content hidden">
+        <div class="sortorder">
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+        </div>
+        <div id="top_referral_target" data-title="Referral Targets" data-compare="1" class="chart barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
           <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
         </div>
-        <div id="top_error" data-title="Errors" class="chart barchart red"></div>
+        <div id="top_error" data-title="Errors" data-compare="1" class="chart barchart red"></div>
       </div>
     </div>
 
@@ -995,14 +995,6 @@ function dataSeries(data, total, sort) {
     return series;
 }
 
-function timeSeries(data, field) {
-    for (var i = 0; i < data.length; i++) {
-        var point = data[i];
-        point.y = point[field] || 0;
-    }
-    return data;
-}
-
 // Renders a bar chart
 function barChart(elem, data, total, sort) {
     var series = dataSeries(data, total, sort);
@@ -1010,9 +1002,11 @@ function barChart(elem, data, total, sort) {
     for (var i = 0; i < series.length; i++) {
         max = Math.max(max, series[i].y);
     }
+    var keys = [];
     var rows = [];
     for (var i = 0; i < series.length; i++) {
         var p = series[i];
+        keys.push(p.key || p.name);
         var label = $("<span class='label'/>").text(p.name);
         var value = $("<span class='value'/>").text(p.value);
         var pct = Math.round(Math.max(5, p.y * 100 / max));
@@ -1020,6 +1014,7 @@ function barChart(elem, data, total, sort) {
         rows.push($("<div class='row'/>").append(label, value, bar).data(p));
     }
     $(elem).empty().append(rows);
+    $(elem).data("data-keys", keys);
 }
 
 // Handles data select events on bar charts
@@ -1037,6 +1032,11 @@ function barChartSelect(evt) {
 // Renders a pie chart
 function pieChart(elem, data, total, sort) {
     var series = dataSeries(data, total, sort);
+    var keys = [];
+    for (var i = 0; i < series.length; i++) {
+        var p = series[i];
+        keys.push(p.key || p.name);
+    }
     var elem = $(elem);
     var color = BLUE;
     if (elem.hasClass("red")) {
@@ -1080,6 +1080,7 @@ function pieChart(elem, data, total, sort) {
         }]
     }
     elem.highcharts(opts);
+    elem.data("data-keys", keys);
 }
 
 // Handles data select events on pie charts
@@ -1099,8 +1100,14 @@ function pieChartSelect(evt) {
 }
 
 // Renders a time line chart
-function timeChart(elem, data, total, sort) {
-    var series = timeSeries(data, sort);
+function timeChart(elem, series, total, sort) {
+    for (var i = 0; i < series.length; i++) {
+        var data = series[i].data || [];
+        for (var j = 0; j < data.length; j++) {
+            var point = data[j];
+            point.y = point[sort] || 0;
+        }
+    }
     var opts = {
         chart: {
             type: 'line'
@@ -1118,7 +1125,7 @@ function timeChart(elem, data, total, sort) {
             }
         },
         legend: {
-            enabled: !!data.key
+            enabled: (series.legend !== false)
         },
         tooltip: {
             formatter: function () {
@@ -1136,10 +1143,7 @@ function timeChart(elem, data, total, sort) {
                        avgtime + " / request";
             }
         },
-        series: [{
-            name: escapeXml(data.key),
-            data: series
-        }]
+        series: series
     }
     $(elem).highcharts(opts);
 }
@@ -1319,11 +1323,12 @@ function dialogShow(data) {
             defers.push(loadData({ date: date, norender: true }));
         }
     }
+    dates.sort(function (a, b) { return Date.parse(a) - Date.parse(b) });
     if (defers.length) {
         show("#loading, #overlay");
         $.when.apply(null, defers).always(dialogRender);
     } else {
-        dialogRender(dates);
+        dialogRender();
     }
 }
 
@@ -1331,23 +1336,36 @@ function dialogRender() {
     var category = $("#dialog").data("chart");
     var key = $("#dialog").data("key");
     var dates = $("#dialog").data("dates");
-    var series = [];
-    series.key = key;
-    for (var i = 0; i < dates.length; i++) {
-        var date = dates[i];
-        var dataset = stats[date];
-        var point = { count: 0 };
-        if (dataset && dataset[category] && dataset[category][key]) {
-            point = Object.create(dataset[category][key]);
-        } else if (dataset && dataset[category] && !key) {
-            point = Object.create(dataset[category]);
-        }
-        point.x = Date.parse(date);
-        point.y = point.count;
-        series.push(point);
-    }
-    series.sort(function (a, b) { return a.x - b.x; });
     var chart = $("#" + category);
+    var keys = chart.data("data-keys") || [];
+    var pos = keys.indexOf(key);
+    if (pos >= 0) {
+        keys.splice(pos, 1);
+    }
+    keys.unshift(key);
+    keys = keys.slice(0, parseInt(chart.attr("data-compare")) || 5);
+    var series = [];
+    if (!key) {
+        series.legend = false;
+    }
+    for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var data = [];
+        for (var j = 0; j < dates.length; j++) {
+            var date = dates[j];
+            var categoryData = stats[date] && stats[date][category];
+            var point = { count: 0 };
+            if (categoryData && categoryData[k]) {
+                point = Object.create(categoryData[k]);
+            } else if (categoryData && !k) {
+                point = Object.create(categoryData);
+            }
+            point.x = Date.parse(date);
+            point.y = point.count;
+            data.push(point);
+        }
+        series.push({ name: escapeXml(k), data: data, visible: (i == 0) });
+    }
     var sort = chart.parent().find(".sortorder .selected").attr("data-sort") || "count";
     var field = sort.replace(/.*\//, "").replace(/^\W+/, "");
     hide("#loading");
