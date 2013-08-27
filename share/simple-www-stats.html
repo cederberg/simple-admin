@@ -909,6 +909,12 @@ function formatTemplate(tmpl, data) {
     });
 }
 
+function escapeXml(str) {
+    str = str || "";
+    str = str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    return str
+}
+
 function tooltipFormat(evt, data) {
     var tooltip = $("#tooltip");
     if (data && data !== tooltip.data("data")) {
@@ -958,9 +964,8 @@ function dataSeries(data, total, sort) {
     for (var k in data) {
         var v = data[k];
         if (v && v.count) {
-            v.x = parseFloat(k);
             v.y = (typeof(v[field]) == "number") ? v[field] : v.count;
-            v.name = k;
+            v.name = v.name || k;
             v.count_ratio = v.count / total.count;
             v.errors_ratio = v.errors / total.errors;
             v.kbytes_ratio = v.kbytes / total.kbytes;
@@ -1132,7 +1137,7 @@ function timeChart(elem, data, total, sort) {
             }
         },
         series: [{
-            name: data.key,
+            name: escapeXml(data.key),
             data: series
         }]
     }
@@ -1215,6 +1220,16 @@ function loadDataCb(opts, res) {
     res.total.date = opts.date;
     res.top_error = res.error;
     delete res.error;
+    for (var k in res.process_time) {
+        var v = res.process_time[k];
+        v.x = parseFloat(k);
+        if (v.x > 10) {
+            v.name = k;
+            v.key = '> 10 secs';
+            res.process_time[v.key] = v;
+            delete res.process_time[k];
+        }
+    }
     if (!opts.norender) {
         $("#total").data("data", res.total);
         formatTemplate("#total", res.total);
@@ -1227,9 +1242,9 @@ function loadDataCb(opts, res) {
         renderChart("#platform", res.platform || []);
         renderChart("#browser", res.browser || []);
         renderChart("#time_of_day", res.time_of_day || []);
+        renderChart("#http_code", res.http_code || []);
         renderChart("#http_version", res.http_version || []);
         renderChart("#http_method", res.http_method || []);
-        renderChart("#http_code", res.http_code || []);
         renderChart("#process_time", res.process_time || [], res.total, "-x");
         renderChart("#top_download", res.top_download || []);
         renderChart("#top_process_time", res.top_process_time || []);
@@ -1295,7 +1310,7 @@ function dialogShow(data) {
     var dates = [];
     var defers = [];
     $("#dialog").data("chart", data.chart);
-    $("#dialog").data("key", data.name || "");
+    $("#dialog").data("key", data.key || data.name || "");
     $("#dialog").data("dates", dates);
     for (var i = 1; i <= 31; i++) {
         var date = formatDate(new Date(now - 24 * 60 * 60 * 1000 * i));
