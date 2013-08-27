@@ -31,6 +31,9 @@ body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 13px;
 }
+body * {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
 textarea {
     margin: 0;
     font-family: inherit;
@@ -109,6 +112,7 @@ header h1 span {
 
 /* Chart Selector styles */
 .chart-selector {
+    position: relative;
     height: 410px;
     overflow-x: auto;
     overflow-y: hidden;
@@ -117,6 +121,18 @@ header h1 span {
     white-space: nowrap;
     background: #F8F8F8;
     box-shadow: 0 1px 3px #888 inset;
+}
+.no-touch .chart-selector .grip {
+    display: none;
+}
+.touch .chart-selector .grip {
+    position: absolute;
+    top: 390px;
+    left: 20px;
+    width: 4580px;
+    height: 12px;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAYAAABfnvydAAAABmJLR0QA+AD4APiJtvilAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QgbEQcQmg5x6gAAACZpVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVAgb24gYSBNYWOV5F9bAAAAUklEQVQY082QuwnAMAxEn0K60xTafyZNoUKdUwWMY0jKXHkfeJx198hMACKCVUdmIglJVNWzwIusu8e9dPd9YTVnpnMXSgKgqj4yrObMZD/44QIsHzqGRsnxPgAAAABJRU5ErkJggg==');
+    background-repeat: repeat-x;
 }
 .chart-selector .box {
     position: relative;
@@ -376,7 +392,6 @@ header h1 span {
 /* Tooltip styles */
 #tooltip {
     position: absolute;
-    overflow: hidden;
     z-index: 10;
     padding: 6px;
     border: 1px solid #888;
@@ -409,6 +424,7 @@ header h1 span {
     float: right;
     margin: 0 0 0 10px;
     max-width: 400px;
+    overflow: hidden;
 }
 
 /* Dialog box styles */
@@ -560,6 +576,7 @@ header h1 span {
     </div>
 
     <div class="chart-selector">
+      <div class="grip"></div>
       <div class="box" style="margin-left: 20px;">
         <h2>Host Names</h2>
         <div class="sortorder">
@@ -802,6 +819,12 @@ header h1 span {
     <div id="overlay"></div>
 
     <script type="text/javascript">
+
+// Settings & detection flags
+var settings = {
+    animation: false,
+    touch: false
+};
 
 // Color schemes
 var BLUE = ['#2a4269', '#38588e', '#476fb2', '#698bc3', '#8da7d2', '#b2c3e0'];
@@ -1117,13 +1140,13 @@ function timeChart(elem, data, total, sort) {
 }
 
 function sortChart(evt) {
+    tooltipHide();
     var target = $(evt.target).closest("span");
     if (!target.is(".selected")) {
         target.parent().find(".selected").removeClass("selected");
         target.addClass("selected");
         renderChart(target.parent().parent().find(".chart"));
     }
-    return false;
 }
 
 function renderChart(elem, data, total, sort) {
@@ -1248,6 +1271,7 @@ function selectDate(date) {
 }
 
 function selectTab(evt) {
+    tooltipHide();
     var target = $(evt.target);
     if (!target.is(".tab-label")) {
         target = target.closest(".tab-label");
@@ -1258,14 +1282,12 @@ function selectTab(evt) {
         $(".tab-content").addClass("hidden");
         $("#" + target.attr("data-ref")).closest(".tab-content").removeClass("hidden");
     }
-    return false;
 }
 
 function dialogOpen(evt) {
     var target = $(evt.target).closest(".timeline");
     dialogShow(target.parent().data("data"));
     tooltipHide();
-    return false;
 }
 
 function dialogShow(data) {
@@ -1325,6 +1347,7 @@ function dialogHide() {
     hide("#dialog, #overlay");
     $("#dialog h2").text("");
     $("#dialog .timechart").empty();
+    return false;
 }
 
 function show(elem) {
@@ -1347,21 +1370,21 @@ function hide(elem) {
 
 // Initialize app
 $(function () {
-    var body = $("body");
 
     // Feature detection
+    var body = $("body");
+    var styles = body[0] && body[0].style;
+    if ("transition" in styles || "-webkit-transition" in styles) {
+        settings.animation = true;
+    }
     try {
         document.createEvent("TouchEvent");
-        body.addClass("touch");
+        settings.touch = true;
     } catch (e) {
-        body.addClass("no-touch");
+        // Do nothing
     }
-    var styles = body[0].style;
-    if ("transition" in styles || "-webkit-transition" in styles) {
-        $("body").addClass("animation");
-    } else {
-        $("body").addClass("no-animation");
-    }
+    body.addClass((settings.animation ? "" : "no-") + "animation");
+    body.addClass((settings.touch ? "" : "no-") + "touch");
 
     // Init HighCharts
     Highcharts.setOptions({
@@ -1384,15 +1407,17 @@ $(function () {
                                   onSelect: selectDate });
 
     // Init event handlers
-    $("#selector select").on("click", false);
+    var onclick = (settings.touch ? "touchstart" : "click");
     $("#selector select").on("change", loadData.bind(null, null));
-    $(window).on("click", selectDate.bind(null, null));
-    body.on("click touchstart", ".sortorder span", sortChart);
-    body.on("click touchstart", ".tab-label", selectTab);
-    body.on("click touchstart", ".barchart .row", barChartSelect);
-    body.on("click touchstart mousemove", "#tooltip", tooltipShow);
-    body.on("click touchstart", ".timeline", dialogOpen);
-    body.on("click touchend", "#dialog .close", dialogHide);
+    $("#selector select").on("click", false);
+    body.on(onclick, selectDate.bind(null, null));
+    body.on(onclick, ".sortorder span", sortChart);
+    body.on(onclick, ".tab-label", selectTab);
+    body.on(onclick, ".barchart .row", barChartSelect);
+    body.on(onclick + " mousemove", "#tooltip", tooltipShow);
+    body.on(onclick, ".timeline", dialogOpen);
+    body.on(onclick, "#dialog .close", dialogHide);
+    $(".chart-selector, .barchart").on("scroll", tooltipHide);
 
     // Load initial data
     loadData();
