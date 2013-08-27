@@ -172,6 +172,12 @@ header h1 span {
 .sortorder {
     color: #EEEEEE;
     font-size: 0.9em;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 .sortorder span {
     padding: 0 2px;
@@ -1172,14 +1178,19 @@ function renderChart(elem, data, total, sort) {
     } else if (elem.hasClass("timechart")) {
         renderQueue.push(timeChart.bind(null, elem, data, total, sort));
     }
-    renderStart();
+    return renderStart();
 }
 
 function renderStart() {
+    var defer = renderQueue.defer || (renderQueue.defer = $.Deferred());
     if (!renderQueue.timer && renderQueue.length) {
         renderQueue.timer = setTimeout(renderQueue.shift(), 10);
         setTimeout(renderNext, 11);
+    } else if (!renderQueue.length) {
+        renderQueue.defer = null;
+        defer.resolve();
     }
+    return defer;
 }
 
 function renderNext() {
@@ -1194,6 +1205,11 @@ function renderStop() {
     }
     if (renderQueue.length) {
         renderQueue.splice(0, renderQueue.length);
+    }
+    if (renderQueue.defer) {
+        var defer = renderQueue.defer;
+        renderQueue.defer = null;
+        defer.reject();
     }
 }
 
@@ -1313,6 +1329,9 @@ function dialogShow(data) {
     var now = new Date().getTime();
     var dates = [];
     var defers = [];
+    if (renderQueue.defer) {
+        defers.push(renderQueue.defer);
+    }
     $("#dialog").data("chart", data.chart);
     $("#dialog").data("key", data.key || data.name || "");
     $("#dialog").data("dates", dates);
@@ -1374,18 +1393,47 @@ function dialogRender() {
     $("#dialog .sortorder .selected").removeClass("selected");
     $("#dialog .sortorder [data-sort='" + field + "']").addClass("selected");
     renderChart("#dialog .timechart", series);
+    locationUpdate(category, key || "-");
 }
 
 function dialogHide() {
     hide("#dialog, #overlay");
     $("#dialog h2").text("");
     $("#dialog .timechart").empty();
+    locationUpdate("-");
     return false;
 }
 
+function locationInit() {
+    var arr = location.hash.replace(/^[#!]*/, "").split("!");
+    category = decodeURIComponent(arr[0] || "");
+    key = decodeURIComponent(arr[1] || "").replace(/^-$/, "");
+    var now = new Date().getTime();
+    var yesterday = new Date(now - 24 * 60 * 60 * 1000);
+    var date = formatDate(yesterday);
+    var categoryData = stats[date] && stats[date][category];
+    if (categoryData) {
+        var data = categoryData[key] || categoryData;
+        data.chart = category;
+        data.key = key;
+        dialogShow(data);
+    }
+}
+
+function locationUpdate(category, key) {
+    var arr = location.hash.replace(/^[#!]*/, "").split("!");
+    category = category || decodeURIComponent(arr[0] || "");
+    key = key || decodeURIComponent(arr[1] || "");
+    if (category === "-") {
+        location.hash = "";
+    } else {
+        location.hash = "#!" + encodeURIComponent(category) + "!" + encodeURIComponent(key);
+    }
+}
+
 function show(elem) {
-    elem = $(elem);
-    if (elem.hasClass("hidden") || elem.hasClass("hiding")) {
+    elem = $(elem).filter(".hidden, .hiding");
+    if (elem.length) {
         elem.addClass("showing");
         elem.removeClass("hidden hiding");
         setTimeout(function () { elem.removeClass("showing"); }, 10);
@@ -1393,11 +1441,10 @@ function show(elem) {
 }
 
 function hide(elem) {
-    $(elem).addClass("hiding");
+    elem = $(elem);
+    elem.addClass("hiding");
     setTimeout(function () {
-        if ($(elem).hasClass("hiding")) {
-            $(elem).addClass("hidden");
-        }
+        elem.filter(".hiding").addClass("hidden");
     }, 1000);
 }
 
@@ -1453,7 +1500,7 @@ $(function () {
     $(".chart-selector, .barchart").on("scroll", tooltipHide);
 
     // Load initial data
-    loadData();
+    loadData().then(locationInit);
 });
     </script>
   </body>
