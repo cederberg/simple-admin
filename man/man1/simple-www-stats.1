@@ -68,6 +68,17 @@ line per entry):
     "-" "Mozilla/5.0 ..." www.site.com cache:MISS time:0.451 backend:0.008
 .fi
 .sp
+.SH "VIEWER TOOL"
+.sp
+The JSON stats can be charted with a quick HTML viewer tool, bundled in the
+\fBshare/simple-www-stats.html\fR file. Copy or symlink this file into the
+directory containing JSON report files. The JSON report files must be named
+\fBlogstats.\fIdate\fB.json\fR, just as the ones \fBsimple-www-logrotate\fR
+creates.
+
+A live demo site at <http://demo.simple-admin.org> shows the viewer tool for
+a few small sites.
+.sp
 .SH "FILES"
 .sp
 .B /etc/simple-www-stats.conf
@@ -77,4 +88,5 @@ Error message configuration file with one line per URL to match.
 .sp
 .SH "SEE ALSO"
 .sp
+\fBsimple-www-logrotate\fR(1),
 <http://www.simple-admin.org/>
