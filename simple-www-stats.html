@@ -106,10 +106,23 @@ line per entry):</p>
 "-" "Mozilla/5.0 ..." www.site.com cache:MISS time:0.451 backend:0.008
 </code></pre>
 
+<h3>Viewer Tool:</h3>
+
+<p>The JSON stats can be charted with a quick HTML viewer tool, bundled in the
+<code>share/simple-www-stats.html</code> file. Copy or symlink this file into
+the directory containing JSON report files. The JSON report files must be
+named <code>logstats.&lt;date&gt;.json</code>, just as the ones
+<code>simple-www-logrotate</code> creates.</p>
+
+<p>A live demo site at
+<a href="http://demo.simple-admin.org/">demo.simple-admin.org</a>
+shows the viewer tool for a few small sites.</p>
+
 <h3>See Also:</h3>
 
 <ul>
   <li><code>/etc/simple-www-stats.conf</code></li>
+  <li><a href="simple-www-logrotate.html">simple-www-logrotate</a>
 </ul>
 
         </section>
