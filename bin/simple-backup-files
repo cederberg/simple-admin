@@ -23,7 +23,7 @@ BACKUP_LATEST_DIR=$BACKUP_BASE_DIR/latest
 BACKUP_MONTH_DIR=$BACKUP_BASE_DIR/$DATE_MONTH
 BACKUP_DAY_DIR=$BACKUP_BASE_DIR/$DATE_DAY
 BACKUP_MINUTE_DIR=$BACKUP_BASE_DIR/$DATE_MINUTE
-OPTIONS="--archive --delete --inplace --quiet"
+OPTIONS="--archive --delete --inplace --whole-file --size-only --quiet"
 VERBOSE="false"
 
 # Set caution flags
@@ -92,7 +92,7 @@ fi
 
 # Remove outdated backup dirs
 find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??-????" -mtime +1 -exec rm -rf {} \;
-find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +30 -exec rm -rf {} \;
+find $BACKUP_BASE_DIR -maxdepth 1 -type d -name "????-??-??" -mtime +14 -exec rm -rf {} \;
 
 # Finished backup
 /usr/local/bin/simple-freemem
