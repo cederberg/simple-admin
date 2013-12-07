@@ -69,7 +69,7 @@ while read DATABASE USER PWD EXTRAS ; do
 done
 
 # Remove outdated backup files
-find $DUMP_DIR -type f -mtime +30 \! -name "*.????-??-01.*" -delete
+find $DUMP_DIR -type f -mtime +14 \! -name "*.????-??-01.*" -delete
 
 # Finished backup
 /usr/local/bin/simple-freemem
