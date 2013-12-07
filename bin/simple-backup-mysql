@@ -16,6 +16,7 @@ CONFIG=/etc/simple-backup-mysql.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
 DATE=`date '+%Y-%m-%d'`
+TEMP_DIR=/tmp/$$
 DUMP_DIR=/backup/$HOST/mysql
 OPTIONS="--opt --quote-names --skip-add-locks --skip-lock-tables"
 VERBOSE="false"
@@ -55,18 +56,23 @@ fi
 
 # Perform MySQL backup
 log "init MySQL backup on $HOST"
-mkdir -p $DUMP_DIR
+mkdir -p $DUMP_DIR $TEMP_DIR
 while read DATABASE USER PWD EXTRAS ; do
     [ "$DATABASE" != "" -a "${DATABASE:0:1}" != "#" ] || continue
     log "starting MySQL dump of $DATABASE"
-    FILE=$DUMP_DIR/$DATABASE.$DATE.sql
-    rm -f $FILE $FILE.lzma
+    FILE=$TEMP_DIR/$DATABASE.$DATE.sql
     mysqldump -u$USER -p$PWD $OPTIONS $EXTRAS --result-file=$FILE --databases $DATABASE
     log "finished MySQL dump of $DATABASE"
-    log "starting compression of file $FILE"
-    lzma $FILE
-    log "finished compression of file $FILE"
 done
+
+# Package and compress backups
+FILE=databases.$DATE.tar
+log "starting compression & transfer of file $FILE"
+tar cf $TEMP_DIR/$FILE $TEMP_DIR/*.sql
+xz $TEMP_DIR/$FILE
+mv -f $TEMP_DIR/$FILE.* $DUMP_DIR/
+rm -rf $TEMP_DIR
+log "finished compression & transfer of file $FILE"
 
 # Remove outdated backup files
 find $DUMP_DIR -type f -mtime +14 \! -name "*.????-??-01.*" -delete

@@ -17,8 +17,8 @@ simple-backup-mysql -- performs a MySQL backup of configured databases
 .sp
 Performs a MySQL backup with \fBmysqldump\fR of the databases listed in
 \fB/etc/simple-backup-mysql.conf\fR. The \fB/backup/\fIhostname\fB/mysql/\fR
-directory is used to store the output MySQL backup SQL files (compressed with
-\fBlzma\fR).
+directory is used to store the output MySQL backup SQL files (packaged and
+compressed as a \fBtar.xz\fR file).
 
 Backup files are stored for 14 days, except the files from the 1st each month
 (which are kept indefinitely). The MySQL backup should be run once per
