@@ -23,7 +23,7 @@ BACKUP_LATEST_DIR=$BACKUP_BASE_DIR/latest
 BACKUP_MONTH_DIR=$BACKUP_BASE_DIR/$DATE_MONTH
 BACKUP_DAY_DIR=$BACKUP_BASE_DIR/$DATE_DAY
 BACKUP_MINUTE_DIR=$BACKUP_BASE_DIR/$DATE_MINUTE
-OPTIONS="--archive --delete --inplace --whole-file --size-only --quiet"
+OPTIONS="--archive --delete --inplace --whole-file --size-only --cvs-exclude --quiet"
 VERBOSE="false"
 
 # Set caution flags
