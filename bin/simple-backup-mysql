@@ -68,9 +68,10 @@ done
 # Package and compress backups
 FILE=databases.$DATE.tar
 log "starting compression & transfer of file $FILE"
-tar cf $TEMP_DIR/$FILE $TEMP_DIR/*.sql
-xz $TEMP_DIR/$FILE
-mv -f $TEMP_DIR/$FILE.* $DUMP_DIR/
+cd $TEMP_DIR
+tar cf $FILE *.sql
+xz $FILE
+mv -f $FILE.* $DUMP_DIR/
 rm -rf $TEMP_DIR
 log "finished compression & transfer of file $FILE"
 
