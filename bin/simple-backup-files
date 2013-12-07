@@ -86,8 +86,8 @@ done
 find $BACKUP_MINUTE_DIR -type d -delete 2> /dev/null || true
 if [ -d $BACKUP_MINUTE_DIR ] ; then
     log updating daily and monthly diff dirs
-    cp -fluR $BACKUP_MINUTE_DIR/* $BACKUP_DAY_DIR/
-    cp -fluR $BACKUP_DAY_DIR/* $BACKUP_MONTH_DIR/
+    cp -fuR $BACKUP_MINUTE_DIR/* $BACKUP_DAY_DIR/
+    cp -fuR $BACKUP_DAY_DIR/* $BACKUP_MONTH_DIR/
 fi
 
 # Remove outdated backup dirs
