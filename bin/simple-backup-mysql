@@ -56,7 +56,7 @@ fi
 
 # Perform MySQL backup
 log "init MySQL backup on $HOST"
-mkdir -p $DUMP_DIR $TEMP_DIR
+mkdir -p $TEMP_DIR
 while read DATABASE USER PWD EXTRAS ; do
     [ "$DATABASE" != "" -a "${DATABASE:0:1}" != "#" ] || continue
     log "starting MySQL dump of $DATABASE"
@@ -71,7 +71,9 @@ log "starting compression & transfer of file $FILE"
 cd $TEMP_DIR
 tar cf $FILE *.sql
 xz $FILE
+mkdir -p $DUMP_DIR
 mv -f $FILE.* $DUMP_DIR/
+cd
 rm -rf $TEMP_DIR
 log "finished compression & transfer of file $FILE"
 
