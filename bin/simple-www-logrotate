@@ -89,5 +89,6 @@ if [ -d $STAT_DIR -a "$LOG_FILES" != "" ] ; then
     TEXT_FILE=$STAT_DIR/logstats.$YESTERDAY.txt
     log "processing stats to $STAT_DIR"
     /usr/local/bin/simple-www-stats --json $JSON_FILE --text $TEXT_FILE $LOG_FILES
+    gzip $JSON_FILE $TEXT_FILE
 fi
 /usr/local/bin/simple-freemem
