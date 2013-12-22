@@ -47,10 +47,10 @@ fi
 # Parse command-line arguments
 if [ "${1:-}" == "-v" ] ; then
     shift
-    OPTIONS="$OPTIONS -v"
+    OPTIONS="$OPTIONS --verbose"
     VERBOSE=true
 else
-    OPTIONS="$OPTIONS -q"
+    OPTIONS="$OPTIONS --quiet"
 fi
 
 # Perform synchronization

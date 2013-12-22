@@ -23,7 +23,7 @@ BACKUP_LATEST_DIR=$BACKUP_BASE_DIR/latest
 BACKUP_MONTH_DIR=$BACKUP_BASE_DIR/$DATE_MONTH
 BACKUP_DAY_DIR=$BACKUP_BASE_DIR/$DATE_DAY
 BACKUP_MINUTE_DIR=$BACKUP_BASE_DIR/$DATE_MINUTE
-OPTIONS="--archive --delete --inplace --whole-file --size-only --cvs-exclude --quiet"
+OPTIONS="--archive --delete --inplace --whole-file --size-only --cvs-exclude"
 VERBOSE="false"
 
 # Set caution flags
@@ -59,7 +59,9 @@ fi
 if [ "${1:-}" == "-v" ] ; then
     shift
     VERBOSE=true
-    OPTIONS="$OPTIONS -v"
+    OPTIONS="$OPTIONS --verbose"
+else
+    OPTIONS="$OPTIONS --quiet"
 fi
 
 # Perform backup
