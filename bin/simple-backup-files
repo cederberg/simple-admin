@@ -59,6 +59,7 @@ fi
 if [ "${1:-}" == "-v" ] ; then
     shift
     VERBOSE=true
+    OPTIONS="$OPTIONS -v"
 fi
 
 # Perform backup
