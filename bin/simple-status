@@ -87,25 +87,35 @@ storagestatus() {
 }
 
 procparents() {
-    TMPFILE=/tmp/simple-status.parents
-    cat /proc/[0-9]*/stat > $TMPFILE
-    exec < $TMPFILE
-    while read ID T1 T2 PARENT T3 T4 TTY T5 T6 T7 T8 T9 T10 T11 T12 T13 T14 T15 T16 T17 T18 T19 T20 RSS T21 ; do
-        VAR="CHILDREN_$PARENT"
-        declare -g "CHILDREN_$PARENT=${!VAR:-} $ID"
-        declare -g "RSS_$ID=$(($RSS * 4))"
-    done
+    TMPFILE=/tmp/simple-status.ps
+    FILES=""
+    ps -eo pid,ppid,thcount,rss,user,group,cmd > $TMPFILE
+    while read ID PARENT THCNT RSS USER GROUP CMD ; do
+        if [ $ID != "2" ] && [ $PARENT != "2" ] && [ -e /proc/$ID/status ] ; then
+            declare -g "PID_${ID}=1"
+            declare -g "PID_${ID}_PARENT=${PARENT}"
+            declare -g "PID_${ID}_THCNT=${THCNT}"
+            declare -g "PID_${ID}_RSS=${RSS}"
+            declare -g "PID_${ID}_USER=${USER}"
+            declare -g "PID_${ID}_GROUP=${GROUP}"
+            declare -g "PID_${ID}_CMD=${CMD}"
+            VAR="PID_${PARENT}_CHILDREN"
+            declare -g "${VAR}=${!VAR:-} $ID"
+            FILES="$FILES /proc/$ID/status"
+        fi
+    done < $TMPFILE
+    grep VmSwap $FILES | sed -e 's|/proc/||;s|/status:VmSwap:\s\+| |' > $TMPFILE
+    while read ID SWAP UNIT ; do
+        declare -g "PID_${ID}_SWAP=${SWAP}"
+    done < $TMPFILE
     rm -rf $TMPFILE
 }
 
 # Function for printing a group of related PIDs
 procids() {
-    PID=$1
-    printf "$PID "
-#    for CHILD in `ps --ppid $PID -o pid --no-headers` ; do
-#        procids $CHILD
-#    done
-    VAR="CHILDREN_$PID"
+    ID=$1
+    printf "${ID} "
+    VAR="PID_${ID}_CHILDREN"
     for CHILD in ${!VAR:-} ; do
         procids $CHILD
     done
@@ -114,16 +124,13 @@ procids() {
 # Function for printing process status
 procdetails() {
     PIDS=`procids $1`
-    #TMPFILE=/tmp/simple-status.vars
-    #ps --format "pid,rss,comm" --no-headers $PIDS > $TMPFILE
-    #exec < $TMPFILE
     TOTAL_RSS=0
     TOTAL_SWAP=0
-    #while read ID RSS CMD ; do
     for ID in $PIDS ; do
-        VAR="RSS_$ID"
+        VAR="PID_${ID}_RSS"
         RSS=${!VAR:-}
-        SWAP=`grep VmSwap /proc/$ID/status | tr -cd '[:digit:]'` || true
+        VAR="PID_${ID}_SWAP"
+        SWAP=${!VAR:-}
         TOTAL_RSS=$((TOTAL_RSS + RSS))
         TOTAL_SWAP=$((TOTAL_SWAP + SWAP))
     done
@@ -139,8 +146,8 @@ servicepid() {
     NAME=$1
     PIDFILE=${2:--}
     MATCH=${3:-${NAME}}
-    if [ -r "$PIDFILE" ] && ps -p `cat $PIDFILE` > /dev/null 2>&1 ; then
-        cat $PIDFILE | awk '{print $1}'
+    if [ -r "$PIDFILE" ] && PID=`cat $PIDFILE | awk '{print $1}'` && VAR="PID_${PID}" && [ "${!VAR:-}" == "1" ] ; then
+        echo -n $PID
     elif PID=`ps --ppid 1 -o pid,comm | grep " $MATCH" | head -n 1 | awk '{print $1}'` ; then
         echo -n $PID
     elif PID=`ps --ppid 1 -o pid,args | grep "$MATCH" | head -n 1 | awk '{print $1}'` ; then
@@ -214,7 +221,8 @@ while [ $DETAIL != "short" ] && read NAME PIDFILE MATCH ; do
         RETVAL=$((RETVAL + 1))
     fi
     if [ "$PID" != "" ] ; then
-        PARENT=`ps --no-headers -o ppid -p $PID | awk '{print $1}'`
+        VAR="PID_${PID}_PARENT"
+        PARENT=${!VAR:-}
         declare "FOUND_$PID=1"
         declare "FOUND_$PARENT=1"
     fi
