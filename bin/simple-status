@@ -86,23 +86,43 @@ storagestatus() {
     done
 }
 
+procparents() {
+    TMPFILE=/tmp/simple-status.parents
+    cat /proc/[0-9]*/stat > $TMPFILE
+    exec < $TMPFILE
+    while read ID T1 T2 PARENT T3 T4 TTY T5 T6 T7 T8 T9 T10 T11 T12 T13 T14 T15 T16 T17 T18 T19 T20 RSS T21 ; do
+        VAR="CHILDREN_$PARENT"
+        declare -g "CHILDREN_$PARENT=${!VAR:-} $ID"
+        declare -g "RSS_$ID=$(($RSS * 4))"
+    done
+    rm -rf $TMPFILE
+}
+
 # Function for printing a group of related PIDs
 procids() {
     PID=$1
     printf "$PID "
-    for CHILD in `ps --ppid $PID -o pid --no-headers` ; do
+#    for CHILD in `ps --ppid $PID -o pid --no-headers` ; do
+#        procids $CHILD
+#    done
+    VAR="CHILDREN_$PID"
+    for CHILD in ${!VAR:-} ; do
         procids $CHILD
     done
 }
 
 # Function for printing process status
 procdetails() {
-    TMPFILE=/tmp/simple-status.vars
-    ps --format "pid,rss,comm" --no-headers `procids $1` > $TMPFILE
-    exec < $TMPFILE
+    PIDS=`procids $1`
+    #TMPFILE=/tmp/simple-status.vars
+    #ps --format "pid,rss,comm" --no-headers $PIDS > $TMPFILE
+    #exec < $TMPFILE
     TOTAL_RSS=0
     TOTAL_SWAP=0
-    while read ID RSS CMD ; do
+    #while read ID RSS CMD ; do
+    for ID in $PIDS ; do
+        VAR="RSS_$ID"
+        RSS=${!VAR:-}
         SWAP=`grep VmSwap /proc/$ID/status | tr -cd '[:digit:]'` || true
         TOTAL_RSS=$((TOTAL_RSS + RSS))
         TOTAL_SWAP=$((TOTAL_SWAP + SWAP))
@@ -183,6 +203,7 @@ fi
 cpustatus
 memstatus
 storagestatus
+procparents
 
 # Checking configured services
 RETVAL=0
