@@ -48,38 +48,38 @@ fail() {
 
 # Function for printing CPU load average
 cpustatus() {
-    CPU_COUNT=`grep --count processor /proc/cpuinfo`
-    LOAD_AVG=`cat /proc/loadavg | awk '{print $1, $2, $3}'`
-    FMT="loadavg:   %s, %s, %s       -- %s processors\n"
+    local CPU_COUNT=`grep --count processor /proc/cpuinfo`
+    local LOAD_AVG=`cat /proc/loadavg | awk '{print $1, $2, $3}'`
+    local FMT="loadavg:   %s, %s, %s       -- %s processors\n"
     printf "$FMT" $LOAD_AVG $CPU_COUNT
 }
 
 # Function for printing memory status
 memstatus() {
-    TMPFILE=/tmp/simple-status.vars
+    local TMPFILE=/tmp/simple-status.vars
     sed -e 's/^\(\w*\):\s*\(\S*\).*/\1="\2"/g;t;d' /proc/meminfo > $TMPFILE
     . $TMPFILE
     rm $TMPFILE
-    FREE=`echo ${MemFree:-0} | awk '{print int($1 / 1024 + 0.5)}'`
-    FREE_PERCENT=`echo ${MemFree:-0} ${MemTotal:-0} | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
-    CACHE=`echo ${Buffers:-0} ${Cached:-0} | awk '{print int(($1 + $2) / 1024 + 0.5)}'`
-    RSS=`echo ${MemFree:-0} ${Buffers:-0} ${Cached:-0} ${MemTotal:-0} | awk '{print int(($4 - $1 - $2 - $3) / 1024 + 0.5)}'`
-    SWAP=`echo ${SwapFree:-0} ${SwapTotal:-0} | awk '{print int(($2 - $1) / 1024 + 0.5)}'`
-    TOTAL=`echo ${MemTotal:-0} | awk '{print int($1 / 1024 + 0.5)}'`
-    INFO=`printf "%s MB (%s%%) free" $FREE $FREE_PERCENT`
-    DETAILS=`printf "%s rss, %s cache, %s swap, %s total (MB)" $RSS $CACHE $SWAP $TOTAL`
+    local FREE=`echo ${MemFree:-0} | awk '{print int($1 / 1024 + 0.5)}'`
+    local FREE_PERCENT=`echo ${MemFree:-0} ${MemTotal:-0} | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
+    local CACHE=`echo ${Buffers:-0} ${Cached:-0} | awk '{print int(($1 + $2) / 1024 + 0.5)}'`
+    local RSS=`echo ${MemFree:-0} ${Buffers:-0} ${Cached:-0} ${MemTotal:-0} | awk '{print int(($4 - $1 - $2 - $3) / 1024 + 0.5)}'`
+    local SWAP=`echo ${SwapFree:-0} ${SwapTotal:-0} | awk '{print int(($2 - $1) / 1024 + 0.5)}'`
+    local TOTAL=`echo ${MemTotal:-0} | awk '{print int($1 / 1024 + 0.5)}'`
+    local INFO=`printf "%s MB (%s%%) free" $FREE $FREE_PERCENT`
+    local DETAILS=`printf "%s rss, %s cache, %s swap, %s total (MB)" $RSS $CACHE $SWAP $TOTAL`
     printf "memory:    %-22s -- %s\n" "$INFO" "$DETAILS"
 }
 
 # Function for printing storage status
 storagestatus() {
     df -k / | tail -n +2 | while read DEVICE TOTALK USEDK FREEK USEDPERCENT MOUNT ; do
-        TOTAL=`echo $TOTALK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
-        USED=`echo $USEDK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
-        FREE=`echo $FREEK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
-        FREE_PERCENT=`echo $FREEK $TOTALK | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
-        INFO=`printf "%s GB (%s%%) free" $FREE $FREE_PERCENT`
-        DETAILS=`printf "%s GB used, %s GB total on %s" $USED $TOTAL $DEVICE`
+        local TOTAL=`echo $TOTALK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
+        local USED=`echo $USEDK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
+        local FREE=`echo $FREEK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
+        local FREE_PERCENT=`echo $FREEK $TOTALK | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
+        local INFO=`printf "%s GB (%s%%) free" $FREE $FREE_PERCENT`
+        local DETAILS=`printf "%s GB used, %s GB total on %s" $USED $TOTAL $DEVICE`
         if [ $TOTALK -ge 1048576 ] ; then
             printf "storage:   %-22s -- %s\n" "$INFO" "$DETAILS"
         fi
@@ -87,8 +87,8 @@ storagestatus() {
 }
 
 procparents() {
-    TMPFILE=/tmp/simple-status.ps
-    FILES=""
+    local TMPFILE=/tmp/simple-status.ps
+    local FILES=""
     ps -eo pid,ppid,thcount,rss,user,group,cmd > $TMPFILE
     while read ID PARENT THCNT RSS USER GROUP CMD ; do
         if [ $ID != "2" ] && [ $PARENT != "2" ] && [ -e /proc/$ID/status ] ; then
@@ -99,9 +99,9 @@ procparents() {
             declare -g "PID_${ID}_USER=${USER}"
             declare -g "PID_${ID}_GROUP=${GROUP}"
             declare -g "PID_${ID}_CMD=${CMD}"
-            VAR="PID_${PARENT}_CHILDREN"
+            local VAR="PID_${PARENT}_CHILDREN"
             declare -g "${VAR}=${!VAR:-} $ID"
-            FILES="$FILES /proc/$ID/status"
+            local FILES="$FILES /proc/$ID/status"
         fi
     done < $TMPFILE
     grep VmSwap $FILES | sed -e 's|/proc/||;s|/status:VmSwap:\s\+| |' > $TMPFILE
@@ -113,9 +113,9 @@ procparents() {
 
 # Function for printing a group of related PIDs
 procids() {
-    ID=$1
+    local ID=$1
     printf "${ID} "
-    VAR="PID_${ID}_CHILDREN"
+    local VAR="PID_${ID}_CHILDREN"
     for CHILD in ${!VAR:-} ; do
         procids $CHILD
     done
@@ -123,29 +123,28 @@ procids() {
 
 # Function for printing process status
 procdetails() {
-    PIDS=`procids $1`
-    TOTAL_RSS=0
-    TOTAL_SWAP=0
+    local PIDS=`procids $1`
+    local TOTAL_RSS=0
+    local TOTAL_SWAP=0
     for ID in $PIDS ; do
-        VAR="PID_${ID}_RSS"
-        RSS=${!VAR:-}
-        VAR="PID_${ID}_SWAP"
-        SWAP=${!VAR:-}
-        TOTAL_RSS=$((TOTAL_RSS + RSS))
-        TOTAL_SWAP=$((TOTAL_SWAP + SWAP))
+        local VAR="PID_${ID}_RSS"
+        local RSS=${!VAR:-}
+        local VAR="PID_${ID}_SWAP"
+        local SWAP=${!VAR:-}
+        local TOTAL_RSS=$((TOTAL_RSS + RSS))
+        local TOTAL_SWAP=$((TOTAL_SWAP + SWAP))
     done
-    rm -f $TMPFILE
-    PID=$1
-    RSS=`echo $TOTAL_RSS | awk '{OFMT="%.1f" ; print $1 / 1024}'`
-    SWAP=`echo $TOTAL_SWAP | awk '{OFMT="%.0f" ; print $1 / 1024}'`
+    local PID=$1
+    local RSS=`echo $TOTAL_RSS | awk '{OFMT="%.1f" ; print $1 / 1024}'`
+    local SWAP=`echo $TOTAL_SWAP | awk '{OFMT="%.0f" ; print $1 / 1024}'`
     printf "pid: %5s,  rss: %6s MB,  swap: %3s MB" $PID $RSS $SWAP
 }
 
 # Function to locate the PID for a named service
 servicepid() {
-    NAME=$1
-    PIDFILE=${2:--}
-    MATCH=${3:-${NAME}}
+    local NAME=$1
+    local PIDFILE=${2:--}
+    local MATCH=${3:-${NAME}}
     if [ -r "$PIDFILE" ] && PID=`cat $PIDFILE | awk '{print $1}'` && VAR="PID_${PID}" && [ "${!VAR:-}" == "1" ] ; then
         echo -n $PID
     elif PID=`ps --ppid 1 -o pid,comm | grep " $MATCH" | head -n 1 | awk '{print $1}'` ; then
@@ -157,32 +156,32 @@ servicepid() {
 
 # Function for printing service status
 servicestatus() {
-    PID=${1:-}
-    NAME=${2:-}
-    PIDFILE=${3:--}
+    local PID=${1:-}
+    local NAME=${2:-}
+    local PIDFILE=${3:--}
     if [ "$PID" == "" ] ; then
-        STATUS=1
-        DETAILS="service not running"
+        local STATUS=1
+        local DETAILS="service not running"
     elif [ $PIDFILE == "-" ] ; then
-        STATUS=0
-        DETAILS=`procdetails $PID`
+        local STATUS=0
+        local DETAILS=`procdetails $PID`
     elif [ ! -r "$PIDFILE" ] ; then
-        STATUS=2
-        DETAILS="no PID file $PIDFILE, pid $PID found"
+        local STATUS=2
+        local DETAILS="no PID file $PIDFILE, pid $PID found"
     elif [ $PID != "`cat $PIDFILE | awk '{print $1}'`" ] ; then
-        STATUS=3
-        DETAILS="invalid PID file $PIDFILE, pid $PID found"
+        local STATUS=3
+        local DETAILS="invalid PID file $PIDFILE, pid $PID found"
     else
-        STATUS=0
-        DETAILS=`procdetails $PID`
+        local STATUS=0
+        local DETAILS=`procdetails $PID`
     fi
     if [ $STATUS -eq 0 -a "$NAME" != "" ] ; then
-        FMT="$COLOR_OK[OK]$COLOR_OFF %-28s -- %s\n"
+        local FMT="$COLOR_OK[OK]$COLOR_OFF %-28s -- %s\n"
     elif [ $STATUS -eq 0 ] ; then
-        FMT="$COLOR_WARN[??]$COLOR_OFF %-28s -- %s\n"
-        NAME=`ps -p $PID -o comm --no-headers | awk '{print $1}'`
+        local FMT="$COLOR_WARN[??]$COLOR_OFF %-28s -- %s\n"
+        local NAME=`ps -p $PID -o comm --no-headers | awk '{print $1}'`
     else
-        FMT="$COLOR_ERR[ERROR] %-25s -- %s$COLOR_OFF\n"
+        local FMT="$COLOR_ERR[ERROR] %-25s -- %s$COLOR_OFF\n"
     fi
     printf "$FMT" "$NAME" "$DETAILS"
     return $STATUS
