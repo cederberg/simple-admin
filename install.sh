@@ -6,6 +6,7 @@
 # Global variables
 PROG=$0
 INTERACTIVE=false
+TMPDIR=/tmp/simple-admin-installer
 
 # Set caution flags
 set -o nounset
@@ -19,9 +20,15 @@ fail() {
     exit 1
 }
 
-# Function for checking for dependencies
-install_deps() {
-    DEPS=$*
+# Function for cleaning up resources on exit
+onexit() {
+    rm -rf $TMPDIR
+}
+trap onexit EXIT
+
+# Function for installing one or more packages if needed
+install_packages() {
+    local DEPS="$@"
     echo -n "Checking dependencies... "
     if apt-get --simulate install $DEPS | tail -n1 | grep '0 upgraded, 0 newly installed' > /dev/null ; then
         echo "installed"
@@ -40,6 +47,22 @@ install_deps() {
     fi
 }
 
+# Function for downloading a URL into a file
+download_url() {
+    local FILE="$1"
+    local URL="$2"
+    if ! which curl > /dev/null && ! which wget > /dev/null ; then
+        install_packages wget
+    fi
+    echo -n "Downloading $URL... "
+    if which curl > /dev/null ; then
+        curl -s -L -o "$FILE" "$URL"
+    else
+        wget -q -O "$FILE" "$URL"
+    fi
+    echo "done"
+}
+
 # Check for root user
 [ `whoami` == 'root' ] || fail "only root can install simple-admin"
 
@@ -50,31 +73,24 @@ fi
 
 # Check for install over HTTP (via pipe)
 if [ `basename $PROG` != 'install.sh' ] ; then
-    cd
-    if which curl > /dev/null ; then
-        if ! which unzip > /dev/null ; then
-            install_deps unzip
-        fi
-    elif ! which wget unzip > /dev/null ; then
-        install_deps wget unzip
+    if ! which unzip > /dev/null ; then
+        install_packages unzip
     fi
     URL="https://github.com/cederberg/simple-admin/archive/master.zip"
-    echo -n "Downloading $URL... "
-    if which curl > /dev/null ; then
-        curl -s -L -O "$URL"
-    else
-        wget -O master.zip -q "$URL"
+    if [ "${VERSION:-}" != "" ] ; then
+        URL="https://github.com/cederberg/simple-admin/archive/v${VERSION}.zip"
     fi
-    unzip -q -u -o master.zip
-    rm -f master.zip
-    cd simple-admin-master
-    echo "done"
+    mkdir -p $TMPDIR
+    cd $TMPDIR
+    download_url simple-admin.zip "$URL"
+    unzip -q -u -o simple-admin.zip
+    cd simple-admin-*
 else
     cd `dirname $PROG`
 fi
 
 # Install required packages
-install_deps aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl libmath-round-perl
+install_packages aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl libmath-round-perl
 
 # Install script files
 echo "Installing scripts to /usr/local/bin/..."
