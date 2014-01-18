@@ -21,7 +21,7 @@ usage() {
 
 # Function for logging an error to stderr and exiting
 fail() {
-    echo "ERROR:" "$*" >&2
+    echo "ERROR:" "$@" >&2
     exit 1
 }
 

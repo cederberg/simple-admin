@@ -21,13 +21,13 @@ set -o pipefail
 
 # Function for logging an error to stderr and exiting
 fail() {
-    echo "ERROR:" "$*" >&2
+    echo "ERROR:" "$@" >&2
     exit 1
 }
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$*" || true
+    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
 }
 
 # Load config (shell)
