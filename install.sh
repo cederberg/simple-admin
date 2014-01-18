@@ -110,24 +110,29 @@ mkdir -p /usr/local/share/man/man1
 cp man/man1/* /usr/local/share/man/man1/
 gzip -f /usr/local/share/man/man1/simple-*.1
 
-# Install man pages
+# Install other files
 echo "Installing shared files to /usr/local/share/simple-admin/..."
 mkdir -p /usr/local/share/simple-admin
-cp share/* /usr/local/share/simple-admin/
+shopt -s nullglob
+cp {etc,share}/* /usr/local/share/simple-admin/
+shopt -u nullglob
 
 # Check for missing config files
 CONFIG_MISSING=""
-for FILE in etc/*.conf ; do
-    if [ ! -e /$FILE ] ; then
-        CONFIG_MISSING="$CONFIG_MISSING $FILE"
+shopt -s nullglob
+for FILE in {etc,share}/*.conf ; do
+    CONF=`basename $FILE`
+    if [ ! -e "/etc/$CONF" ] ; then
+        CONFIG_MISSING="$CONFIG_MISSING $CONF"
     fi
 done
+shopt -u nullglob
 if [ "$CONFIG_MISSING" != '' ] ; then
     echo
     echo "Config files must be manually installed. See web site for examples."
     echo "The following example files can be copied and modified:"
     for FILE in $CONFIG_MISSING ; do
-        echo "    $PWD/$FILE"
+        echo "    /usr/local/share/simple-admin/$FILE"
     done
 fi
 
