@@ -15,7 +15,7 @@ set -o pipefail
 
 # Function for logging and exiting on error
 fail() {
-    echo "ERROR:" $* >&2
+    echo "ERROR:" "$@" >&2
     exit 1
 }
 
@@ -41,7 +41,7 @@ install_deps() {
 }
 
 # Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to install simple-admin"
+[ `whoami` == 'root' ] || fail "only root can install simple-admin"
 
 # Check for terminal on stdin
 if [ -t 0 ] ; then
@@ -74,18 +74,7 @@ else
 fi
 
 # Install required packages
-echo -n "Checking dependencies... "
-DEPS="aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl libmath-round-perl"
-if apt-get --simulate install $DEPS | tail -n1 | grep '0 upgraded, 0 newly installed' > /dev/null ; then
-    echo "installed"
-else
-    echo "not installed"
-    echo "The following packages will be installed or updated:"
-    echo "    $DEPS"
-    echo -n "Press <Ctrl-C> to cancel, or <Enter> to continue: "
-    read
-    apt-get --yes install $DEPS
-fi
+install_deps aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl libmath-round-perl
 
 # Install script files
 echo "Installing scripts to /usr/local/bin/..."
