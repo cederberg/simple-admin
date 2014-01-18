@@ -39,7 +39,7 @@ fail() {
 # Function for printing CPU load average
 cpustatus() {
     local CPU_COUNT=`grep --count processor /proc/cpuinfo`
-    local LOAD_AVG=`cat /proc/loadavg | awk '{print $1, $2, $3}'`
+    local LOAD_AVG=`awk '{print $1, $2, $3}' /proc/loadavg`
     local FMT="loadavg:  %s, %s, %s       -- %s processors\n"
     printf "$FMT" $LOAD_AVG $CPU_COUNT
 }
@@ -50,14 +50,14 @@ memstatus() {
     sed -e 's/^\(\w*\):\s*\(\S*\).*/\1="\2"/g;t;d' /proc/meminfo > $TMPFILE
     . $TMPFILE
     rm $TMPFILE
-    local FREE=`echo ${MemFree:-0} | awk '{print int($1 / 1024 + 0.5)}'`
+    local FREE=$(( (${MemFree:-0} + 512) / 1024 ))
     local FREE_PERCENT=`echo ${MemFree:-0} ${MemTotal:-0} | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
-    local CACHE=`echo ${Buffers:-0} ${Cached:-0} | awk '{print int(($1 + $2) / 1024 + 0.5)}'`
-    local RSS=`echo ${MemFree:-0} ${Buffers:-0} ${Cached:-0} ${MemTotal:-0} | awk '{print int(($4 - $1 - $2 - $3) / 1024 + 0.5)}'`
-    local SWAP=`echo ${SwapFree:-0} ${SwapTotal:-0} | awk '{print int(($2 - $1) / 1024 + 0.5)}'`
-    local TOTAL=`echo ${MemTotal:-0} | awk '{print int($1 / 1024 + 0.5)}'`
-    local INFO=`printf "%s MB (%s%%) free" $FREE $FREE_PERCENT`
-    local DETAILS=`printf "%s rss, %s cache, %s swap, %s total (MB)" $RSS $CACHE $SWAP $TOTAL`
+    local CACHE=$(( (${Buffers:-0} + ${Cached:-0} + 512) / 1024 ))
+    local RSS=$(( (${MemTotal:-0} - ${MemFree:-0} - ${Buffers:-0} - ${Cached:-0} + 512) / 1024 ))
+    local SWAP=$(( (${SwapTotal:-0} - ${SwapFree:-0} + 512) / 1024 ))
+    local TOTAL=$(( (${MemTotal:-0} + 512) / 1024 ))
+    local INFO="$FREE MB ($FREE_PERCENT%) free"
+    local DETAILS="$RSS rss, $CACHE cache, $SWAP swap, $TOTAL total (MB)"
     printf "memory:   %-22s -- %s\n" "$INFO" "$DETAILS"
 }
 
@@ -68,8 +68,8 @@ storagestatus() {
         local USED=`echo $USEDK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
         local FREE=`echo $FREEK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
         local FREE_PERCENT=`echo $FREEK $TOTALK | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
-        local INFO=`printf "%s GB (%s%%) free" $FREE $FREE_PERCENT`
-        local DETAILS=`printf "%s GB used, %s GB total on %s" $USED $TOTAL $DEVICE`
+        local INFO="$FREE GB ($FREE_PERCENT%) free"
+        local DETAILS="$USED GB used, $TOTAL GB total on $DEVICE"
         if [ $TOTALK -ge 1048576 ] ; then
             printf "storage:  %-22s -- %s\n" "$INFO" "$DETAILS"
         fi
