@@ -40,7 +40,7 @@ fail() {
 cpustatus() {
     local CPU_COUNT=`grep --count processor /proc/cpuinfo`
     local LOAD_AVG=`cat /proc/loadavg | awk '{print $1, $2, $3}'`
-    local FMT="loadavg:   %s, %s, %s       -- %s processors\n"
+    local FMT="loadavg:  %s, %s, %s       -- %s processors\n"
     printf "$FMT" $LOAD_AVG $CPU_COUNT
 }
 
@@ -58,7 +58,7 @@ memstatus() {
     local TOTAL=`echo ${MemTotal:-0} | awk '{print int($1 / 1024 + 0.5)}'`
     local INFO=`printf "%s MB (%s%%) free" $FREE $FREE_PERCENT`
     local DETAILS=`printf "%s rss, %s cache, %s swap, %s total (MB)" $RSS $CACHE $SWAP $TOTAL`
-    printf "memory:    %-22s -- %s\n" "$INFO" "$DETAILS"
+    printf "memory:   %-22s -- %s\n" "$INFO" "$DETAILS"
 }
 
 # Function for printing storage status
@@ -71,7 +71,7 @@ storagestatus() {
         local INFO=`printf "%s GB (%s%%) free" $FREE $FREE_PERCENT`
         local DETAILS=`printf "%s GB used, %s GB total on %s" $USED $TOTAL $DEVICE`
         if [ $TOTALK -ge 1048576 ] ; then
-            printf "storage:   %-22s -- %s\n" "$INFO" "$DETAILS"
+            printf "storage:  %-22s -- %s\n" "$INFO" "$DETAILS"
         fi
     done
 }
@@ -127,7 +127,7 @@ procdetails() {
     local PID=$1
     local RSS=`echo $TOTAL_RSS | awk '{OFMT="%.1f" ; print $1 / 1024}'`
     local SWAP=`echo $TOTAL_SWAP | awk '{OFMT="%.0f" ; print $1 / 1024}'`
-    printf "pid: %5s,  rss: %6s MB,  swap: %3s MB" $PID $RSS $SWAP
+    printf "pid: %5s,  rss: %7s MB,  swap: %3s MB" $PID $RSS $SWAP
 }
 
 # Function to locate the PID for a named service
@@ -166,12 +166,12 @@ servicestatus() {
         local DETAILS=`procdetails $PID`
     fi
     if [ $STATUS -eq 0 -a "$NAME" != "" ] ; then
-        local FMT="$COLOR_OK[OK]$COLOR_OFF %-28s -- %s\n"
+        local FMT="$COLOR_OK[OK]$COLOR_OFF %-27s -- %s\n"
     elif [ $STATUS -eq 0 ] ; then
-        local FMT="$COLOR_WARN[??]$COLOR_OFF %-28s -- %s\n"
+        local FMT="$COLOR_WARN[??]$COLOR_OFF %-27s -- %s\n"
         local NAME=`ps -p $PID -o comm --no-headers | awk '{print $1}'`
     else
-        local FMT="$COLOR_ERR[ERROR] %-25s -- %s$COLOR_OFF\n"
+        local FMT="$COLOR_ERR[ERROR] %-24s -- %s$COLOR_OFF\n"
     fi
     printf "$FMT" "$NAME" "$DETAILS"
     return $STATUS
