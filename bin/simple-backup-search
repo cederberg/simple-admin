@@ -19,18 +19,9 @@ set -o errexit
 set -o pipefail
 
 # Setup color codes
-case $TERM in
-    *color)
-        COLOR_OFF=`echo -en '\033[0m'`
-        COLOR_ON=`echo -en '\033[36m'`
-        COLOR_ERR=`echo -en '\033[1;31m'`
-        ;;
-    *)
-        COLOR_OFF=''
-        COLOR_ON=''
-        COLOR_ERR=''
-        ;;
-esac
+COLOR_OFF=`tput sgr0`
+COLOR_ON=`tput setaf 6`
+COLOR_ERR=`tput setaf 1; tput bold`
 
 # Function for printing command-line usage info
 usage() {
@@ -58,7 +49,7 @@ PATHS=`find $ROOTS -type f -iwholename "*$PATTERN*" -printf "%P\n" | sort | uniq
 for PATH in $PATHS ; do
     NOTFOUND=""
     [ -e /$PATH ] || NOTFOUND="$COLOR_ERR[deleted]$COLOR_OFF"
-    printf "$COLOR_ON%s$COLOR_OFF: $NOTFOUND\n" "/$PATH"
+    printf "$COLOR_ON%s$COLOR_OFF $NOTFOUND\n" "/$PATH"
     for ROOT in $ROOTS ; do
         /usr/bin/find $ROOT -type f -path "$ROOT/$PATH" -printf "  %TY-%Tm-%Td %TH:%TM %10s  %H\n"
     done

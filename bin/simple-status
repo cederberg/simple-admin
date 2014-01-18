@@ -20,20 +20,10 @@ set -o errexit
 set -o pipefail
 
 # Setup color codes
-case $TERM in
-    *color)
-        COLOR_OFF=`echo -en '\033[0m'`
-        COLOR_OK=`echo -en '\033[32m'`
-        COLOR_WARN=`echo -en '\033[33m'`
-        COLOR_ERR=`echo -en '\033[1;31m'`
-        ;;
-    *)
-        COLOR_OFF=''
-        COLOR_OK=''
-        COLOR_WARN=''
-        COLOR_ERR=''
-        ;;
-esac
+COLOR_OFF=`tput sgr0`
+COLOR_OK=`tput setaf 2`
+COLOR_WARN=`tput setaf 3`
+COLOR_ERR=`tput setaf 1; tput bold`
 
 # Function for logging a warning to stderr without exiting
 warn() {
