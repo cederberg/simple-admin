@@ -104,7 +104,7 @@ procparents() {
 # Function for printing a group of related PIDs
 procids() {
     local PIDS="$@"
-    printf "${PIDS} "
+    echo -n ${PIDS} " "
     for ID in ${PIDS} ; do
         local VAR="PID_${ID}_CHILDREN"
         [ "${!VAR:-}" != "" ] && procids ${!VAR:-}
@@ -118,9 +118,9 @@ procdetails() {
     local TOTAL_SWAP=0
     for ID in $PIDS ; do
         local VAR="PID_${ID}_RSS"
-        local RSS=${!VAR:-}
+        local RSS=${!VAR:-0}
         local VAR="PID_${ID}_SWAP"
-        local SWAP=${!VAR:-}
+        local SWAP=${!VAR:-0}
         local TOTAL_RSS=$((TOTAL_RSS + RSS))
         local TOTAL_SWAP=$((TOTAL_SWAP + SWAP))
     done
@@ -135,7 +135,7 @@ servicepid() {
     local NAME=$1
     local PIDFILE=${2:--}
     local MATCH=${3:-${NAME}}
-    if [ -r "$PIDFILE" ] && PID=`awk '{print $1}' < $PIDFILE` && VAR="PID_${PID}" && [ "${!VAR:-}" == "1" ] ; then
+    if [ -r "$PIDFILE" ] && PID=$(<"$PIDFILE") && VAR="PID_${PID}" && [ "${!VAR:-}" == "1" ] ; then
         echo -n $PID
     elif PID=`ps --ppid 1 -o pid,comm | grep " $MATCH" | head -n 1 | awk '{print $1}'` ; then
         echo -n $PID
