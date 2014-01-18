@@ -1,25 +1,32 @@
 simple-admin
 ============
-Scripts for simplified Ubuntu server administration and
-maintenance.
+Scripts for simplified Debian and Ubuntu server administration
+and maintenance.
 
 Web Site: http://www.simple-admin.org/
 
 
 Requirements
 ------------
-* Ubuntu 10.04 LTS (or later)
-* ...and some command-line tools (installed if missing)
+* Ubuntu 10.04 LTS (or later) or Debian 6.0 (or later)
+* ...a few command-line tools (handled by installer)
 
 
 Installation
 ------------
-The install script will install required command-line tools and
-Perl modules.
+The automated installer script downloads and copies files to locations
+under in `/usr/local`. It also installs the required command-line tools
+and Perl modules.
 
 * `curl -L get.simple-admin.org | bash` -- for curl supporters
 * `wget -qO - get.simple-admin.org | bash` -- for wget fans
-* ...or download, unpack and run install script: `./install.sh`
+* ...or run directly from a download directory: `./install.sh`
 
-Configuration files can be copied & modified from `etc/*.conf` examples.
+To install a specified version, add a `VERSION` variable for `bash`:
+
+* `curl -L get.simple-admin.org | VERSION="1.3" bash`
+* `wget -qO - get.simple-admin.org | VERSION="1.3" bash`
+
+Configuration files can be copied & modified from
+`/usr/local/share/simple-admin/*.conf` examples (after installation).
 
