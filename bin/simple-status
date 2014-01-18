@@ -136,12 +136,14 @@ servicepid() {
     local PIDFILE=${2:--}
     local MATCH=${3:-${NAME}}
     if [ -r "$PIDFILE" ] && PID=$(<"$PIDFILE") && VAR="PID_${PID}" && [ "${!VAR:-}" == "1" ] ; then
-        echo -n $PID
+        true
     elif PID=`ps --ppid 1 -o pid,comm | grep " $MATCH" | head -n 1 | awk '{print $1}'` ; then
-        echo -n $PID
+        true
     elif PID=`ps --ppid 1 -o pid,args | grep "$MATCH" | head -n 1 | awk '{print $1}'` ; then
-        echo -n $PID
-    fi 
+        true
+    else
+        PID=
+    fi
 }
 
 # Function for printing service status
@@ -205,7 +207,7 @@ procparents
 RETVAL=0
 while [ $DETAIL != "short" ] && read NAME PIDFILE MATCH ; do
     [ "$NAME" != "" -a "${NAME:0:1}" != "#" ] || continue
-    PID=`servicepid $NAME $PIDFILE $MATCH`
+    servicepid $NAME $PIDFILE $MATCH
     if ! servicestatus "$PID" $NAME $PIDFILE ; then
         RETVAL=$((RETVAL + 1))
     fi
