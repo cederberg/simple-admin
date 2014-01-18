@@ -1,8 +1,0 @@
-# Base directory for HTTP access log files (containing webalizer.conf in subdirs)
-LOG_DIR=/var/log/www
-
-# Base directory for stats output (using subdirs as per LOG_DIR structure)
-OUTPUT_DIR=/srv/webstats
-
-# Extra Webalizer command-line options
-OPTIONS="-c /etc/webalizer/webalizer.conf"
