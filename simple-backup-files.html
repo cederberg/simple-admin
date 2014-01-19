@@ -70,12 +70,11 @@ directory with timestamps and permissions intact.</p>
 <p>Files removed or modified since the last backup will be moved to a new
 <code>/backup/&lt;hostname&gt;/files/&lt;timestamp&gt;</code> directory.
 Additional timestamped directories for the day and month are also created and
-updated with these modifications.</p>
+updated with the oldest file versions.</p>
 
 <p>The monthly backup directories are kept indefinitely, daily backups are
-preserved for 30 days, and any other timestamped backup directory is preserved
-for 48 hours. In order to save space, identical files are hard linked between
-the timestamped backup directories.</p>
+preserved for 14 days, and any other timestamped backup directory is preserved
+for 48 hours.</p>
 
 <p>The backup can be run as frequently as every minute, but should probably be
 run once per day to keep disk usage down.</p>
