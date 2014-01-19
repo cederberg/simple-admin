@@ -65,9 +65,10 @@
 <p>Performs a MySQL backup with <code>mysqldump</code> of the databases listed
 in <code>/etc/simple-backup-mysql.conf</code>. The
 <code>/backup/&lt;hostname&gt;/mysql/</code> directory is used to store the
-output MySQL backup SQL files (compressed with <code>lzma</code>).</p>
+output MySQL backup SQL files (packaged and compressed as a <code>tar.xz</code>
+file).</p>
 
-<p>Backup files are stored for 30 days, except the files from the 1st each
+<p>Backup files are stored for 14 days, except the files from the 1st each
 month (which are kept indefinitely). The MySQL backup should be run once per
 day. More frequent runs will overwrite previous backups.</p>
 
