@@ -90,7 +90,7 @@ else
 fi
 
 # Install required packages
-install_packages aptitude rsync lzma libgeo-ipfree-perl libjson-xs-perl libmath-round-perl
+install_packages aptitude rsync xz-utils libgeo-ipfree-perl libjson-xs-perl libmath-round-perl
 
 # Install script files
 echo "Installing scripts to /usr/local/bin/..."

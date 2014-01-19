@@ -18,7 +18,7 @@ simple-www-logrotate -- rotates HTTP access log files
 Rotates HTTP access log files by renaming \fB*.log\fR files in a directory
 hierarchy. Immediately afterwards a command is run to create new log files.
 
-The old log files are compressed with \fBlzma\fR and processed with
+The old log files are compressed with \fBxz\fR and processed with
 \fBsimple-www-stats\fR. After a configurable number of days, the old log files
 are removed.
 .sp
@@ -57,5 +57,5 @@ Configuration file with shell variables.
 .sp
 .SH "SEE ALSO"
 .sp
-\fBsimple-www-stats\fR(1), \fBlzma\fR(1),
+\fBsimple-www-stats\fR(1), \fBxz\fR(1),
 <http://www.simple-admin.org/>

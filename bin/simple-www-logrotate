@@ -52,7 +52,7 @@ fi
 YESTERDAY=`date -d "-1 day" +%Y%m%d`
 FILES=`find $LOG_DIR -name '*.log'`
 for LOG in $FILES ; do
-    if [ -e $LOG.$YESTERDAY -o -e $LOG.$YESTERDAY.lzma ] ; then
+    if [ -e $LOG.$YESTERDAY -o -e $LOG.$YESTERDAY.xz ] ; then
         log "skipping $LOG (already rotated)"
     else
         log "rotating $LOG"
@@ -70,7 +70,7 @@ sleep 60
 for LOG in $FILES ; do
     if [ -s $LOG.$YESTERDAY ] ; then
         log "compressing $LOG.$YESTERDAY"
-        lzma $LOG.$YESTERDAY
+        xz $LOG.$YESTERDAY
     elif [ -e $LOG.$YESTERDAY ] ; then
         log "removing empty file $LOG.$YESTERDAY"
         rm -f $LOG.$YESTERDAY
@@ -79,11 +79,11 @@ done
 
 # Remove old log files
 log "removing old log files"
-find $LOG_DIR -name '*.gz' -mtime +$LOG_EXPIRES -exec rm -rf {} \;
 find $LOG_DIR -name '*.lzma' -mtime +$LOG_EXPIRES -exec rm -rf {} \;
+find $LOG_DIR -name '*.xz' -mtime +$LOG_EXPIRES -exec rm -rf {} \;
 
 # Process web statistics
-LOG_FILES=`find $LOG_DIR -name "access.log.$YESTERDAY.lzma"`
+LOG_FILES=`find $LOG_DIR -name "access.log.$YESTERDAY.xz"`
 if [ -d $STAT_DIR -a "$LOG_FILES" != "" ] ; then
     JSON_FILE=$STAT_DIR/logstats.$YESTERDAY.json
     TEXT_FILE=$STAT_DIR/logstats.$YESTERDAY.txt
