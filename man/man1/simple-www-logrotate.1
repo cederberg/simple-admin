@@ -20,7 +20,8 @@ hierarchy. Immediately afterwards a command is run to create new log files.
 
 The old log files are compressed with \fBxz\fR and processed with
 \fBsimple-www-stats\fR. After a configurable number of days, the old log files
-are removed.
+are removed. This is similar to the standard \fBlogrotate\fR command, but
+easier to configure and schedule for midnight.
 .sp
 .SH "OPTIONS"
 .sp
@@ -57,5 +58,5 @@ Configuration file with shell variables.
 .sp
 .SH "SEE ALSO"
 .sp
-\fBsimple-www-stats\fR(1), \fBxz\fR(1),
+\fBsimple-www-stats\fR(1), \fBxz\fR(1), \fBlogrotate\fR(8),
 <http://www.simple-admin.org/>
