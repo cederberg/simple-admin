@@ -66,9 +66,10 @@
 directory hierarchy. Immediately afterwards a command is run to create new log
 files.</p>
 
-<p>The old log files are compressed with <code>lzma</code> and processed with
+<p>The old log files are compressed with <code>xz</code> and processed with
 <code>simple-www-stats</code>. After a configurable number of days, the old log
-files are removed.</p>
+files are removed. This is similar to the standard <code>logrotate</code>
+command, but easier to configure and schedule for midnight.</p>
 
 <h3>Configuration:</h3>
 
@@ -93,7 +94,8 @@ STAT_DIR=/srv/logstats
 <ul>
   <li><code>/etc/simple-www-logrotate.conf</code></li>
   <li><a href="simple-www-stats.html">simple-www-stats</a>
-  <li><a href="http://manpages.ubuntu.com/manpages/man1/lzma.1.html">lzma</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man1/xz.1.html">xz</a></li>
+  <li><a href="http://manpages.ubuntu.com/manpages/man8/logrotate.8.html">logrotate</a></li>
 </ul>
 
 
