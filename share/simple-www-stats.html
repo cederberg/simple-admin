@@ -1455,15 +1455,8 @@ $(function () {
     // Feature detection
     var body = $("body");
     var styles = body[0] && body[0].style;
-    if ("transition" in styles || "-webkit-transition" in styles) {
-        settings.animation = true;
-    }
-    try {
-        document.createEvent("TouchEvent");
-        settings.touch = true;
-    } catch (e) {
-        // Do nothing
-    }
+    settings.animation = !!("transition" in styles || "-webkit-transition" in styles);
+    settings.touch = !!('ontouchstart' in window);
     body.addClass((settings.animation ? "" : "no-") + "animation");
     body.addClass((settings.touch ? "" : "no-") + "touch");
 
