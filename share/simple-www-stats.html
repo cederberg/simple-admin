@@ -1336,7 +1336,7 @@ function dialogShow(data) {
     $("#dialog").data("chart", data.chart);
     $("#dialog").data("key", data.key || data.name || "");
     $("#dialog").data("dates", dates);
-    for (var i = 1; i <= 31; i++) {
+    for (var i = 1; i <= 90; i++) {
         var date = formatDate(new Date(now - 24 * 60 * 60 * 1000 * i));
         dates.push(date);
         if (typeof(stats[date]) === "undefined") {
