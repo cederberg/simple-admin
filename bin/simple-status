@@ -82,21 +82,21 @@ procparents() {
     ps -eo pid,ppid,thcount,rss,user,group,cmd > $TMPFILE
     while read ID PARENT THCNT RSS USER GROUP CMD ; do
         if [ $ID != "2" ] && [ $PARENT != "2" ] && [ -e /proc/$ID/status ] ; then
-            declare -g "PID_${ID}=1"
-            declare -g "PID_${ID}_PARENT=${PARENT}"
-            declare -g "PID_${ID}_THCNT=${THCNT}"
-            declare -g "PID_${ID}_RSS=${RSS}"
-            declare -g "PID_${ID}_USER=${USER}"
-            declare -g "PID_${ID}_GROUP=${GROUP}"
-            declare -g "PID_${ID}_CMD=${CMD}"
+            eval "PID_${ID}=1"
+            eval "PID_${ID}_PARENT='${PARENT}'"
+            eval "PID_${ID}_THCNT='${THCNT}'"
+            eval "PID_${ID}_RSS='${RSS}'"
+            eval "PID_${ID}_USER='${USER}'"
+            eval "PID_${ID}_GROUP='${GROUP}'"
+            eval "PID_${ID}_CMD='${CMD}'"
             local VAR="PID_${PARENT}_CHILDREN"
-            declare -g "${VAR}=${!VAR:-} $ID"
+            eval "${VAR}='${!VAR:-} $ID'"
             local FILES="$FILES /proc/$ID/status"
         fi
     done < $TMPFILE
     grep VmSwap $FILES | sed -e 's|/proc/||;s|/status:VmSwap:\s\+| |' > $TMPFILE
     while read ID SWAP UNIT ; do
-        declare -g "PID_${ID}_SWAP=${SWAP}"
+        eval "PID_${ID}_SWAP='${SWAP}'"
     done < $TMPFILE
     rm -rf $TMPFILE
 }
