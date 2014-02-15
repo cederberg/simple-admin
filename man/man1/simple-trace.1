@@ -1,0 +1,67 @@
+.TH "simple-trace" "1" "Simple-Admin" "" "Simple-Admin"
+.\" -----------------------------------------------------------------
+.\" * disable hyphenation
+.nh
+.\" * disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.SH "NAME"
+simple-trace -- collects a system and process activity trace
+.SH "SYNOPSIS"
+.sp
+.nf
+\fBsimple-trace\fR [\fIpid\fR|\fIpidfile\fR]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+
+Runs activity diagnostics and traces for the system during 10 seconds.
+The results are stored to a directory
+\fB/tmp/simple-trace-\fIdatetime\fR with one file for each trace.
+
+If either a numeric \fIpid\fR or a \fIpidfile\fR is specified, a
+number of additional traces are run for the process in question.
+
+The output is collected from standard system tools, such as \fBtop\fR,
+\fBsar\fR, \fBnetstat\fR, \fBstrace\fR, and others. If a tool isn't
+installed, the corresponding output file will only log an error. An
+example of the resulting file structure:
+.sp
+.nf
+    /tmp/simple-trace-2014-02-12-144611-4619
+        proc-fd-list
+        proc-logs
+        proc-ps
+        proc-pstree
+        proc-status
+        proc-strace
+        system-cpu-sar
+        system-cpu-top
+        system-iotop
+        system-io-diskfree
+        system-io-lsof
+        system-io-sar
+        system-logs
+        system-mem-free
+        system-mem-sar
+        system-mysql
+        system-netstat
+        system-net-ipv4-sar
+        system-net-ipv6-sar
+        system-uptime
+.fi
+.sp
+.SH "SEE ALSO"
+.sp
+\fBuptime\fR(1),
+\fBtop\fR(1),
+\fBpstree\fR(1),
+\fBfree\fR(1),
+\fBdf\fR(1),
+\fBnetstat\fR(8),
+\fBiotop\fR(8),
+\fBlsof\fR(8),
+\fBsar\fR(1),
+\fBstrace\fR(1),
+<http://www.simple-admin.org/>

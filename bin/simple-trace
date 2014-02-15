@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+#
+# Collects a system and process activity trace.
+#
+# Syntax: simple-trace [<pid>|<pidfile>]
+#
+
+# Configuration variables
+VERBOSE="true"
+
+# Set caution flags
+set -o nounset
+set -o errtrace
+set -o errexit
+set -o pipefail
+
+# Setup color codes
+COLOR_OFF=`tput sgr0`
+COLOR_OK=`tput setaf 2`
+COLOR_WARN=`tput setaf 3`
+COLOR_ERR=`tput setaf 1; tput bold`
+
+# Function for printing command-line usage info
+usage() {
+    echo "Collects a system and process activity trace."
+    echo
+    echo "Syntax: simple-trace [<pid>|<pidfile>]"
+    exit 1
+}
+
+# Function for logging information in verbose mode
+log() {
+    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
+}
+
+# Function for logging a warning to stderr without exiting
+warn() {
+    echo "${COLOR_ERR}WARNING:${COLOR_OFF}" "$@" >&2
+}
+
+# Function for logging an error to stderr and exiting
+fail() {
+    echo "${COLOR_ERR}ERROR:${COLOR_OFF}" "$@" >&2
+    exit 1
+}
+
+# Function to lookup and run a command
+run() {
+    CMD=$1
+    shift
+    if [ -x $CMD ] || which $CMD > /dev/null ; then
+        exec $CMD "$@" 2>&1
+    fi
+    export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+    if which $CMD > /dev/null ; then
+        exec $CMD "$@" 2>&1
+    else
+        fail "couldn't locate $CMD in PATH"
+    fi
+}
+
+# Parse command-line arguments
+if [ $# -eq 0 ] ; then
+    PID=
+elif [ ! $# -eq 1 ] ; then
+    usage
+elif [ "$1" == "-?" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then
+    usage
+elif [ -r "$1" ] ; then
+    PID=$(<"$1")
+else
+    PID=$1
+fi
+if [ "$PID" != "" ] && [ ! -r /proc/$PID ] ; then
+    fail "cannot read process (pid: $PID)"
+fi
+
+# Init trace
+NOW=`date +"%Y-%m-%d-%H%M%S"`
+DIR="/tmp/simple-trace-$NOW"
+if [ "$PID" == "" ] ; then
+    log "Starting system trace, logging data for 10 secs..."
+else
+    DIR="$DIR-$PID"
+    log "Starting trace of process $PID, logging data for 10 secs..."
+fi
+mkdir -p $DIR
+
+# System trace
+run uptime > $DIR/system-uptime &
+run free > $DIR/system-mem-free &
+run df > $DIR/system-io-diskfree &
+run netstat -aepn > $DIR/system-netstat &
+run top -b -n 1 > $DIR/system-cpu-top &
+run lsof > $DIR/system-io-lsof &
+run iotop -qqq --only > $DIR/system-iotop &
+run sar -u ALL 1 > $DIR/system-cpu-sar &
+run sar -r 1 > $DIR/system-mem-sar &
+run sar -b 1 > $DIR/system-io-sar &
+run sar -n IP 1 > $DIR/system-net-ipv4-sar &
+run sar -n IP6 1 > $DIR/system-net-ipv6-sar &
+[ ! -r /etc/mysql/debian.cnf ] || run mysqladmin --defaults-file=/etc/mysql/debian.cnf status extended-status processlist >  $DIR/system-mysql &
+find /var/log -type f -mmin -10 | xargs tail -n 20 > $DIR/system-logs
+
+# Process trace
+if [ "$PID" != "" ] ; then
+    run cp /proc/$PID/status $DIR/proc-status &
+    run ls -l /proc/$PID/fd/ > $DIR/proc-fd-list &
+    run ps -f $PID > $DIR/proc-ps &
+    run pstree -p $PID > $DIR/proc-pstree &
+    if [ -x /usr/bin/jps ] && /usr/bin/jps | grep -q $PID ; then
+        # Java processes thread dumps on SIGQUIT (3)
+        kill -QUIT $PID
+        sleep 1
+    fi
+    run strace -p $PID -q -s 2000 -T -C -f -o $DIR/proc-strace > /dev/null &
+    LOGS=`find /proc/$PID/cwd /proc/$PID/fd -type l -exec readlink {} \; | grep "/log" | sort | uniq`
+    if [ "$LOGS" != "" ] ; then
+        find $LOGS -type f -mmin -10 | xargs tail -n 100 > $DIR/proc-logs
+    fi
+fi
+
+# Wait 10 secs for traces
+sleep 10
+PROCS=`ps --ppid $$ -o pid --no-header | xargs`
+kill $PROCS > /dev/null 2>&1 || true
+sleep 1
+kill -9 $PROCS > /dev/null 2>&1 || true
+log "Done tracing to $DIR"
