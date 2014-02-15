@@ -103,6 +103,7 @@ install bin/simple-fileinfo /usr/local/bin/
 install bin/simple-freemem /usr/local/bin/
 install --mode=0744 bin/simple-restart /usr/local/bin/
 install bin/simple-status /usr/local/bin/
+[ ! -r bin/simple-trace ] || install bin/simple-trace /usr/local/bin/
 install --mode=0744 bin/simple-uptodate /usr/local/bin/
 install bin/simple-utf8 /usr/local/bin/
 install --mode=0744 bin/simple-www-logrotate /usr/local/bin/
