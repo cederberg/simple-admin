@@ -207,8 +207,15 @@ procparents
 RETVAL=0
 while [ $DETAIL != "short" ] && read NAME PIDFILE MATCH ; do
     [ "$NAME" != "" -a "${NAME:0:1}" != "#" ] || continue
+    HIDDEN=false
+    if [ "${NAME:0:1}" == "-" ] ; then
+        NAME=${NAME:1}
+        HIDDEN=true
+    fi
     servicepid $NAME $PIDFILE $MATCH
-    if ! servicestatus "$PID" $NAME $PIDFILE ; then
+    if $HIDDEN && ([ "$PID" == "" ] || [ $DETAIL != "full" ]) ; then
+        true
+    elif ! servicestatus "$PID" $NAME $PIDFILE ; then
         RETVAL=$((RETVAL + 1))
     fi
     if [ "$PID" != "" ] ; then

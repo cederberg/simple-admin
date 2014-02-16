@@ -37,24 +37,28 @@ Prints a short summary without listing process status.
 .RE
 -\fBm\fR
 .RS 4
-Prints a medium length report, not listing unconfigured processes.
+Prints a medium length report, not listing hidden or unconfigured processes.
 .RE
 .sp
 .SH "CONFIGURATION"
 .sp
 The processes to check are configured in \fB/etc/simple-status.conf\fR with one
 line per process. Comment or blank lines are ignored. Each line contains the
-process or service name, pid file and optional command-line match:
+process or service name, pid file and an optional command-line match:
 .sp
 .nf
     cron            /var/run/crond.pid
     sshd            /var/run/sshd.pid
-    local           -               local-command-match
+    local           - local-command-match
+    -rsyslog        /var/run/rsyslogd.pid
 .fi
 .sp
 If \fB-\fR is specified as the pid file, the process lookup is made by name
 (optionally using the command-line match). Process lookup is also made by name
 if the pid file didn't exist or didn't match a running process.
+
+Processes with a leading \fB-\fR character in the name are optional. These will be
+hidden in the medium report and not reported when not running.
 .sp
 .SH "FILES"
 .sp
