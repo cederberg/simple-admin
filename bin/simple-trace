@@ -124,6 +124,5 @@ fi
 sleep 10
 PROCS=`ps --ppid $$ -o pid --no-header | xargs`
 kill $PROCS > /dev/null 2>&1 || true
-sleep 1
-kill -9 $PROCS > /dev/null 2>&1 || true
+wait $PROCS > /dev/null 2>&1 || true
 log "Done tracing to $DIR"
