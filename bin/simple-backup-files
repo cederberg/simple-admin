@@ -23,7 +23,8 @@ BACKUP_LATEST_DIR=$BACKUP_BASE_DIR/latest
 BACKUP_MONTH_DIR=$BACKUP_BASE_DIR/$DATE_MONTH
 BACKUP_DAY_DIR=$BACKUP_BASE_DIR/$DATE_DAY
 BACKUP_MINUTE_DIR=$BACKUP_BASE_DIR/$DATE_MINUTE
-OPTIONS="--archive --delete --checksum --cvs-exclude"
+TEMP_LIST=/tmp/$$.simple-backup-files.lst
+OPTIONS="--archive --delete --checksum"
 VERBOSE="false"
 
 # Set caution flags
@@ -64,29 +65,42 @@ else
     OPTIONS="$OPTIONS --quiet"
 fi
 
-# Perform backup
-log "init backup to $BACKUP_BASE_DIR"
-mkdir -p $BACKUP_LATEST_DIR $BACKUP_MONTH_DIR $BACKUP_DAY_DIR $BACKUP_MINUTE_DIR
-touch $BACKUP_LATEST_DIR
+# Create include/exclude list
+echo "-C" > $TEMP_LIST
 while read SRC EXPIRES ; do
     [ "$SRC" != "" -a "${SRC:0:1}" != "#" ] || continue
     if [ ! -d $SRC ] ; then
         log "skipping $SRC: directory not found"
         continue
     fi
-    log "syncing dir $SRC"
-    DST=$BACKUP_LATEST_DIR$SRC
-    DIFF=$BACKUP_MINUTE_DIR$SRC
-    mkdir -p $DST
-    rsync $OPTIONS --backup --backup-dir=$DIFF $SRC/ $DST/
+    RULE="+"
+    if [ "${SRC:0:1}" == "-" -o "${SRC:0:1}" == "+" ] ; then
+        RULE=${SRC:0:1}
+        SRC=${SRC:1}
+    fi
+    echo "$RULE $SRC/***" >> $TEMP_LIST
+    if [ $RULE == "+" ] ; then
+        PARENT=$SRC
+        while PARENT=`dirname $PARENT` && [ $PARENT != "/" ] ; do
+            echo "+ $PARENT/" >> $TEMP_LIST
+        done
+    fi
     if [ "$EXPIRES" != "" ] ; then
         log "removing $SRC backups older than $EXPIRES days"
         find $BACKUP_BASE_DIR/????-*$SRC -maxdepth 0 -type d -mtime +$EXPIRES -exec rm -rf {} \; 2> /dev/null || true
     fi
 done
+echo "- *" >> $TEMP_LIST
+
+# Perform backup
+log "init backup to $BACKUP_BASE_DIR"
+mkdir -p $BACKUP_LATEST_DIR $BACKUP_MONTH_DIR $BACKUP_DAY_DIR $BACKUP_MINUTE_DIR
+touch $BACKUP_LATEST_DIR
+rsync $OPTIONS --backup --backup-dir=$BACKUP_MINUTE_DIR --include-from=$TEMP_LIST / $BACKUP_LATEST_DIR/
+rm -f $TEMP_LIST
 
 # Remove empty dirs & update daily and montly dirs
-find $BACKUP_MINUTE_DIR -type d -delete 2> /dev/null || true
+rmdir $BACKUP_MINUTE_DIR 2> /dev/null || true
 if [ -d $BACKUP_MINUTE_DIR ] ; then
     log updating daily and monthly diff dirs
     rsync --archive --ignore-existing --quiet $BACKUP_MINUTE_DIR/ $BACKUP_DAY_DIR/
