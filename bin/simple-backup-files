@@ -67,16 +67,12 @@ fi
 
 # Create include/exclude list
 echo "-C" > $TEMP_LIST
-while read SRC EXPIRES ; do
-    [ "$SRC" != "" -a "${SRC:0:1}" != "#" ] || continue
-    if [ ! -d $SRC ] ; then
-        log "skipping $SRC: directory not found"
-        continue
-    fi
-    RULE="+"
-    if [ "${SRC:0:1}" == "-" -o "${SRC:0:1}" == "+" ] ; then
-        RULE=${SRC:0:1}
-        SRC=${SRC:1}
+while read RULE SRC EXPIRES ; do
+    [ "$RULE" != "" -a "${RULE:0:1}" != "#" ] || continue
+    if [ "${RULE:0:1}" == "/" ] ; then
+        EXPIRES=$SRC
+        SRC=$RULE
+        RULE="+"
     fi
     echo "$RULE $SRC/***" >> $TEMP_LIST
     if [ $RULE == "+" ] ; then
