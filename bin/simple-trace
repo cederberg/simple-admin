@@ -6,6 +6,7 @@
 #
 
 # Configuration variables
+PROCID="simple-trace[$$]"
 VERBOSE="true"
 
 # Set caution flags
@@ -31,16 +32,13 @@ usage() {
 # Function for logging information in verbose mode
 log() {
     [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
-}
-
-# Function for logging a warning to stderr without exiting
-warn() {
-    echo "${COLOR_ERR}WARNING:${COLOR_OFF}" "$@" >&2
+    logger -p local0.info -t "$PROCID" "$@" || true
 }
 
 # Function for logging an error to stderr and exiting
 fail() {
     echo "${COLOR_ERR}ERROR:${COLOR_OFF}" "$@" >&2
+    logger -p local0.error -t "$PROCID" "$@" || true
     exit 1
 }
 

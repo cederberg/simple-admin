@@ -10,6 +10,7 @@
 #
 
 # Configuration parameters
+PROCID="simple-uptodate[$$]"
 HOST=`hostname`
 SENDMAIL=/usr/sbin/sendmail
 SECURITY=false
@@ -24,6 +25,7 @@ set -o pipefail
 # Function for logging an error to stderr and exiting
 fail() {
     echo "ERROR:" "$@" >&2
+    logger -p local0.error -t "$PROCID" "$@" || true
     exit 1
 }
 

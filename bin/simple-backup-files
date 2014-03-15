@@ -12,6 +12,7 @@
 #
 
 # Global variables
+PROCID="simple-backup-files[$$]"
 CONFIG=simple-backup-files.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
@@ -36,12 +37,14 @@ set -o pipefail
 # Function for logging an error to stderr and exiting
 fail() {
     echo "ERROR:" "$@" >&2
+    logger -p local0.error -t "$PROCID" "$@" || true
     exit 1
 }
 
 # Function for logging information in verbose mode
 log() {
     [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
+    logger -p local0.info -t "$PROCID" "$@" || true
 }
 
 # Check for root user
