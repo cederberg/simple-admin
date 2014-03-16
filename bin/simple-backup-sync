@@ -57,7 +57,7 @@ else
 fi
 
 # Perform synchronization
-log "init sync from $HOST" 
+log "init backup sync from $HOST"
 while read SRC DST EXTRAS ; do
     [ "$SRC" != "" -a "${SRC:0:1}" != "#" ] || continue
     log "syncing from: $SRC"
@@ -66,4 +66,4 @@ while read SRC DST EXTRAS ; do
     /usr/local/bin/simple-freemem
     sleep 60
 done
-log "done sync from $HOST"
+log "done backup sync from $HOST"

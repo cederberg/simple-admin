@@ -70,7 +70,7 @@ done
 
 # Package and compress backups
 FILE=databases.$DATE.tar
-log "starting compression & transfer of file $FILE"
+log "starting compression of file $FILE"
 cd $TEMP_DIR
 tar cf $FILE *.sql
 xz $FILE
@@ -78,7 +78,7 @@ mkdir -p $DUMP_DIR
 mv -f $FILE.* $DUMP_DIR/
 cd
 rm -rf $TEMP_DIR
-log "finished compression & transfer of file $FILE"
+log "finished compression of file $FILE"
 
 # Remove outdated backup files
 find $DUMP_DIR -type f -mtime +14 \! -name "*.????-??-01.*" -delete
