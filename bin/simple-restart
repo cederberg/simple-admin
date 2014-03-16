@@ -106,26 +106,27 @@ start() {
 
 # Function for stopping a named service
 stop() {
-    NAME=$1
-    WAIT=${2:-}
-    FORCE=${3:-}
-    PID=`findprocess $NAME` || true
+    local NAME=$1
+    local WAIT=${2:-}
+    local FORCE=${3:-}
+    local PID=`findprocess $NAME` || true
+    local PIDS=`pgrep -f $NAME` || true
     log "stopping service $NAME (pid: $PID)..."
     service $NAME stop > /dev/null || true
-    if [ "$WAIT" != "" -a "$PID" != "" ] ; then
-        waitprocess $WAIT $PID
-        if [ "$FORCE" != "" ] && ps --pid $PID > /dev/null ; then
-            warn "sending TERM signal to $NAME (pid: $PID)..."
-            kill -TERM $PID
-            waitprocess $WAIT $PID
+    if [ "$WAIT" != "" -a "$PIDS" != "" ] ; then
+        waitprocess $WAIT $PIDS
+        if [ "$FORCE" != "" ] && ps $PIDS > /dev/null ; then
+            warn "sending TERM signal to $NAME (pid: $PIDS)..."
+            kill -TERM $PIDS
+            waitprocess $WAIT $PIDS
         fi
-        if [ "$FORCE" != "" ] && ps --pid $PID > /dev/null ; then
-            warn "sending KILL signal to $NAME (pid: $PID)..."
-            kill -KILL $PID
-            waitprocess $WAIT $PID
+        if [ "$FORCE" != "" ] && ps $PIDS > /dev/null ; then
+            warn "sending KILL signal to $NAME (pid: $PIDS)..."
+            kill -KILL $PIDS
+            waitprocess $WAIT $PIDS
         fi
-        if ps --pid $PID > /dev/null ; then
-            fail "failed to kill process $NAME (pid: $PID), aborting"
+        if ps $PIDS > /dev/null ; then
+            fail "failed to kill process $NAME (pid: $PIDS), aborting"
         fi
     fi
     log "service $NAME (pid: $PID) stopped"
