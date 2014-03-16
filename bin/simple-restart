@@ -68,20 +68,14 @@ usage() {
 
 # Function for finding the PID from a service name (single PID returned)
 findprocess() {
-    NAME=$1
-    OUT=`find /var/run/ -type f -iregex ".*/${NAME}d?.pid" -exec cat {} \;`
-    if [ "$OUT" == "" ] ; then
-        OUT=`ps -C $NAME --no-headers --sort pid`
-    fi
-    if [ "$OUT" == "" ] ; then
-        OUT=`ps -e -O command --sort pid | grep $NAME | grep -v grep | head -1`
-    fi
-    if [ "$OUT" != "" ] ; then
-        echo $OUT | awk '{print $1}'
+    local NAME=$1
+    local PID=""
+    local PIDFILE=`find /var/run/ -type f -iregex ".*/${NAME}d?.pid"`
+    if [ -r "$PIDFILE" ] && PID=$(<"$PIDFILE") && [ -d "/proc/$PID" ] ; then
+        echo $PID
         return 0
-    else
-        return 1
     fi
+    pgrep -o $NAME || pgrep -o -f $NAME
 }
 
 # Function for waiting for a process to die
