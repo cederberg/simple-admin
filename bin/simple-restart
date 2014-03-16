@@ -59,14 +59,14 @@ usage() {
     echo
     echo "Groups:"
     for VAR in $(compgen -A variable group_) ; do
-        NAME=${VAR#group_}
-        DESC=${!VAR}
+        local NAME=${VAR#group_}
+        local DESC=${!VAR}
         printf "  %-8s -- %s\n" $NAME "$DESC"
     done
     exit 1
 }
 
-# Function for finding a PID from a service name
+# Function for finding the PID from a service name (single PID returned)
 findprocess() {
     NAME=$1
     OUT=`find /var/run/ -type f -iregex ".*/${NAME}d?.pid" -exec cat {} \;`
@@ -86,10 +86,11 @@ findprocess() {
 
 # Function for waiting for a process to die
 waitprocess() {
-    WAIT=$1
-    PID=$2
-    SECS=0
-    while [ $SECS -lt "$WAIT" ] && ps --pid $PID > /dev/null ; do
+    local WAIT=$1
+    shift
+    local PIDS="$@"
+    local SECS=0
+    while [ $SECS -lt "$WAIT" ] && ps $PIDS > /dev/null ; do
         let ++SECS
         sleep 1
     done
@@ -97,8 +98,8 @@ waitprocess() {
 
 # Function for starting a named service
 start() {
-    NAME=$1
-    WAIT=${2:-}
+    local NAME=$1
+    local WAIT=${2:-}
     log "starting service $NAME..."
     service $NAME start > /dev/null || fail "failed to start $NAME"
     if [ "$WAIT" != "" ] ; then
