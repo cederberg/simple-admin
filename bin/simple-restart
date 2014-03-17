@@ -110,7 +110,7 @@ stop() {
     local WAIT=${2:-}
     local FORCE=${3:-}
     local PID=`findprocess $NAME` || true
-    local PIDS=`pgrep -f $NAME` || true
+    local PIDS=`pgrep -d ' ' -f $NAME` || true
     log "stopping service $NAME (pid: $PID)..."
     service $NAME stop > /dev/null || true
     if [ "$WAIT" != "" -a "$PIDS" != "" ] ; then
