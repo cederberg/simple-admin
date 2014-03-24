@@ -92,11 +92,11 @@ run netstat -aepn > $DIR/system-netstat &
 run top -b -n 1 > $DIR/system-cpu-top &
 run lsof > $DIR/system-io-lsof &
 run iotop -qqq --only > $DIR/system-iotop &
-run sar -u ALL 1 > $DIR/system-cpu-sar &
-run sar -r 1 > $DIR/system-mem-sar &
-run sar -b 1 > $DIR/system-io-sar &
-run sar -n IP 1 > $DIR/system-net-ipv4-sar &
-run sar -n IP6 1 > $DIR/system-net-ipv6-sar &
+run sar -u ALL 1 10 > $DIR/system-cpu-sar &
+run sar -r 1 10 > $DIR/system-mem-sar &
+run sar -b 1 10 > $DIR/system-io-sar &
+run sar -n IP 1 10 > $DIR/system-net-ipv4-sar &
+run sar -n IP6 1 10 > $DIR/system-net-ipv6-sar &
 [ ! -r /etc/mysql/debian.cnf ] || run mysqladmin --defaults-file=/etc/mysql/debian.cnf status extended-status processlist >  $DIR/system-mysql &
 find /var/log -type f -mmin -10 | xargs tail -n 20 > $DIR/system-logs
 
