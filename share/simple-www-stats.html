@@ -1482,7 +1482,8 @@ $(function () {
     // Init event handlers
     var onclick = (settings.touch ? "touchstart" : "click");
     $("#selector select").on("change", loadData.bind(null, null));
-    $("#selector select").on("click", false);
+    $("#selector select").on(onclick, false);
+    $("#datepicker").on(onclick, false);
     body.on(onclick, selectDate.bind(null, null));
     body.on(onclick, ".sortorder span", sortChart);
     body.on(onclick, ".tab-label", selectTab);
