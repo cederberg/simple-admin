@@ -562,10 +562,12 @@ header h1 span {
           <option value="-2">Day Before Yesterday</option>
           <option value="-8">Last Week</option>
           <option value="-31">Last Month</option>
+          <option value="-90">Last Quarter</option>
         </optgroup>
         <option value="...">Select Another Date...</option>
       </select>
     </div>
+
     <div id="datepicker" class="hidden hiding"></div>
 
     <div id="total" data-title="Totals">
@@ -844,6 +846,9 @@ var renderQueue = [];
 
 // Statistics data (by date)
 var stats = {};
+
+// Active stats date
+var currentDate = null;
 
 // Format a date
 function formatDate(date) {
@@ -1214,17 +1219,13 @@ function renderStop() {
 
 function loadData(opts) {
     opts = opts || {};
-    opts.date = opts.date || $("#selector select").val();
-    if (opts.date === "...") {
-        show("#datepicker");
-        return false;
-    } else if (stats[opts.date]) {
+    opts.date = opts.date || currentDate;
+    if (stats[opts.date]) {
         loadDataCb(opts, stats[opts.date]);
     } else {
         if (!opts.norender) {
             show("#loading, #overlay");
             renderStop();
-            $("#selector select").data("current", opts.date);
         }
         opts.file = "logstats." + opts.date.replace(/-/g, "") + ".json";
         var cb = loadDataCb.bind(this, opts);
@@ -1283,11 +1284,21 @@ function loadDataFail(opts, xhr, status, error) {
     }
 }
 
-function selectDate(date) {
+function dateSelect() {
+    var value = $("#selector select").val();
+    if (value === "...") {
+        show("#datepicker");
+        return false;
+    } else {
+        currentDate = value;
+        loadData();
+    }
+}
+
+function datepickerSelect(date) {
     hide("#datepicker");
     if (!date) {
-        date = $("#selector select").data("current");
-        $("#selector select").val(date);
+        $("#selector select").val(currentDate);
     } else {
         var opt = $("#selector option[value='" + date + "']");
         if (!opt.length) {
@@ -1325,7 +1336,7 @@ function dialogOpen(evt) {
 }
 
 function dialogShow(data) {
-    var now = new Date().getTime();
+    var start = $.datepicker.parseDate("yy-mm-dd", currentDate).getTime();
     var dates = [];
     var defers = [];
     if (renderQueue.defer) {
@@ -1334,8 +1345,8 @@ function dialogShow(data) {
     $("#dialog").data("chart", data.chart);
     $("#dialog").data("key", data.key || data.name || "");
     $("#dialog").data("dates", dates);
-    for (var i = 1; i <= 90; i++) {
-        var date = formatDate(new Date(now - 24 * 60 * 60 * 1000 * i));
+    for (var i = 0; i < 90; i++) {
+        var date = formatDate(new Date(start - 24 * 60 * 60 * 1000 * i));
         dates.push(date);
         if (typeof(stats[date]) === "undefined") {
             defers.push(loadData({ date: date, norender: true }));
@@ -1476,14 +1487,14 @@ $(function () {
     });
     $("#datepicker").datepicker({ numberOfMonths: 2, showWeek: true,
                                   maxDate: "-1D", dateFormat: "yy-mm-dd",
-                                  onSelect: selectDate });
+                                  onSelect: datepickerSelect });
 
     // Init event handlers
     var onclick = (settings.touch ? "touchstart" : "click");
-    $("#selector select").on("change", loadData.bind(null, null));
+    $("#selector select").on("change", dateSelect);
     $("#selector select").on(onclick, false);
     $("#datepicker").on(onclick, false);
-    body.on(onclick, selectDate.bind(null, null));
+    body.on(onclick, datepickerSelect.bind(null, null));
     body.on(onclick, ".sortorder span", sortChart);
     body.on(onclick, ".tab-label", selectTab);
     body.on(onclick, ".barchart .row", barChartSelect);
@@ -1493,6 +1504,7 @@ $(function () {
     $(".chart-selector, .barchart").on("scroll", tooltipHide);
 
     // Load initial data
+    currentDate = $("#selector select").val();
     loadData().then(locationInit);
 });
     </script>
