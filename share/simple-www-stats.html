@@ -3,16 +3,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.2/css/smoothness/jquery-ui-1.10.2.custom.min.css">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Chivo:900">
     <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="http://www.simple-admin.org/favicon.ico">
-    <!--[if IE 7]>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.0/css/font-awesome-ie7.min.css">
-    <![endif]-->
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highcharts/3.0.2/highcharts.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.2/css/smoothness/jquery-ui-1.10.2.custom.min.css">
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/highcharts/3.0.10/highcharts.js"></script>
     <title>Simple-Admin Web Stats Viewer</title>
     <style type="text/css">
 
@@ -30,6 +27,7 @@ body {
     margin: 0;
     padding: 10px 20px;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
     font-size: 13px;
 }
 body * {
@@ -396,6 +394,7 @@ header h1 span {
     overflow-y: auto;
     margin: 25px 0 0 0;
 }
+
 /* Tooltip styles */
 #tooltip {
     position: absolute;
@@ -459,7 +458,7 @@ header h1 span {
     color: #AAAAAA;
     text-shadow: 0 0 1px #AAAAAA;
 }
-#dialog .close.icon-remove-sign:before {
+#dialog .close.fa-times-circle:before {
     cursor: pointer;
 }
 #dialog h2 {
@@ -572,7 +571,7 @@ header h1 span {
 
     <div id="total" data-title="Totals">
       <div class="timeline">
-        <i class="icon-signal"></i>
+        <i class="fa fa-signal"></i>
         Timeline
       </div>
       <b>Total <span data-field="date" style="padding: 0;"></span>:</b>
@@ -587,110 +586,110 @@ header h1 span {
       <div class="box" style="margin-left: 20px;">
         <h2>Host Names</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="host" data-title="Host Names" class="chart barchart purple"></div>
       </div>
       <div class="box">
         <h2>File Types</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="file_type" data-title="File Types" class="chart piechart cyan"></div>
       </div>
       <div class="box">
         <h2>File Sources</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="file_source" data-title="File Sources" class="chart barchart green"></div>
       </div>
       <div class="box">
         <h2>Referral Sites</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="top_referral_site" data-title="Referral Sites" class="chart barchart orange"></div>
       </div>
       <div class="box">
         <h2>Countries</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="country" data-title="Countries" class="chart piechart red"></div>
       </div>
       <div class="box">
         <h2>Time of Day</h2>
         <div class="sortorder">
-          <span data-sort="name/count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="name/kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="name/secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="name/avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="name/count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="name/kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="name/secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="name/avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="time_of_day" data-title="Time of Day" data-compare="10" class="chart barchart blue"></div>
       </div>
       <div class="box">
         <h2>Platforms</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="platform" data-title="Platforms" class="chart piechart purple"></div>
       </div>
       <div class="box">
         <h2>Browsers</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="browser" data-title="Browsers" class="chart piechart orange"></div>
       </div>
       <div class="box">
         <h2>Response Codes</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="http_code" data-title="Response Codes" class="chart barchart cyan"></div>
       </div>
       <div class="box">
         <h2>HTTP Versions</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="http_version" data-title="HTTP Versions" class="chart barchart green"></div>
       </div>
       <div class="box">
         <h2>HTTP Methods</h2>
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="http_method" data-title="HTTP Methods" class="chart barchart orange"></div>
       </div>
@@ -702,68 +701,68 @@ header h1 span {
 
     <div class="tab-container">
       <div class="tab-label-list">
-        <div class="tab-label cyan active" data-ref="top_request"><i class="icon-sort-by-attributes-alt"></i> Top Requests</div>
-        <div class="tab-label purple" data-ref="top_download"><i class="icon-truck"></i> Top Downloads</div>
-        <div class="tab-label orange" data-ref="top_process_time"><i class="icon-time"></i> Top Process Time</div>
-        <div class="tab-label green" data-ref="top_redirect"><i class="icon-retweet"></i> Top Redirects</div>
-        <div class="tab-label blue" data-ref="top_referral_source"><i class="icon-signout"></i> Referral Sources</div>
-        <div class="tab-label cyan" data-ref="top_referral_target"><i class="icon-signin"></i> Referral Targets</div>
-        <div class="tab-label red" data-ref="top_error"><i class="icon-ban-circle"></i> Errors</div>
+        <div class="tab-label cyan active" data-ref="top_request"><i class="fa fa-sort-amount-desc"></i> Top Requests</div>
+        <div class="tab-label purple" data-ref="top_download"><i class="fa fa-truck"></i> Top Downloads</div>
+        <div class="tab-label orange" data-ref="top_process_time"><i class="fa fa-clock-o"></i> Top Process Time</div>
+        <div class="tab-label green" data-ref="top_redirect"><i class="fa fa-retweet"></i> Top Redirects</div>
+        <div class="tab-label blue" data-ref="top_referral_source"><i class="fa fa-sign-out"></i> Referral Sources</div>
+        <div class="tab-label cyan" data-ref="top_referral_target"><i class="fa fa-sign-in"></i> Referral Targets</div>
+        <div class="tab-label red" data-ref="top_error"><i class="fa fa-ban"></i> Errors</div>
       </div>
       <div class="tab-content">
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="top_request" data-title="Top Requests" data-compare="1" class="chart barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size" class="selected"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size" class="selected"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="top_download" data-title="Top Downloads" data-compare="1" class="chart barchart purple"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time" class="selected"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time" class="selected"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="top_process_time" data-title="Top Process Time" data-compare="1" class="chart barchart orange"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
         </div>
         <div id="top_redirect" data-title="Top Redirects" data-compare="1" class="chart barchart green"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="top_referral_source" data-title="Referral Sources" data-compare="1" class="chart barchart blue"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-          <span data-sort="-kbytes" title="Sort by download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-          <span data-sort="-secs" title="Sort by total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+          <span data-sort="-kbytes" title="Sort by download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+          <span data-sort="-secs" title="Sort by total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+          <span data-sort="-avgsecs" title="Sort by average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
         </div>
         <div id="top_referral_target" data-title="Referral Targets" data-compare="1" class="chart barchart cyan"></div>
       </div>
       <div class="tab-content hidden">
         <div class="sortorder">
-          <span data-sort="-count" title="Sort by request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
+          <span data-sort="-count" title="Sort by request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
         </div>
         <div id="top_error" data-title="Errors" data-compare="1" class="chart barchart red"></div>
       </div>
@@ -771,7 +770,7 @@ header h1 span {
 
     <div id="tooltip" class="hidden hiding">
       <div class="timeline">
-        <i class="icon-signal"></i><br>
+        <i class="fa fa-signal"></i><br>
         <label>View Timeline</label>
       </div>
       <div class="data">
@@ -807,19 +806,19 @@ header h1 span {
     </div>
 
     <div id="dialog" class="hidden hiding">
-      <i class="close icon-remove-sign"></i>
+      <i class="close fa fa-times-circle"></i>
       <h2>Title</h2>
       <div class="sortorder">
-        <span data-sort="count" title="Timeline for request count" class="selected"><i class="icon-sort-by-attributes-alt"></i><label>Requests</label></span> |
-        <span data-sort="kbytes" title="Timeline for download size"><i class="icon-file-text-alt"></i><label>Downloads</label></span> |
-        <span data-sort="secs" title="Timeline for total processing time"><i class="icon-time"></i><label>Total Time</label></span> |
-        <span data-sort="avgsecs" title="Timeline for average processing time"><i class="icon-bolt"></i><label>Avg. Time</label></span>
+        <span data-sort="count" title="Timeline for request count" class="selected"><i class="fa fa-sort-amount-desc"></i><label>Requests</label></span> |
+        <span data-sort="kbytes" title="Timeline for download size"><i class="fa fa-file-text-o"></i><label>Downloads</label></span> |
+        <span data-sort="secs" title="Timeline for total processing time"><i class="fa fa-clock-o"></i><label>Total Time</label></span> |
+        <span data-sort="avgsecs" title="Timeline for average processing time"><i class="fa fa-bolt"></i><label>Avg. Time</label></span>
       </div>
       <div class="chart timechart purple"></div>
     </div>
 
     <div id="loading">
-      <i class="icon-spinner"></i><br>
+      <i class="fa fa-spinner fa-spin"></i><br>
       <span>Loading Data...</span>
     </div>
 
@@ -1171,7 +1170,7 @@ function renderChart(elem, data, total, sort) {
     total = total || $("#total").data("data");
     sort = sort || elem.parent().find(".sortorder .selected").attr("data-sort");
     elem.data("data", data);
-    elem.empty().append($("<div class='working'><i class='icon-spinner'></i> Working...</div>"));
+    elem.empty().append($("<div class='working'><i class='fa fa-spinner fa-spin'></i> Working...</div>"));
     if (elem.hasClass("barchart")) {
         renderQueue.push(barChart.bind(null, elem, data, total, sort));
     } else if (elem.hasClass("piechart")) {
