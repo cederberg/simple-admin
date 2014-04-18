@@ -79,12 +79,11 @@ storagestatus() {
 procparents() {
     local TMPFILE=/tmp/simple-status.ps
     local FILES=""
-    ps -eo pid,ppid,thcount,rss,user,group,cmd > $TMPFILE
-    while read ID PARENT THCNT RSS USER GROUP CMD ; do
+    ps -eo pid,ppid,rss,user,group,cmd > $TMPFILE
+    while read ID PARENT RSS USER GROUP CMD ; do
         if [ $ID != "2" ] && [ $PARENT != "2" ] && [ -e /proc/$ID/status ] ; then
             eval "PID_${ID}=1"
             eval "PID_${ID}_PARENT='${PARENT}'"
-            eval "PID_${ID}_THCNT='${THCNT}'"
             eval "PID_${ID}_RSS='${RSS}'"
             eval "PID_${ID}_USER='${USER}'"
             eval "PID_${ID}_GROUP='${GROUP}'"
