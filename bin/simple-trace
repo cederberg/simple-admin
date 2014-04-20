@@ -16,10 +16,17 @@ set -o errexit
 set -o pipefail
 
 # Setup color codes
-COLOR_OFF=`tput sgr0`
-COLOR_OK=`tput setaf 2`
-COLOR_WARN=`tput setaf 3`
-COLOR_ERR=`tput setaf 1; tput bold`
+if [ -t 0 ]; then
+    COLOR_OFF=`tput sgr0`
+    COLOR_OK=`tput setaf 2`
+    COLOR_WARN=`tput setaf 3`
+    COLOR_ERR=`tput setaf 1; tput bold`
+else
+    COLOR_OFF=""
+    COLOR_OK=""
+    COLOR_WARN=""
+    COLOR_ERR=""
+fi
 
 # Function for printing command-line usage info
 usage() {
