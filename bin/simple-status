@@ -40,8 +40,10 @@ fail() {
 cpustatus() {
     local CPU_COUNT=`grep --count processor /proc/cpuinfo`
     local LOAD_AVG=`awk '{print $1, $2, $3}' /proc/loadavg`
-    local FMT="loadavg:  %s, %s, %s       -- %s processors\n"
-    printf "$FMT" $LOAD_AVG $CPU_COUNT
+    local FMT='loadavg:  %s, %s, %s       -- %s processors\n'
+    printf "$FMT" $LOAD_AVG $CPU_COUNT >&3
+    printf '  "loadavg": [%s,%s,%s],\n' $LOAD_AVG >&4
+    printf '  "procs": %s,\n' $CPU_COUNT >&4
 }
 
 # Function for printing memory status
@@ -50,15 +52,22 @@ memstatus() {
     sed -e 's/^\(\w*\):\s*\(\S*\).*/\1="\2"/g;t;d' /proc/meminfo > $TMPFILE
     . $TMPFILE
     rm $TMPFILE
-    local FREE=$(( (${MemFree:-0} + 512) / 1024 ))
-    local FREE_PERCENT=`echo ${MemFree:-0} ${MemTotal:-0} | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
-    local CACHE=$(( (${Buffers:-0} + ${Cached:-0} + 512) / 1024 ))
-    local RSS=$(( (${MemTotal:-0} - ${MemFree:-0} - ${Buffers:-0} - ${Cached:-0} + 512) / 1024 ))
-    local SWAP=$(( (${SwapTotal:-0} - ${SwapFree:-0} + 512) / 1024 ))
-    local TOTAL=$(( (${MemTotal:-0} + 512) / 1024 ))
-    local INFO="$FREE MB ($FREE_PERCENT%) free"
-    local DETAILS="$RSS rss, $CACHE cache, $SWAP swap, $TOTAL total (MB)"
-    printf "memory:   %-22s -- %s\n" "$INFO" "$DETAILS"
+    local TOTAL_KB=${MemTotal:-0}
+    local TOTAL_MB=$(( ($TOTAL_KB + 512) / 1024 ))
+    local FREE_KB=${MemFree:-0}
+    local FREE_MB=$(( ($FREE_KB + 512) / 1024 ))
+    local FREE_PCT=`echo $FREE_KB $TOTAL_KB | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
+    local FREE_INFO="$FREE_MB MB ($FREE_PCT%) free"
+    local CACHE_KB=$(( ${Buffers:-0} + ${Cached:-0} ))
+    local CACHE_MB=$(( ($CACHE_KB + 512) / 1024 ))
+    local RSS_KB=$(( ${MemTotal:-0} - ${MemFree:-0} - ${Buffers:-0} - ${Cached:-0} ))
+    local RSS_MB=$(( ($RSS_KB + 512) / 1024 ))
+    local SWAP_KB=$(( ${SwapTotal:-0} - ${SwapFree:-0} ))
+    local SWAP_MB=$(( ($SWAP_KB + 512) / 1024 ))
+    local FMT='memory:   %-22s -- %s rss, %s cache, %s swap, %s total (MB)\n'
+    printf "$FMT" "$FREE_INFO" $RSS_MB $CACHE_MB $SWAP_MB $TOTAL_MB >&3
+    local FMT='  "memory": {"total": %s, "free": %s, "rss": %s, "cache": %s, "swap": %s},\n'
+    printf "$FMT" $TOTAL_KB $FREE_KB $RSS_KB $CACHE_KB $SWAP_KB >&4
 }
 
 # Function for printing storage status
@@ -71,7 +80,9 @@ storagestatus() {
         local INFO="$FREE GB ($FREE_PERCENT%) free"
         local DETAILS="$USED GB used, $TOTAL GB total on $DEVICE"
         if [ $TOTALK -ge 1048576 ] ; then
-            printf "storage:  %-22s -- %s\n" "$INFO" "$DETAILS"
+            printf "storage:  %-22s -- %s\n" "$INFO" "$DETAILS" >&3
+            local FMT='  "storage": {"total": %s, "used": %s, "free": %s, "dev": "%s"},\n'
+            printf "$FMT" $TOTALK $USEDK $FREEK "$DEVICE" >&4
         fi
     done
 }
@@ -127,6 +138,7 @@ procdetails() {
     local RSS=`echo $TOTAL_RSS | awk '{OFMT="%.1f" ; print $1 / 1024}'`
     local SWAP=`echo $TOTAL_SWAP | awk '{OFMT="%.0f" ; print $1 / 1024}'`
     printf "pid: %5s,  rss: %7s MB,  swap: %3s MB" $PID $RSS $SWAP
+    printf '"pid": %s, "rss": %s, "swap": %s' $PID $TOTAL_RSS $TOTAL_SWAP >&4
 }
 
 # Function to locate the PID for a named service
@@ -150,6 +162,7 @@ servicestatus() {
     local PID=${1:-}
     local NAME=${2:-}
     local PIDFILE=${3:--}
+    printf '    {' >&4
     if [ "$PID" == "" ] ; then
         local STATUS=1
         local DETAILS="service not running"
@@ -171,10 +184,13 @@ servicestatus() {
     elif [ $STATUS -eq 0 ] ; then
         local FMT="$COLOR_WARN[??]$COLOR_OFF %-27s -- %s\n"
         local NAME=`ps -p $PID -o comm --no-headers | awk '{print $1}'`
+        printf ', "warning": "service not listed in config"' >&4
     else
         local FMT="$COLOR_ERR[ERROR] %-24s -- %s$COLOR_OFF\n"
+        printf ', "error": "%s"', "$DETAILS" >&4
     fi
-    printf "$FMT" "$NAME" "$DETAILS"
+    printf "$FMT" "$NAME" "$DETAILS" >&3
+    printf ', "name": "%s", "status": %s},\n' "$NAME" $STATUS >&4
     return $STATUS
 }
 
@@ -187,16 +203,38 @@ else
     fail "Missing config file $CONFIG"
 fi
 
+# Setup default output file descriptors
+exec 3>&1
+exec 4>/dev/null
+
 # Parse command-line arguments
-if [ "${1:-}" == "-s" ] ; then
-    shift
-    DETAIL="short"
-elif [ "${1:-}" == "-m" ] ; then
-    shift
-    DETAIL="medium"
-fi
+while [ $# -gt 0 ] ; do
+    case "$1" in
+    "-s"|"--short")
+        DETAIL="short"
+        shift
+        ;;
+    "-m"|"--medium")
+        DETAIL="medium"
+        shift
+        ;;
+    "--full")
+        DETAIL="full"
+        shift
+        ;;
+    "--json")
+        exec 3>/dev/null
+        exec 4>&1
+        shift
+        ;;
+    *)
+        fail "Invalid command-line argument: $1"
+        ;;
+    esac
+done
 
 # System statistics
+echo "{" >&4
 cpustatus
 memstatus
 storagestatus
@@ -204,6 +242,7 @@ procparents
 
 # Checking configured services
 RETVAL=0
+printf '  "services": [\n' >&4
 while [ $DETAIL != "short" ] && read NAME PIDFILE MATCH ; do
     [ "$NAME" != "" -a "${NAME:0:1}" != "#" ] || continue
     HIDDEN=false
@@ -234,6 +273,9 @@ if [ $DETAIL = "full" ] ; then
         fi
     done
 fi
+printf '    "EOL"\n' >&4
+printf '  ]\n' >&4
+printf '}\n' >&4
 
 # Check for running simple-restart
 LOCKFILE=/tmp/simple-restart.pid
