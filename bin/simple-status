@@ -111,7 +111,7 @@ procparents() {
             local FILES="$FILES /proc/$ID/status"
         fi
     done < $TMPFILE
-    grep VmSwap $FILES | sed -e 's|/proc/||;s|/status:VmSwap:\s\+| |' > $TMPFILE
+    grep VmSwap $FILES 2>/dev/null | sed -e 's|/proc/||;s|/status:VmSwap:\s\+| |' > $TMPFILE
     while read ID SWAP UNIT ; do
         eval "PID_${ID}_SWAP='${SWAP}'"
     done < $TMPFILE
