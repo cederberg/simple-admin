@@ -84,5 +84,4 @@ log "finished compression of file $FILE"
 find $DUMP_DIR -type f -mtime +14 \! -name "*.????-??-01.*" -delete
 
 # Finished backup
-/usr/local/bin/simple-freemem
 log "done MySQL backup on $HOST"

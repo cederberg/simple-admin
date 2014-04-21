@@ -94,4 +94,3 @@ if [ -d $STAT_DIR -a "$LOG_FILES" != "" ] ; then
     /usr/local/bin/simple-www-stats --json $JSON_FILE --text $TEXT_FILE $LOG_FILES
     gzip $JSON_FILE $TEXT_FILE
 fi
-/usr/local/bin/simple-freemem

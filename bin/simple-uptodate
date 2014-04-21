@@ -67,4 +67,3 @@ if [ $FOUND -ne 0 ] ; then
     fi
 fi
 rm $OUTFILE
-/usr/local/bin/simple-freemem
