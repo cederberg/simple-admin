@@ -2,10 +2,10 @@
 #
 # Performs a remote file sync for configured directories.
 #
-# Syntax: simple-backup-sync [-v]
+# Syntax: simple-backup-sync [options]
 #
 # Options:
-#   -v  Print verbose output.
+#   -v, --verbose    Print verbose output.
 #
 # Files:
 #   /etc/simple-backup-sync.conf
@@ -38,6 +38,31 @@ log() {
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 
+# Function for printing command-line usage info
+usage() {
+    echo "Syntax: simple-backup-sync [options]"
+    echo
+    echo "Options:"
+    echo "  -v, --verbose    Print verbose output."
+    exit 1
+}
+
+# Parse command-line arguments
+while [ $# -gt 0 ] ; do
+    case "$1" in
+    "-v"|"--verbose")
+        VERBOSE=true
+        shift
+        ;;
+    "-?"|"-h"|"--help")
+        usage
+        ;;
+    *)
+        fail "invalid command-line argument: $1"
+        ;;
+    esac
+done
+
 # Load config to stdin
 if [ -f $CONFIG ] ; then
     exec < $CONFIG
@@ -47,11 +72,9 @@ else
     fail "missing config file $CONFIG"
 fi
 
-# Parse command-line arguments
-if [ "${1:-}" == "-v" ] ; then
-    shift
+# Adjust rsync options
+if $VERBOSE ; then
     OPTIONS="$OPTIONS --verbose"
-    VERBOSE=true
 else
     OPTIONS="$OPTIONS --quiet"
 fi
