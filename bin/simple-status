@@ -7,8 +7,8 @@
 # Options:
 #   -s, --short   Prints a short summary without process listing.
 #   -m, --medium  Prints a medium report, with only configured processes.
-#   --full        Prints a full report (default)
-#   --json        Prints the report in JSON output format
+#   --full        Prints a full report (default).
+#   --json        Prints the report in JSON output format.
 #
 # Files:
 #   /etc/simple-status.conf
@@ -58,8 +58,8 @@ usage() {
     echo "Options:"
     echo "  -s, --short   Prints a short summary without process listing."
     echo "  -m, --medium  Prints a medium report, with only configured processes."
-    echo "  --full        Prints a full report (default)"
-    echo "  --json        Prints the report in JSON output format"
+    echo "  --full        Prints a full report (default)."
+    echo "  --json        Prints the report in JSON output format."
     exit 1
 }
 

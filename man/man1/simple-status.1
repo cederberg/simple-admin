@@ -10,7 +10,7 @@ simple-status -- checks and prints the machine and process status
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBsimple-status\fR [-\fBs\fR] [-\fBm\fR]
+\fBsimple-status\fR [options]
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -31,13 +31,21 @@ utility.
 .sp
 .SH "OPTIONS"
 .sp
--\fBs\fR
+-\fBs\fR, --\fBshort\fR
 .RS 4
-Prints a short summary without listing process status.
+Prints a short summary without process listing.
 .RE
--\fBm\fR
+-\fBm\fR, --\fBmedium\fR
 .RS 4
-Prints a medium length report, not listing hidden or unconfigured processes.
+Prints a medium length report, with only configured processes.
+.RE
+--\fBfull\fR
+.RS 4
+Prints a full report (default).
+.RE
+--\fBjson\fR
+.RS 4
+Prints the report in JSON output format.
 .RE
 .sp
 .SH "CONFIGURATION"
