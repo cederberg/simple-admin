@@ -7,7 +7,7 @@
 
 # Configuration variables
 PROCID="simple-trace[$$]"
-VERBOSE="true"
+VERBOSE=true
 
 # Set caution flags
 set -o nounset
@@ -38,7 +38,7 @@ usage() {
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
+    $VERBOSE && echo `date +"%F %T"`: "$@" || true
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 

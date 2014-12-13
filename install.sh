@@ -36,7 +36,7 @@ install_packages() {
         echo "not installed"
         echo "The following packages will be installed or updated:"
         echo "    $DEPS"
-        if [ $INTERACTIVE == 'true' ] ; then
+        if $INTERACTIVE ; then
             echo -n "Press <Ctrl-C> to cancel, or <Enter> to continue: "
             read
         else

@@ -17,7 +17,7 @@ CONFIG=/etc/simple-backup-sync.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
 OPTIONS="--archive --hard-links --delete --compress"
-VERBOSE="false"
+VERBOSE=false
 
 # Set caution flags
 set -o nounset
@@ -34,7 +34,7 @@ fail() {
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
+    $VERBOSE && echo `date +"%F %T"`: "$@" || true
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 

@@ -14,8 +14,8 @@ CONFIG=/etc/simple-restart.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
 SENDMAIL=/usr/sbin/sendmail
-MAIL="false"
-VERBOSE="true"
+MAIL=false
+VERBOSE=true
 
 # Set caution flags
 set -o nounset
@@ -49,7 +49,7 @@ fail() {
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
+    $VERBOSE && echo `date +"%F %T"`: "$@" || true
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 
@@ -153,11 +153,11 @@ fi
 # Parse command-line arguments
 if [ "${1:-}" == "-m" ] ; then
     shift
-    MAIL="true"
+    MAIL=true
 fi
 if [ "${1:-}" == "-q" ] ; then
     shift
-    VERBOSE="false"
+    VERBOSE=false
 fi
 if [ -z "${1:-}" ] ; then
     usage
@@ -181,13 +181,13 @@ fi
 printf $$ > $LOCKFILE
 
 # Restart services
-if [ $MAIL == "true" ] ; then
+if $MAIL ; then
     COLOR_OFF=''
     COLOR_OK=''
     COLOR_ERR=''
     (
-        printf "To: root\n" ;
-        printf "Subject: simple-restart $GROUP ($HOST `date +'%F %T'`)\n\n" ;
+        printf "To: root\n"
+        printf "Subject: simple-restart $GROUP ($HOST `date +'%F %T'`)\n\n"
         ( $STOP ; $START ) || true
     ) 2>&1 | $SENDMAIL root
 else

@@ -12,7 +12,7 @@
 PROCID="simple-www-logrotate[$$]"
 CONFIG=/etc/simple-www-logrotate.conf
 LOCALDIR=`dirname $0`/..
-VERBOSE="false"
+VERBOSE=false
 
 # Set caution flags
 set -o nounset
@@ -29,7 +29,7 @@ fail() {
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
+    $VERBOSE && echo `date +"%F %T"`: "$@" || true
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 

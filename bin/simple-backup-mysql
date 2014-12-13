@@ -20,7 +20,7 @@ DATE=`date '+%Y-%m-%d'`
 TEMP_DIR=/tmp/$$
 DUMP_DIR=/backup/$HOST/mysql
 OPTIONS="--opt --quote-names --skip-add-locks --skip-lock-tables"
-VERBOSE="false"
+VERBOSE=false
 
 # Set caution flags
 set -o nounset
@@ -37,7 +37,7 @@ fail() {
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
+    $VERBOSE && echo `date +"%F %T"`: "$@" || true
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 

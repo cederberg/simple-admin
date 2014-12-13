@@ -26,7 +26,7 @@ BACKUP_DAY_DIR=$BACKUP_BASE_DIR/$DATE_DAY
 BACKUP_MINUTE_DIR=$BACKUP_BASE_DIR/$DATE_MINUTE
 TEMP_LIST=/tmp/$$.simple-backup-files.lst
 OPTIONS="--archive --delete --checksum"
-VERBOSE="false"
+VERBOSE=false
 
 # Set caution flags
 set -o nounset
@@ -43,7 +43,7 @@ fail() {
 
 # Function for logging information in verbose mode
 log() {
-    [ "$VERBOSE" == "true" ] && echo `date +"%F %T"`: "$@" || true
+    $VERBOSE && echo `date +"%F %T"`: "$@" || true
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 
