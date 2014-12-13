@@ -65,8 +65,9 @@ done
 [ `whoami` == 'root' ] || fail "only root is allowed to run simple-uptodate"
 
 # Check for update
-apt-get update > /dev/null || fail "couldn't update package lists with apt-get"
-apt-get clean || true
+export DEBIAN_FRONTEND="noninteractive"
+apt-get --yes update > /dev/null || fail "couldn't update package lists with apt-get"
+apt-get --yes clean || true
 if $SECURITY ; then
     TYPE="security updates"
     SEARCH='~U ~Asecurity'
