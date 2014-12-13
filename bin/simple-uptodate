@@ -80,10 +80,11 @@ aptitude search -F '%16p# %V# -- %d' "$SEARCH" > $OUTFILE || fail "couldn't sear
 FOUND=`cat $OUTFILE | wc -l`
 if [ $FOUND -ne 0 ] ; then
     if $MAIL ; then
-        printf "Subject: System $TYPE for $HOST\n\n" > $OUTFILE.1
-        printf "Found $FOUND system $TYPE for $HOST:\n\n" > $OUTFILE.2
-        cat $OUTFILE.1 $OUTFILE.2 $OUTFILE | $SENDMAIL root
-        rm $OUTFILE.1 $OUTFILE.2
+        (
+            printf "Subject: System $TYPE for $HOST\n\n"
+            printf "Found $FOUND system $TYPE for $HOST:\n\n"
+            cat $OUTFILE
+        ) | $SENDMAIL root
     else
         printf "Found $FOUND system $TYPE for $HOST:\n\n"
         cat $OUTFILE
