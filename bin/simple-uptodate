@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #
-# Checks if the system requires (security) updates.
+# Checks for and optionally installs system (security) updates.
 #
 # Syntax: simple-uptodate [options]
 #
 # Options:
+#   -a, --autoinstall  Automatically install updates found.
 #   -s, --security     Only check for security updates.
 #   -m, --mail         Mail root@localhost instead of printing results.
 #
@@ -13,8 +14,9 @@
 PROCID="simple-uptodate[$$]"
 HOST=`hostname`
 SENDMAIL=/usr/sbin/sendmail
+AUTOINSTALL=false
 SECURITY=false
-MAIL=false
+MAILREPORT=false
 
 # Set caution flags
 set -o nounset
@@ -31,11 +33,12 @@ fail() {
 
 # Function for printing command-line usage info
 usage() {
-    echo "Checks if the system requires (security) updates."
+    echo "Checks for and optionally installs system (security) updates."
     echo
     echo "Syntax: simple-uptodate [options]"
     echo
     echo "Options:"
+    echo "  -a, --autoinstall  Automatically install updates found."
     echo "  -s, --security     Only check for security updates."
     echo "  -m, --mail         Mail root@localhost instead of printing results."
     exit 1
@@ -44,12 +47,16 @@ usage() {
 # Parse command-line arguments
 while [ $# -gt 0 ] ; do
     case "$1" in
+    "-a"|"--autoinstall")
+        AUTOINSTALL=true
+        shift
+        ;;
     "-s"|"--security")
         SECURITY=true
         shift
         ;;
     "-m"|"--mail")
-        MAIL=true
+        MAILREPORT=true
         shift
         ;;
     "-?"|"-h"|"--help")
@@ -64,10 +71,13 @@ done
 # Check for root user
 [ `whoami` == 'root' ] || fail "only root is allowed to run simple-uptodate"
 
-# Check for update
+# Ensure non-interactive usage & up-to-date packages
+exec < /dev/null
 export DEBIAN_FRONTEND="noninteractive"
 apt-get --yes update > /dev/null || fail "couldn't update package lists with apt-get"
 apt-get --yes clean || true
+
+# Search for updates
 if $SECURITY ; then
     TYPE="security updates"
     SEARCH='~U ~Asecurity'
@@ -79,7 +89,12 @@ OUTFILE=/tmp/simple-uptodate.txt
 aptitude search -F '%16p# %V# -- %d' "$SEARCH" > $OUTFILE || fail "couldn't search for $TYPE"
 FOUND=`cat $OUTFILE | wc -l`
 if [ $FOUND -ne 0 ] ; then
-    if $MAIL ; then
+    if $AUTOINSTALL ; then
+	printf "\n\nInstalling $FOUND system $TYPE:\n\n" >> $OUTFILE
+	PKGS=`aptitude search -F '%p' "$SEARCH"`
+        aptitude --assume-yes safe-upgrade $PKGS >> $OUTFILE 2>&1 || fail "couldn't update packages $PKGS"
+    fi
+    if $MAILREPORT ; then
         (
             printf "Subject: System $TYPE for $HOST\n\n"
             printf "Found $FOUND system $TYPE for $HOST:\n\n"
