@@ -2,11 +2,11 @@
 #
 # Checks if the system requires (security) updates.
 #
-# Syntax: simple-uptodate [-s] [-m]
+# Syntax: simple-uptodate [options]
 #
 # Options:
-#   -s  Check only for security updates.
-#   -m  Mail root instead of printing results.
+#   -s, --security     Only check for security updates.
+#   -m, --mail         Mail root@localhost instead of printing results.
 #
 
 # Configuration parameters
@@ -22,30 +22,52 @@ set -o errtrace
 set -o errexit
 set -o pipefail
 
-# Function for logging an error to stderr and exiting
+# Function for logging an error to stderr and syslog and exiting
 fail() {
     echo "ERROR:" "$@" >&2
     logger -p local0.error -t "$PROCID" "$@" || true
     exit 1
 }
 
-# Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to run simple-uptodate"
+# Function for printing command-line usage info
+usage() {
+    echo "Checks if the system requires (security) updates."
+    echo
+    echo "Syntax: simple-uptodate [options]"
+    echo
+    echo "Options:"
+    echo "  -s, --security     Only check for security updates."
+    echo "  -m, --mail         Mail root@localhost instead of printing results."
+    exit 1
+}
 
 # Parse command-line arguments
-if [ "${1:-}" == "-s" ] ; then
-    shift
-    SECURITY=true
-fi
-if [ "${1:-}" == "-m" ] ; then
-    shift
-    MAIL=true
-fi
+while [ $# -gt 0 ] ; do
+    case "$1" in
+    "-s"|"--security")
+        SECURITY=true
+        shift
+        ;;
+    "-m"|"--mail")
+        MAIL=true
+        shift
+        ;;
+    "-?"|"-h"|"--help")
+        usage
+        ;;
+    *)
+        fail "invalid command-line argument: $1"
+        ;;
+    esac
+done
+
+# Check for root user
+[ `whoami` == 'root' ] || fail "only root is allowed to run simple-uptodate"
 
 # Check for update
 apt-get update > /dev/null || fail "couldn't update package lists with apt-get"
 apt-get clean || true
-if [ "$SECURITY" == "true" ] ; then
+if $SECURITY ; then
     TYPE="security updates"
     SEARCH='~U ~Asecurity'
 else
@@ -56,7 +78,7 @@ OUTFILE=/tmp/simple-uptodate.txt
 aptitude search -F '%16p# %V# -- %d' "$SEARCH" > $OUTFILE || fail "couldn't search for $TYPE"
 FOUND=`cat $OUTFILE | wc -l`
 if [ $FOUND -ne 0 ] ; then
-    if [ $MAIL == "true" ] ; then
+    if $MAIL ; then
         printf "Subject: System $TYPE for $HOST\n\n" > $OUTFILE.1
         printf "Found $FOUND system $TYPE for $HOST:\n\n" > $OUTFILE.2
         cat $OUTFILE.1 $OUTFILE.2 $OUTFILE | $SENDMAIL root
