@@ -6,31 +6,39 @@
 .ad l
 .\" -----------------------------------------------------------------
 .SH "NAME"
-simple-uptodate -- checks if the system requires (security) updates
+simple-uptodate -- checks for and optionally installs system (security) updates
 .SH "SYNOPSIS"
 .sp
 .nf
-\fBsimple-uptodate\fR [-\fBs\fR] [-\fBm\fR]
+\fBsimple-uptodate\fR [options]
 .fi
 .sp
 .SH "DESCRIPTION"
 .sp
-Synchronizes the package index with \fBapt-get update\fR and then runs a
-simulated check for updates and prints the results. Can also filter the updates
-for security-related issues.
+Synchronizes the package index with \fBapt-get update\fR and then runs an
+\fBaptitude\fR search for updates. The search can optionally be filtered to
+only include security-related updates.
+
+When \fB--autoinstall\fR is specified, the packages found are also updated
+with \fBaptitude safe-upgrade\fR.
 
 If no updates are available, no output is printed.
 .sp
 .SH "OPTIONS"
 .sp
--\fBs\fR
+-\fBa\fR, --\fBautoinstall\fR
 .RS 4
-Checks only for security updates.
+Automatically install updates found.
 .RE
 
--\fBm\fR
+-\fBs\fR, --\fBsecurity\fR
 .RS 4
-E-mail the output to \fBroot@localhost\fR instead of the standard output.
+Only check for security updates.
+.RE
+
+-\fBm\fR, --\fBmail\fR
+.RS 4
+Mail \fBroot@localhost\fR instead of printing results to standard output.
 .RE
 .sp
 .SH "SEE ALSO"
