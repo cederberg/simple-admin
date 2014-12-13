@@ -2,7 +2,10 @@
 #
 # Rotates HTTP access log files.
 #
-# Syntax: simple-www-logrotate [-v]
+# Syntax: simple-www-logrotate [options]
+#
+# Options:
+#   -v, --verbose    Print verbose output.
 #
 # Files:
 #   /etc/simple-www-logrotate.conf
@@ -27,14 +30,38 @@ fail() {
     exit 1
 }
 
+# Function for printing command-line usage info
+usage() {
+    echo "Rotates HTTP access log files."
+    echo
+    echo "Syntax: simple-www-logrotate [options]"
+    echo
+    echo "Options:"
+    echo "  -v, --verbose    Print verbose output."
+    exit 1
+}
+
 # Function for logging information in verbose mode
 log() {
     $VERBOSE && echo `date +"%F %T"`: "$@" || true
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 
-# Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to run simple-www-logrotate"
+# Parse command-line arguments
+while [ $# -gt 0 ] ; do
+    case "$1" in
+    "-v"|"--verbose")
+        VERBOSE=true
+        shift
+        ;;
+    "-?"|"-h"|"--help")
+        usage
+        ;;
+    *)
+        fail "invalid command-line argument: $1"
+        ;;
+    esac
+done
 
 # Load config (shell)
 if [ -f $CONFIG ] ; then
@@ -45,11 +72,8 @@ else
     fail "missing config file $CONFIG"
 fi
 
-# Parse command-line arguments
-if [ "${1:-}" == "-v" ] ; then
-    shift
-    VERBOSE=true
-fi
+# Check for root user
+[ `whoami` == 'root' ] || fail "only root is allowed to run simple-www-logrotate"
 
 # Rename log files
 YESTERDAY=`date -d "-1 day" +%Y%m%d`
