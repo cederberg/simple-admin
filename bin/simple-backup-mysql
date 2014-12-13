@@ -2,10 +2,10 @@
 #
 # Performs a MySQL dump of configured databases.
 #
-# Syntax: simple-backup-mysql [-v]
+# Syntax: simple-backup-mysql [options]
 #
 # Options:
-#   -v  Print verbose output.
+#   -v, --verbose    Print verbose output.
 #
 # Files:
 #   /etc/simple-backup-mysql.conf
@@ -41,6 +41,33 @@ log() {
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 
+# Function for printing command-line usage info
+usage() {
+    echo "Performs a MySQL dump of configured databases."
+    echo
+    echo "Syntax: simple-backup-mysql [options]"
+    echo
+    echo "Options:"
+    echo "  -v, --verbose    Print verbose output."
+    exit 1
+}
+
+# Parse command-line arguments
+while [ $# -gt 0 ] ; do
+    case "$1" in
+    "-v"|"--verbose")
+        VERBOSE=true
+        shift
+        ;;
+    "-?"|"-h"|"--help")
+        usage
+        ;;
+    *)
+        fail "invalid command-line argument: $1"
+        ;;
+    esac
+done
+
 # Load config to stdin
 if [ -f $CONFIG ] ; then
     exec < $CONFIG
@@ -50,11 +77,9 @@ else
     fail "missing config file $CONFIG"
 fi
 
-# Parse command-line arguments
-if [ "${1:-}" == "-v" ] ; then
-    shift
+# Adjust mysqldump options
+if $VERBOSE ; then
     OPTIONS="$OPTIONS -v"
-    VERBOSE=true
 fi
 
 # Perform MySQL backup
