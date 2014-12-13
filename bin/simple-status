@@ -2,7 +2,13 @@
 #
 # Checks and prints the machine and process status.
 #
-# Syntax: simple-status
+# Syntax: simple-status [options]
+#
+# Options:
+#   -s, --short   Prints a short summary without process listing.
+#   -m, --medium  Prints a medium report, with only configured processes.
+#   --full        Prints a full report (default)
+#   --json        Prints the report in JSON output format
 #
 # Files:
 #   /etc/simple-status.conf
@@ -40,6 +46,20 @@ warn() {
 # Function for logging an error to stderr and exiting
 fail() {
     echo "${COLOR_ERR}ERROR:${COLOR_OFF}" "$@" >&2
+    exit 1
+}
+
+# Function for printing command-line usage info
+usage() {
+    echo "Checks and prints the machine and process status."
+    echo
+    echo "Syntax: simple-status [options]"
+    echo
+    echo "Options:"
+    echo "  -s, --short   Prints a short summary without process listing."
+    echo "  -m, --medium  Prints a medium report, with only configured processes."
+    echo "  --full        Prints a full report (default)"
+    echo "  --json        Prints the report in JSON output format"
     exit 1
 }
 
@@ -234,8 +254,11 @@ while [ $# -gt 0 ] ; do
         exec 4>&1
         shift
         ;;
+    "-?"|"-h"|"--help")
+        usage
+        ;;
     *)
-        fail "Invalid command-line argument: $1"
+        fail "invalid command-line argument: $1"
         ;;
     esac
 done
