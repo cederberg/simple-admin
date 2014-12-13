@@ -30,6 +30,12 @@ fail() {
     exit 1
 }
 
+# Function for logging information in verbose mode
+log() {
+    $VERBOSE && echo `date +"%F %T"`: "$@" || true
+    logger -p local0.info -t "$PROCID" "$@" || true
+}
+
 # Function for printing command-line usage info
 usage() {
     echo "Rotates HTTP access log files."
@@ -39,12 +45,6 @@ usage() {
     echo "Options:"
     echo "  -v, --verbose    Print verbose output."
     exit 1
-}
-
-# Function for logging information in verbose mode
-log() {
-    $VERBOSE && echo `date +"%F %T"`: "$@" || true
-    logger -p local0.info -t "$PROCID" "$@" || true
 }
 
 # Parse command-line arguments
