@@ -2,10 +2,10 @@
 #
 # Performs a filesystem backup for configured directories.
 #
-# Syntax: simple-backup-files [-v]
+# Syntax: simple-backup-files [options]
 #
 # Options:
-#   -v  Print verbose output.
+#   -v, --verbose    Print verbose output.
 #
 # Files:
 #   /etc/simple-backup-files.conf
@@ -47,8 +47,16 @@ log() {
     logger -p local0.info -t "$PROCID" "$@" || true
 }
 
-# Check for root user
-[ `whoami` == 'root' ] || fail "only root is allowed to run simple-backup-files"
+# Function for printing command-line usage info
+usage() {
+    echo "Performs a filesystem backup for configured directories."
+    echo
+    echo "Syntax: simple-backup-files [options]"
+    echo
+    echo "Options:"
+    echo "  -v, --verbose    Print verbose output."
+    exit 1
+}
 
 # Load config to stdin
 if [ -f /etc/$CONFIG ] ; then
@@ -60,9 +68,26 @@ else
 fi
 
 # Parse command-line arguments
-if [ "${1:-}" == "-v" ] ; then
-    shift
-    VERBOSE=true
+while [ $# -gt 0 ] ; do
+    case "$1" in
+    "-v"|"--verbose")
+        VERBOSE=true
+        shift
+        ;;
+    "-?"|"-h"|"--help")
+        usage
+        ;;
+    *)
+        fail "invalid command-line argument: $1"
+        ;;
+    esac
+done
+
+# Check for root user
+[ `whoami` == 'root' ] || fail "only root is allowed to run simple-backup-files"
+
+# Adjust rsync options
+if $VERBOSE ; then
     OPTIONS="$OPTIONS --verbose"
 else
     OPTIONS="$OPTIONS --quiet"
