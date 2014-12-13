@@ -2,7 +2,11 @@
 #
 # Restarts a group of services in a predefined order.
 #
-# Syntax: simple-restart [-m] [-q] <groupname>
+# Syntax: simple-restart [options] <groupname>
+#
+# Options:
+#   -m, --mail     Mail root@localhost instead of printing to standard output.
+#   -q, --quiet    Quiet mode. Only prints errors to standard error.
 #
 # Files:
 #   /etc/simple-restart.conf
@@ -14,7 +18,7 @@ CONFIG=/etc/simple-restart.conf
 LOCALDIR=`dirname $0`/..
 HOST=`hostname`
 SENDMAIL=/usr/sbin/sendmail
-MAIL=false
+MAILREPORT=false
 VERBOSE=true
 
 # Set caution flags
@@ -57,11 +61,11 @@ log() {
 usage() {
     echo "Restarts a group of services in a predefined order."
     echo
-    echo "Syntax: simple-restart [-m] [-q] <group>"
+    echo "Syntax: simple-restart [options] <group>"
     echo
     echo "Options:"
-    echo "  -m       -- E-mail output to root@localhost."
-    echo "  -q       -- Quiet mode (prints no output)."
+    echo "  -m, --mail     Mail root@localhost instead of printing to standard output."
+    echo "  -q, --quiet    Quiet mode. Only prints errors to standard error."
     echo
     echo "Groups:"
     for VAR in $(compgen -A variable group_) ; do
@@ -138,6 +142,33 @@ stop() {
     log "service $NAME (pid: $PID) stopped"
 }
 
+# Parse command-line arguments
+while [ $# -gt 0 ] ; do
+    case "$1" in
+    "-m"|"--mail")
+        MAILREPORT=true
+        shift
+        ;;
+    "-q"|"--quiet")
+        VERBOSE=false
+        shift
+        ;;
+    "-?"|"-h"|"--help")
+        usage
+        ;;
+    *)
+        if [ $# -gt 1 ] ; then
+            usage
+        fi
+	GROUP="$1"
+        shift
+        ;;
+    esac
+done
+if [ -z "${GROUP:-}" ] ; then
+    usage
+fi
+
 # Check for root user
 [ `whoami` == 'root' ] || fail "only root is allowed to run simple-restart"
 
@@ -149,20 +180,6 @@ elif [ -f $LOCALDIR/$CONFIG ] ; then
 else
     fail "missing config file $CONFIG"
 fi
-
-# Parse command-line arguments
-if [ "${1:-}" == "-m" ] ; then
-    shift
-    MAIL=true
-fi
-if [ "${1:-}" == "-q" ] ; then
-    shift
-    VERBOSE=false
-fi
-if [ -z "${1:-}" ] ; then
-    usage
-fi
-GROUP=$1
 
 # Check for valid group name
 START=start_$GROUP
@@ -181,7 +198,7 @@ fi
 printf $$ > $LOCKFILE
 
 # Restart services
-if $MAIL ; then
+if $MAILREPORT ; then
     COLOR_OFF=''
     COLOR_OK=''
     COLOR_ERR=''
