@@ -71,6 +71,9 @@ done
 # Check for root user
 [ `whoami` == 'root' ] || fail "only root is allowed to run simple-uptodate"
 
+# Load /etc/environment
+export $(grep -v ^# /etc/environment | xargs)
+
 # Ensure non-interactive usage & up-to-date packages
 exec < /dev/null
 export DEBIAN_FRONTEND="noninteractive"
