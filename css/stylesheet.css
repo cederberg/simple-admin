@@ -52,6 +52,20 @@ table {
 	border-spacing: 0;
 }
 
+/*
+ * Remove text-shadow in selection highlight:
+ * https://twitter.com/miketaylr/status/12228805301
+ * These selection rule sets have to be separate.
+ */
+::-moz-selection {
+  background: #FFF8AA;
+  text-shadow: none;
+}
+::selection {
+  background: #FFF8AA;
+  text-shadow: none;
+}
+
 
 /********************************************************************
  * LAYOUT STYLES
