@@ -354,6 +354,11 @@ a.button i {
   color: #666666;
 }
 
+.size-120 {
+  font-size: 1.2em;
+  vertical-align: -0.1em
+}
+
 .clearfix:after {
   content: ".";
   display: inline-block;
