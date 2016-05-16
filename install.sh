@@ -144,4 +144,4 @@ fi
 
 # Finished
 echo
-echo "Simple-Admin for Ubuntu is now installed -- http://www.simple-admin.org/"
+echo "Simple-Admin for Ubuntu is now installed"
