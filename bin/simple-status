@@ -280,7 +280,7 @@ while [ $DETAIL != "short" ] && read NAME PIDFILE MATCH ; do
         NAME=${NAME:1}
         HIDDEN=true
     fi
-    servicepid $NAME $PIDFILE $MATCH
+    servicepid $NAME $PIDFILE "$MATCH"
     if $HIDDEN && ([ "$PID" == "" ] || [ $DETAIL != "full" ]) ; then
         true
     elif ! servicestatus "$PID" $NAME $PIDFILE ; then
