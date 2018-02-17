@@ -173,7 +173,7 @@ servicepid() {
     local NAME=$1
     local PIDFILE=${2:--}
     local MATCH=${3:-${NAME}}
-    if [ -r "$PIDFILE" ] && PID=$(<"$PIDFILE") && VAR="PID_${PID}" && [ "${!VAR:-}" == "1" ] ; then
+    if [ -r "$PIDFILE" ] && PID=$(( $(<"$PIDFILE") )) && VAR="PID_${PID}" && [ "${!VAR:-}" == "1" ] ; then
         true
     elif PID=`ps --ppid 1 -o pid,comm | grep " $MATCH" | head -n 1 | awk '{print $1}'` ; then
         true
