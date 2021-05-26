@@ -83,10 +83,10 @@ apt-get --yes clean || true
 # Search for updates
 if $SECURITY ; then
     TYPE="security updates"
-    SEARCH='~U ~Asecurity ?not(~ahold)'
+    SEARCH='~U~Asecurity!~ahold'
 else
     TYPE="updates"
-    SEARCH='~U ?not(~ahold)'
+    SEARCH='~U!~ahold'
 fi
 OUTFILE=/tmp/simple-uptodate.txt
 aptitude search -F '%16p# %V# -- %d' "$SEARCH" > $OUTFILE || fail "couldn't search for $TYPE"
