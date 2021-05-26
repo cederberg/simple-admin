@@ -89,7 +89,7 @@ else
     SEARCH='~U!~ahold'
 fi
 OUTFILE=/tmp/simple-uptodate.txt
-aptitude search -F '%16p# %V# -- %d' "$SEARCH" > $OUTFILE || fail "couldn't search for $TYPE"
+aptitude search -F '%16p# %V# -- %d' "$SEARCH" > $OUTFILE || true
 FOUND=`cat $OUTFILE | wc -l`
 if [ $FOUND -ne 0 ] ; then
     if $AUTOINSTALL ; then
