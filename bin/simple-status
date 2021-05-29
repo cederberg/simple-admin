@@ -65,12 +65,16 @@ usage() {
 
 # Function for printing CPU load average
 cpustatus() {
-    local CPU_COUNT=`grep --count processor /proc/cpuinfo`
-    local LOAD_AVG=`awk '{print $1, $2, $3}' /proc/loadavg`
-    local FMT='loadavg:  %s, %s, %s       -- %s processors\n'
-    printf "$FMT" $LOAD_AVG $CPU_COUNT >&3
-    printf '  "loadavg": [%s,%s,%s],\n' $LOAD_AVG >&4
-    printf '  "procs": %s,\n' $CPU_COUNT >&4
+    local CORES=$(grep --count processor /proc/cpuinfo)
+    local UPTIME=($(</proc/uptime))
+    local LOADAVG=($(</proc/loadavg))
+    local PROCS=$(awk -F / '{printf $2}' <<< "${LOADAVG[3]}")
+    local FMT='loadavg:  %s, %s, %s       -- up %d days, %s processes, %s cores\n'
+    printf "$FMT" ${LOADAVG[@]:0:3} $((${UPTIME[0]%.*} / 86400)) ${PROCS} ${CORES} >&3
+    printf '  "cores": %s,\n' ${CORES} >&4
+    printf '  "uptime": %s,\n' ${UPTIME[0]%.*} >&4
+    printf '  "loadavg": [%s,%s,%s],\n' ${LOADAVG[@]:0:3} >&4
+    printf '  "processes": %s,\n' ${PROCS} >&4
 }
 
 # Function for printing memory status
