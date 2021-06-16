@@ -103,17 +103,17 @@ memstatus() {
 
 # Function for printing storage status
 storagestatus() {
-    df -k / | tail -n +2 | while read DEVICE TOTALK USEDK FREEK USEDPERCENT MOUNT ; do
+    df -k | tail -n +2 | while read DEVICE TOTALK USEDK FREEK USEDPERCENT MOUNT ; do
         local TOTAL=`echo $TOTALK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
         local USED=`echo $USEDK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
         local FREE=`echo $FREEK | awk '{OFMT="%.1f" ; print $1 / 1048576}'`
         local FREE_PERCENT=`echo $FREEK $TOTALK | awk '{OFMT="%.1f" ; print $1 * 100 / $2}'`
         local INFO="$FREE GB ($FREE_PERCENT%) free"
-        local DETAILS="$USED GB used, $TOTAL GB total on $DEVICE"
+        local DETAILS="$USED GB used, $TOTAL GB total on $MOUNT"
         if [ $TOTALK -ge 1048576 ] ; then
             printf "storage:  %-22s -- %s\n" "$INFO" "$DETAILS" >&3
-            local FMT='  "storage": {"total": %s, "used": %s, "free": %s, "dev": "%s"},\n'
-            printf "$FMT" $TOTALK $USEDK $FREEK "$DEVICE" >&4
+            local FMT='  "storage": {"total": %s, "used": %s, "free": %s, "dev": "%s", "mount": "%s"},\n'
+            printf "$FMT" $TOTALK $USEDK $FREEK "$DEVICE" "$MOUNT" >&4
         fi
     done
 }
